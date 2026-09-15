@@ -62,7 +62,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           children: [
             // Top Skip Button
             Align(
-              alignmen  t: Alignment.topRight,
+              alignment: Alignment.topRight,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: _currentPage < _slides.length - 1
