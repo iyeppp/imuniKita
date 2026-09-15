@@ -46,3 +46,11 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Gradle cache lokal (workaround cache ~/.gradle corrupt)
+/.gradle-home/
+build_log.txt
+
+# Development Context (notes, planning docs, AI context)
+# Folder ini hanya ada di lokal, tidak di-track git manapun
+progress_context/
