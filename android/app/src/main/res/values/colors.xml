@@ -2,4 +2,5 @@
 <resources>
     <!-- Warna splash screen native (sama dengan AppColors.coral = 0xFFF0856A) -->
     <color name="splash_background">#F0856A</color>
+	<color name="ic_launcher_background">#F0856A</color>
 </resources>
