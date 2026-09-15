@@ -78,6 +78,8 @@ dev_dependencies:
     sdk: flutter
   build_runner: ^2.4.12
   hive_ce_generator: ^1.11.3
+  flutter_native_splash: ^2.4.4
+  flutter_launcher_icons: ^0.14.3
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -125,3 +127,24 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_native_splash:
+  color: "#F0856A"
+  image: assets/images/syringe_logo.png
+  color_dark: "#F0856A"
+  image_dark: assets/images/syringe_logo.png
+  android: true
+  ios: true
+  android_12:
+    color: "#F0856A"
+    image: assets/images/syringe_logo.png
+    color_dark: "#F0856A"
+    image_dark: assets/images/syringe_logo.png
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/app_icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#F0856A"
+  adaptive_icon_foreground: "assets/images/app_icon_foreground.png"
