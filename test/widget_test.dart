@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:imunikita/app/router/app_router.dart';
 import 'package:imunikita/app/theme/app_theme.dart';
+import 'package:imunikita/features/auth/presentation/screens/splash_screen.dart';
 
 void main() {
   testWidgets('AppTheme.lightTheme dapat dibangun', (
@@ -29,4 +30,22 @@ void main() {
     expect(AppRoutes.splash, '/');
     expect(AppRoutes.dashboard, '/dashboard');
   });
+
+  testWidgets('SplashScreen menampilkan elemen visual sesuai design system', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SplashScreen(),
+      ),
+    );
+
+    // Initial pump
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Si kecil,\nterlindungi'), findsOneWidget);
+    expect(find.text('Jadwal imunisasi dalam genggamanmu'), findsOneWidget);
+  });
 }
+
+
