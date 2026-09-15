@@ -7,6 +7,7 @@ import 'package:workmanager/workmanager.dart';
 
 import 'app/app.dart';
 import 'core/services/notification_service.dart';
+import 'hive_registrar.g.dart';
 
 /// Entry point WorkManager — harus top-level function
 @pragma('vm:entry-point')
@@ -22,6 +23,7 @@ void main() async {
 
   // 1. Inisialisasi Hive CE (local database)
   await Hive.initFlutter();
+  Hive.registerAdapters();
 
   // 2. Inisialisasi timezone — default WIB (UTC+7)
   tz.initializeTimeZones();

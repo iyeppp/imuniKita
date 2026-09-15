@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/screens/splash_screen.dart';
+import '../../features/auth/presentation/screens/onboarding_screen.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/register_screen.dart';
 
 // ---------------------------------------------------------------------------
 // Placeholder — diganti dengan screen asli saat Sprint 1–4
@@ -86,15 +89,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       GoRoute(
         path: AppRoutes.onboarding,
-        builder: (_, _) => const _PlaceholderScreen('Onboarding'),
+        builder: (_, _) => const OnboardingScreen(),
       ),
       GoRoute(
         path: AppRoutes.login,
-        builder: (_, _) => const _PlaceholderScreen('Login'),
+        builder: (_, _) => const LoginScreen(),
       ),
       GoRoute(
         path: AppRoutes.register,
-        builder: (_, _) => const _PlaceholderScreen('Register'),
+        builder: (_, _) => const RegisterScreen(),
       ),
 
       // ── Baby Profile ───────────────────────────────────────────────────
