@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/presentation/screens/splash_screen.dart';
+
 // ---------------------------------------------------------------------------
 // Placeholder — diganti dengan screen asli saat Sprint 1–4
 // ---------------------------------------------------------------------------
@@ -79,8 +81,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // ── Auth & Onboarding ──────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.splash,
-        builder: (_, _) => const _PlaceholderScreen('Splash Screen'),
+        builder: (_, _) => const SplashScreen(),
       ),
+
       GoRoute(
         path: AppRoutes.onboarding,
         builder: (_, _) => const _PlaceholderScreen('Onboarding'),
