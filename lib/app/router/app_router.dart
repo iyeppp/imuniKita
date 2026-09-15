@@ -79,41 +79,41 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // ── Auth & Onboarding ──────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.splash,
-        builder: (_, __) => const _PlaceholderScreen('Splash Screen'),
+        builder: (_, _) => const _PlaceholderScreen('Splash Screen'),
       ),
       GoRoute(
         path: AppRoutes.onboarding,
-        builder: (_, __) => const _PlaceholderScreen('Onboarding'),
+        builder: (_, _) => const _PlaceholderScreen('Onboarding'),
       ),
       GoRoute(
         path: AppRoutes.login,
-        builder: (_, __) => const _PlaceholderScreen('Login'),
+        builder: (_, _) => const _PlaceholderScreen('Login'),
       ),
       GoRoute(
         path: AppRoutes.register,
-        builder: (_, __) => const _PlaceholderScreen('Register'),
+        builder: (_, _) => const _PlaceholderScreen('Register'),
       ),
 
       // ── Baby Profile ───────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.addBaby,
-        builder: (_, __) => const _PlaceholderScreen('Tambah Profil Bayi'),
+        builder: (_, _) => const _PlaceholderScreen('Tambah Profil Bayi'),
       ),
 
       // ── Dashboard ──────────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.dashboard,
-        builder: (_, __) => const _PlaceholderScreen('Dashboard'),
+        builder: (_, _) => const _PlaceholderScreen('Dashboard'),
       ),
 
       // ── Imunisasi & Kalender (nested) ──────────────────────────────────
       GoRoute(
         path: AppRoutes.calendar,
-        builder: (_, __) => const _PlaceholderScreen('Kalender Imunisasi'),
+        builder: (_, _) => const _PlaceholderScreen('Kalender Imunisasi'),
         routes: [
           GoRoute(
             path: 'timeline',
-            builder: (_, __) => const _PlaceholderScreen('Timeline Vaksin'),
+            builder: (_, _) => const _PlaceholderScreen('Timeline Vaksin'),
           ),
           GoRoute(
             path: 'detail/:id',
@@ -127,11 +127,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // ── Pertumbuhan (nested) ───────────────────────────────────────────
       GoRoute(
         path: AppRoutes.growth,
-        builder: (_, __) => const _PlaceholderScreen('Grafik Pertumbuhan'),
+        builder: (_, _) => const _PlaceholderScreen('Grafik Pertumbuhan'),
         routes: [
           GoRoute(
             path: 'add',
-            builder: (_, __) =>
+            builder: (_, _) =>
                 const _PlaceholderScreen('Tambah Data Pertumbuhan'),
           ),
         ],
@@ -140,11 +140,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // ── Jurnal Kesehatan (nested) ──────────────────────────────────────
       GoRoute(
         path: AppRoutes.journal,
-        builder: (_, __) => const _PlaceholderScreen('Jurnal Kesehatan'),
+        builder: (_, _) => const _PlaceholderScreen('Jurnal Kesehatan'),
         routes: [
           GoRoute(
             path: 'add',
-            builder: (_, __) => const _PlaceholderScreen('Tambah Jurnal'),
+            builder: (_, _) => const _PlaceholderScreen('Tambah Jurnal'),
           ),
         ],
       ),
@@ -152,7 +152,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // ── Edukasi (nested) ───────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.education,
-        builder: (_, __) => const _PlaceholderScreen('Education Hub'),
+        builder: (_, _) => const _PlaceholderScreen('Education Hub'),
         routes: [
           GoRoute(
             path: 'article/:id',
@@ -172,19 +172,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // ── Direktori Faskes ───────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.faskes,
-        builder: (_, __) => const _PlaceholderScreen('Direktori Faskes'),
+        builder: (_, _) => const _PlaceholderScreen('Direktori Faskes'),
       ),
 
       // ── Chatbot ────────────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.chatbot,
-        builder: (_, __) => const _PlaceholderScreen('ImuniBot 🤖'),
+        builder: (_, _) => const _PlaceholderScreen('ImuniBot 🤖'),
       ),
 
       // ── Settings ───────────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.settings,
-        builder: (_, __) => const _PlaceholderScreen('Settings & Profil'),
+        builder: (_, _) => const _PlaceholderScreen('Settings & Profil'),
       ),
     ],
   );

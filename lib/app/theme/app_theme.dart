@@ -144,10 +144,7 @@ abstract class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.error, width: 2),
         ),
-        hintStyle: GoogleFonts.inter(
-          fontSize: 14,
-          color: AppColors.textHint,
-        ),
+        hintStyle: GoogleFonts.inter(fontSize: 14, color: AppColors.textHint),
         labelStyle: GoogleFonts.inter(
           fontSize: 14,
           color: AppColors.textSecondary,
@@ -155,7 +152,7 @@ abstract class AppTheme {
       ),
 
       // ── Card ───────────────────────────────────────────────────────────
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
@@ -185,9 +182,7 @@ abstract class AppTheme {
       // ── SnackBar ───────────────────────────────────────────────────────
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         contentTextStyle: GoogleFonts.inter(fontSize: 14),
       ),
 
@@ -199,9 +194,7 @@ abstract class AppTheme {
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       ),
     );

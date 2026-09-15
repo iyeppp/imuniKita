@@ -51,6 +51,13 @@ app.*.map.json
 /.gradle-home/
 build_log.txt
 
+# Build output sub-project (gradle/pod) — root /build/ tidak menutup ini
+android/build/
+ios/build/
+macos/build/
+linux/build/
+windows/build/
+
 # Development Context (notes, planning docs, AI context)
 # Folder ini hanya ada di lokal, tidak di-track git manapun
 progress_context/

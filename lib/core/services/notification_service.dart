@@ -11,15 +11,16 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   // Channel ID untuk Android — harus konsisten agar notifikasi tidak duplikat
-  static const _channelId   = 'imunikita_reminders';
+  static const _channelId = 'imunikita_reminders';
   static const _channelName = 'Pengingat Imunisasi';
   static const _channelDesc =
       'Notifikasi pengingat jadwal imunisasi H-7 dan H-1';
 
   /// Inisialisasi plugin. Dipanggil sekali di [main].
   static Future<void> init() async {
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
 
     const darwinSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
@@ -33,14 +34,15 @@ class NotificationService {
     );
 
     await _plugin.initialize(
-      initSettings,
+      settings: initSettings,
       onDidReceiveNotificationResponse: _onNotificationTap,
     );
 
     // Minta permission notifikasi (Android 13+ / API 33+)
     await _plugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.requestNotificationsPermission();
   }
 
@@ -65,11 +67,11 @@ class NotificationService {
     String? payload,
   }) async {
     await _plugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(scheduledDate, tz.local),
-      NotificationDetails(
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: tz.TZDateTime.from(scheduledDate, tz.local),
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           _channelId,
           _channelName,
@@ -91,7 +93,7 @@ class NotificationService {
 
   /// Batalkan notifikasi berdasarkan [id].
   static Future<void> cancelNotification(int id) async {
-    await _plugin.cancel(id);
+    await _plugin.cancel(id: id);
   }
 
   /// Batalkan semua notifikasi yang terjadwal.
@@ -101,7 +103,7 @@ class NotificationService {
 
   /// Daftar semua notifikasi yang masih pending (untuk debugging).
   static Future<List<PendingNotificationRequest>>
-      getPendingNotifications() async {
+  getPendingNotifications() async {
     return _plugin.pendingNotificationRequests();
   }
 }

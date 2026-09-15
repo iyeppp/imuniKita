@@ -33,7 +33,6 @@ void main() async {
   // 4. Inisialisasi WorkManager untuk background check
   await Workmanager().initialize(
     callbackDispatcher,
-    isInDebugMode: false,
   );
 
   runApp(
