@@ -6,6 +6,7 @@ import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/baby_profile/presentation/screens/add_baby_screen.dart';
 
 // ---------------------------------------------------------------------------
 // Placeholder — diganti dengan screen asli saat Sprint 1–4
@@ -34,37 +35,37 @@ class _PlaceholderScreen extends StatelessWidget {
 // ---------------------------------------------------------------------------
 abstract class AppRoutes {
   // Auth & Onboarding
-  static const splash      = '/';
-  static const onboarding  = '/onboarding';
-  static const login       = '/login';
-  static const register    = '/register';
+  static const splash = '/';
+  static const onboarding = '/onboarding';
+  static const login = '/login';
+  static const register = '/register';
 
   // Baby profile
-  static const addBaby     = '/add-baby';
+  static const addBaby = '/add-baby';
 
   // Main tabs
-  static const dashboard   = '/dashboard';
+  static const dashboard = '/dashboard';
 
   // Imunisasi & Kalender
-  static const calendar         = '/calendar';
-  static const vaccineTimeline  = '/calendar/timeline';
-  static const vaccineDetail    = '/calendar/detail/:id';
+  static const calendar = '/calendar';
+  static const vaccineTimeline = '/calendar/timeline';
+  static const vaccineDetail = '/calendar/detail/:id';
 
   // Pertumbuhan
-  static const growth    = '/growth';
+  static const growth = '/growth';
   static const addGrowth = '/growth/add';
 
   // Jurnal Kesehatan
-  static const journal    = '/journal';
+  static const journal = '/journal';
   static const addJournal = '/journal/add';
 
   // Edukasi
-  static const education     = '/education';
+  static const education = '/education';
   static const articleDetail = '/education/article/:id';
-  static const quiz          = '/education/quiz/:id';
+  static const quiz = '/education/quiz/:id';
 
   // Direktori Faskes
-  static const faskes  = '/faskes';
+  static const faskes = '/faskes';
 
   // Chatbot
   static const chatbot = '/chatbot';
@@ -82,19 +83,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     debugLogDiagnostics: true,
     routes: [
       // ── Auth & Onboarding ──────────────────────────────────────────────
-      GoRoute(
-        path: AppRoutes.splash,
-        builder: (_, _) => const SplashScreen(),
-      ),
+      GoRoute(path: AppRoutes.splash, builder: (_, _) => const SplashScreen()),
 
       GoRoute(
         path: AppRoutes.onboarding,
         builder: (_, _) => const OnboardingScreen(),
       ),
-      GoRoute(
-        path: AppRoutes.login,
-        builder: (_, _) => const LoginScreen(),
-      ),
+      GoRoute(path: AppRoutes.login, builder: (_, _) => const LoginScreen()),
       GoRoute(
         path: AppRoutes.register,
         builder: (_, _) => const RegisterScreen(),
@@ -103,7 +98,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // ── Baby Profile ───────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.addBaby,
-        builder: (_, _) => const _PlaceholderScreen('Tambah Profil Bayi'),
+        builder: (_, _) => const AddBabyScreen(),
       ),
 
       // ── Dashboard ──────────────────────────────────────────────────────
@@ -162,15 +157,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: 'article/:id',
-            builder: (_, state) => _PlaceholderScreen(
-              'Artikel — ${state.pathParameters['id']}',
-            ),
+            builder: (_, state) =>
+                _PlaceholderScreen('Artikel — ${state.pathParameters['id']}'),
           ),
           GoRoute(
             path: 'quiz/:id',
-            builder: (_, state) => _PlaceholderScreen(
-              'Kuis — ${state.pathParameters['id']}',
-            ),
+            builder: (_, state) =>
+                _PlaceholderScreen('Kuis — ${state.pathParameters['id']}'),
           ),
         ],
       ),
