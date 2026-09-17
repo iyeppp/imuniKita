@@ -130,16 +130,16 @@ flutter:
 
 flutter_native_splash:
   color: "#F0856A"
-  image: assets/images/syringe_logo.png
+  image: assets/images/splash_logo.png
   color_dark: "#F0856A"
-  image_dark: assets/images/syringe_logo.png
+  image_dark: assets/images/splash_logo.png
   android: true
   ios: true
   android_12:
     color: "#F0856A"
-    image: assets/images/syringe_logo.png
+    image: assets/images/splash_logo.png
     color_dark: "#F0856A"
-    image_dark: assets/images/syringe_logo.png
+    image_dark: assets/images/splash_logo.png
 
 flutter_launcher_icons:
   android: "launcher_icon"
