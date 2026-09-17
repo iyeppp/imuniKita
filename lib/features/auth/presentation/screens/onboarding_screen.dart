@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../widgets/neo_button.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -19,19 +20,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<Map<String, dynamic>> _slides = [
     {
       'title': 'Pantau Imunisasi Buah Hati',
-      'description': 'Catat dan pantau riwayat imunisasi anak dengan mudah demi perlindungan optimal sejak lahir.',
+      'description':
+          'Catat dan pantau riwayat imunisasi anak dengan mudah demi perlindungan optimal sejak lahir.',
       'icon': Icons.child_care,
       'color': AppColors.coral,
     },
     {
       'title': 'Pengingat Otomatis H-7 & H-1',
-      'description': 'Jangan lewatkan jadwal penting. Aplikasi akan memberikan notifikasi otomatis sebelum hari imunisasi.',
+      'description':
+          'Jangan lewatkan jadwal penting. Aplikasi akan memberikan notifikasi otomatis sebelum hari imunisasi.',
       'icon': Icons.calendar_month,
       'color': AppColors.teal,
     },
     {
       'title': 'Pantau Tumbuh Kembang si Kecil',
-      'description': 'Pantau grafik berat badan, tinggi badan, dan lingkar kepala sesuai standar referensi WHO.',
+      'description':
+          'Pantau grafik berat badan, tinggi badan, dan lingkar kepala sesuai standar referensi WHO.',
       'icon': Icons.bar_chart,
       'color': AppColors.yellow,
     },
@@ -64,7 +68,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Align(
               alignment: Alignment.topRight,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: _currentPage < _slides.length - 1
                     ? TextButton(
                         onPressed: _completeOnboarding,
@@ -102,9 +107,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           width: 200,
                           height: 200,
                           decoration: BoxDecoration(
-                            color: (slide['color'] as Color).withValues(alpha: 0.2),
+                            color: (slide['color'] as Color)
+                                .withValues(alpha: 0.2),
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.darkText, width: 3),
+                            border:
+                                Border.all(color: AppColors.darkText, width: 3),
                             boxShadow: const [
                               BoxShadow(
                                 color: AppColors.darkText,
@@ -154,7 +161,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
             // Page Indicator Dots and Action Buttons
             Padding(
-              padding: EdgeInsets.fromLTRB(32, 16, 32, media.padding.bottom + 24),
+              padding:
+                  EdgeInsets.fromLTRB(32, 16, 32, media.padding.bottom + 24),
               child: Column(
                 children: [
                   // Animated Page Indicator Dots
@@ -168,88 +176,41 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         height: 10,
                         width: isSelected ? 24 : 10,
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.teal : AppColors.grey.withValues(alpha: 0.5),
+                          color: isSelected
+                              ? AppColors.teal
+                              : AppColors.grey.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(5),
-                          border: Border.all(color: AppColors.darkText, width: 1.5),
+                          border:
+                              Border.all(color: AppColors.darkText, width: 1.5),
                         ),
                       );
                     }),
                   ),
                   const SizedBox(height: 32),
 
-                  // Bottom Action Buttons with Bold Neo-brutalism Style
+                  // Bottom Action Buttons with NeoButton
                   _currentPage == _slides.length - 1
-                      ? Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: AppColors.darkText,
-                                offset: Offset(3, 3),
-                                blurRadius: 0,
-                              ),
-                            ],
-                          ),
-                          child: ElevatedButton(
-                            onPressed: _completeOnboarding,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.teal,
-                              side: const BorderSide(color: AppColors.darkText, width: 2),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Text(
-                              'Mulai Sekarang',
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.darkText,
-                              ),
-                            ),
-                          ),
+                      ? NeoButton(
+                          label: 'Mulai Sekarang',
+                          onPressed: _completeOnboarding,
+                          backgroundColor: AppColors.teal,
                         )
                       : Align(
                           alignment: Alignment.centerRight,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: AppColors.darkText,
-                                  offset: Offset(3, 3),
-                                  blurRadius: 0,
-                                ),
-                              ],
+                          child: NeoButton(
+                            label: 'Selanjutnya',
+                            backgroundColor: AppColors.coral,
+                            icon: const Icon(
+                              Icons.arrow_forward,
+                              color: AppColors.darkText,
+                              size: 18,
                             ),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                _pageController.nextPage(
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.coral,
-                                side: const BorderSide(color: AppColors.darkText, width: 2),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    'Selanjutnya',
-                                    style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.darkText,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  const Icon(Icons.arrow_forward, color: AppColors.darkText, size: 18),
-                                ],
-                              ),
-                            ),
+                            onPressed: () {
+                              _pageController.nextPage(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              );
+                            },
                           ),
                         ),
                 ],
