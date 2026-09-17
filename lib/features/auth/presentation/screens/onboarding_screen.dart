@@ -208,53 +208,49 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             ),
                           ),
                         )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const SizedBox(width: 60), // Balanced spacing
-                            Container(
-                              width: 140,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: AppColors.darkText,
-                                    offset: Offset(3, 3),
-                                    blurRadius: 0,
+                      : Align(
+                          alignment: Alignment.centerRight,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: AppColors.darkText,
+                                  offset: Offset(3, 3),
+                                  blurRadius: 0,
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                _pageController.nextPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.coral,
+                                side: const BorderSide(color: AppColors.darkText, width: 2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Selanjutnya',
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.darkText,
+                                    ),
                                   ),
+                                  const SizedBox(width: 4),
+                                  const Icon(Icons.arrow_forward, color: AppColors.darkText, size: 18),
                                 ],
                               ),
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  _pageController.nextPage(
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInOut,
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.coral,
-                                  side: const BorderSide(color: AppColors.darkText, width: 2),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      'Selanjutnya',
-                                      style: GoogleFonts.poppins(
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.darkText,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    const Icon(Icons.arrow_forward, color: AppColors.darkText, size: 18),
-                                  ],
-                                ),
-                              ),
                             ),
-                          ],
+                          ),
                         ),
                 ],
               ),
