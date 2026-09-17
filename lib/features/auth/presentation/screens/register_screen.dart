@@ -7,6 +7,10 @@ import 'package:uuid/uuid.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../data/models/user_model.dart';
+import '../utils/auth_validators.dart';
+import '../utils/snackbar_helper.dart';
+import '../widgets/labeled_text_field.dart';
+import '../widgets/neo_button.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -22,7 +26,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -51,7 +56,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       final userBox = await Hive.openBox<UserModel>('userBox');
-      
+
       final localId = const Uuid().v4();
       final newUser = UserModel(
         localId: localId,
@@ -72,29 +77,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       await prefs.setString('user_name', newUser.namaLengkap);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.success,
-            content: Text(
-              'Registrasi berhasil! Selamat bergabung, ${newUser.namaLengkap}.',
-              style: GoogleFonts.poppins(color: Colors.white),
-            ),
-          ),
+        SnackbarHelper.showSuccess(
+          context,
+          'Registrasi berhasil! Selamat bergabung, ${newUser.namaLengkap}.',
         );
         // Redirect to AddBaby screen as specified
         context.go(AppRoutes.addBaby);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.error,
-            content: Text(
-              'Gagal mendaftar: $e',
-              style: GoogleFonts.poppins(color: Colors.white),
-            ),
-          ),
-        );
+        SnackbarHelper.showError(context, 'Gagal mendaftar: $e');
       }
     } finally {
       if (mounted) {
@@ -140,143 +132,93 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 32),
 
                   // Full Name Field
-                  Text(
-                    'Nama Lengkap',
-                    style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.darkText),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
+                  LabeledTextField(
+                    label: 'Nama Lengkap',
                     controller: _nameController,
+                    hint: 'Nama Lengkap Anda',
                     keyboardType: TextInputType.name,
-                    decoration: const InputDecoration(hintText: 'Nama Lengkap Anda'),
-                    validator: (value) => value == null || value.trim().isEmpty ? 'Nama lengkap wajib diisi' : null,
+                    validator: (val) => AuthValidators.required(val, 'Nama lengkap'),
                   ),
                   const SizedBox(height: 16),
 
                   // Email Field
-                  Text(
-                    'Email',
-                    style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.darkText),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
+                  LabeledTextField(
+                    label: 'Email',
                     controller: _emailController,
+                    hint: 'nama@email.com',
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(hintText: 'nama@email.com'),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) return 'Email wajib diisi';
-                      final emailRegExp = RegExp(r'^[\w.-]+@([\w-]+\.)+[\w-]{2,4}$');
-                      if (!emailRegExp.hasMatch(value)) return 'Format email tidak valid';
-                      return null;
-                    },
+                    validator: AuthValidators.email,
                   ),
                   const SizedBox(height: 16),
 
                   // Phone Number Field
-                  Text(
-                    'Nomor HP',
-                    style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.darkText),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
+                  LabeledTextField(
+                    label: 'Nomor HP',
                     controller: _phoneController,
+                    hint: '081234567890',
                     keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(hintText: '081234567890'),
-                    validator: (value) => value == null || value.trim().isEmpty ? 'Nomor HP wajib diisi' : null,
+                    validator: (val) => AuthValidators.required(val, 'Nomor HP'),
                   ),
                   const SizedBox(height: 16),
 
                   // City Field
-                  Text(
-                    'Kota Tempat Tinggal',
-                    style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.darkText),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
+                  LabeledTextField(
+                    label: 'Kota Tempat Tinggal',
                     controller: _cityController,
-                    keyboardType: TextInputType.text,
-                    decoration: const InputDecoration(hintText: 'Contoh: Jakarta'),
-                    validator: (value) => value == null || value.trim().isEmpty ? 'Kota wajib diisi' : null,
+                    hint: 'Contoh: Jakarta',
+                    validator: (val) => AuthValidators.required(val, 'Kota'),
                   ),
                   const SizedBox(height: 16),
 
                   // Password Field
-                  Text(
-                    'Password',
-                    style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.darkText),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
+                  LabeledTextField(
+                    label: 'Password',
                     controller: _passwordController,
+                    hint: '••••••••',
                     obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      hintText: '••••••••',
-                      suffixIcon: IconButton(
-                        icon: Icon(_obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: AppColors.darkText),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                        color: AppColors.darkText,
                       ),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
-                    validator: (value) => value == null || value.length < 6 ? 'Password minimal 6 karakter' : null,
+                    validator: AuthValidators.password,
                   ),
                   const SizedBox(height: 16),
 
                   // Confirm Password Field
-                  Text(
-                    'Konfirmasi Password',
-                    style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.darkText),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
+                  LabeledTextField(
+                    label: 'Konfirmasi Password',
                     controller: _confirmPasswordController,
+                    hint: '••••••••',
                     obscureText: _obscureConfirmPassword,
-                    decoration: InputDecoration(
-                      hintText: '••••••••',
-                      suffixIcon: IconButton(
-                        icon: Icon(_obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: AppColors.darkText),
-                        onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureConfirmPassword
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                        color: AppColors.darkText,
                       ),
+                      onPressed: () => setState(() =>
+                          _obscureConfirmPassword = !_obscureConfirmPassword),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) return 'Konfirmasi password wajib diisi';
-                      if (value != _passwordController.text) return 'Password tidak cocok';
-                      return null;
-                    },
+                    validator: (val) => AuthValidators.confirmPassword(
+                      val,
+                      _passwordController.text,
+                    ),
                   ),
                   const SizedBox(height: 28),
 
-                  // Register Button with Loading State
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: _isLoading
-                          ? null
-                          : const [
-                              BoxShadow(
-                                color: AppColors.darkText,
-                                offset: Offset(3, 3),
-                                blurRadius: 0,
-                              ),
-                            ],
-                    ),
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleRegister,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        side: const BorderSide(color: AppColors.darkText, width: 2),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        disabledBackgroundColor: AppColors.primary.withOpacity(0.6),
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(color: AppColors.darkText, strokeWidth: 2.5),
-                            )
-                          : Text(
-                              'Daftar',
-                              style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: AppColors.darkText),
-                            ),
-                    ),
+                  // Register Button
+                  NeoButton(
+                    label: 'Daftar',
+                    isLoading: _isLoading,
+                    onPressed: _handleRegister,
+                    backgroundColor: AppColors.primary,
                   ),
                   const SizedBox(height: 20),
 
@@ -286,7 +228,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     children: [
                       Text(
                         'Sudah punya akun? ',
-                        style: GoogleFonts.poppins(fontSize: 14, color: AppColors.textSecondary),
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                       GestureDetector(
                         onTap: () => context.go(AppRoutes.login),
