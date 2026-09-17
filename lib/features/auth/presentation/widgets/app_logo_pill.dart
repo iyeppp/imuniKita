@@ -1,8 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../../app/theme/app_colors.dart';
 
 /// Logo Pill ImuniKita dengan gaya neo-brutalism.
+/// Menggunakan logo karakter jarum suntik terbaru (`syringe_logo.png`).
 /// Digunakan di LoginScreen dan screen lain yang memerlukan branding header.
 class AppLogoPill extends StatelessWidget {
   const AppLogoPill({super.key});
@@ -10,7 +11,7 @@ class AppLogoPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.pinkLogo,
         borderRadius: BorderRadius.circular(30),
@@ -26,12 +27,17 @@ class AppLogoPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.vaccines, color: AppColors.darkText, size: 28),
-          const SizedBox(width: 8),
+          Image.asset(
+            'assets/images/syringe_logo.png',
+            width: 42,
+            height: 42,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(width: 10),
           Text(
             'ImuniKita',
             style: GoogleFonts.baloo2(
-              fontSize: 26,
+              fontSize: 28,
               fontWeight: FontWeight.w800,
               color: AppColors.darkText,
             ),
