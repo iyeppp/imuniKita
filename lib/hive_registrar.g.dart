@@ -4,11 +4,6 @@
 
 import 'package:hive_ce/hive_ce.dart';
 import 'package:imunikita/features/auth/data/models/user_model.dart';
-<<<<<<< Updated upstream
-
-extension HiveRegistrar on HiveInterface {
-  void registerAdapters() {
-=======
 import 'package:imunikita/features/baby_profile/data/models/baby_model.dart';
 import 'package:imunikita/features/growth/data/models/growth_record_model.dart';
 import 'package:imunikita/features/health_journal/data/models/health_journal_model.dart';
@@ -19,19 +14,15 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(BabyModelAdapter());
     registerAdapter(GrowthRecordModelAdapter());
     registerAdapter(HealthJournalModelAdapter());
->>>>>>> Stashed changes
     registerAdapter(UserModelAdapter());
   }
 }
 
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
-<<<<<<< Updated upstream
-=======
     registerAdapter(BabyModelAdapter());
     registerAdapter(GrowthRecordModelAdapter());
     registerAdapter(HealthJournalModelAdapter());
->>>>>>> Stashed changes
     registerAdapter(UserModelAdapter());
   }
 }
