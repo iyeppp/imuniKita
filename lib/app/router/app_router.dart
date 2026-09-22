@@ -6,6 +6,18 @@ import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+<<<<<<< Updated upstream
+=======
+import '../../features/baby_profile/presentation/screens/add_baby_screen.dart';
+import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
+import '../../features/immunization/presentation/screens/calendar_screen.dart';
+import '../../features/immunization/presentation/screens/vaccine_timeline_screen.dart';
+import '../../features/immunization/presentation/screens/vaccine_detail_screen.dart';
+import '../../features/growth/presentation/screens/growth_chart_screen.dart';
+import '../../features/growth/presentation/screens/add_growth_record_screen.dart';
+import '../../features/health_journal/presentation/screens/journal_list_screen.dart';
+import '../../features/health_journal/presentation/screens/add_journal_screen.dart';
+>>>>>>> Stashed changes
 
 // ---------------------------------------------------------------------------
 // Placeholder — diganti dengan screen asli saat Sprint 1–4
@@ -109,22 +121,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // ── Dashboard ──────────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.dashboard,
-        builder: (_, _) => const _PlaceholderScreen('Dashboard'),
+        builder: (_, _) => const DashboardScreen(),
       ),
 
       // ── Imunisasi & Kalender (nested) ──────────────────────────────────
       GoRoute(
         path: AppRoutes.calendar,
-        builder: (_, _) => const _PlaceholderScreen('Kalender Imunisasi'),
+        builder: (_, _) => const CalendarScreen(),
         routes: [
           GoRoute(
             path: 'timeline',
-            builder: (_, _) => const _PlaceholderScreen('Timeline Vaksin'),
+            builder: (_, _) => const VaccineTimelineScreen(),
           ),
           GoRoute(
             path: 'detail/:id',
-            builder: (_, state) => _PlaceholderScreen(
-              'Detail Vaksin — ${state.pathParameters['id']}',
+            builder: (_, state) => VaccineDetailScreen(
+              scheduleId: state.pathParameters['id'] ?? '',
             ),
           ),
         ],
@@ -133,12 +145,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // ── Pertumbuhan (nested) ───────────────────────────────────────────
       GoRoute(
         path: AppRoutes.growth,
-        builder: (_, _) => const _PlaceholderScreen('Grafik Pertumbuhan'),
+        builder: (_, _) => const GrowthChartScreen(),
         routes: [
           GoRoute(
             path: 'add',
-            builder: (_, _) =>
-                const _PlaceholderScreen('Tambah Data Pertumbuhan'),
+            builder: (_, _) => const AddGrowthRecordScreen(),
           ),
         ],
       ),
@@ -146,11 +157,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // ── Jurnal Kesehatan (nested) ──────────────────────────────────────
       GoRoute(
         path: AppRoutes.journal,
-        builder: (_, _) => const _PlaceholderScreen('Jurnal Kesehatan'),
+        builder: (_, _) => const JournalListScreen(),
         routes: [
           GoRoute(
             path: 'add',
-            builder: (_, _) => const _PlaceholderScreen('Tambah Jurnal'),
+            builder: (_, _) => const AddJournalScreen(),
           ),
         ],
       ),
