@@ -15,6 +15,7 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(GrowthRecordModelAdapter());
     registerAdapter(HealthJournalModelAdapter());
     registerAdapter(UserModelAdapter());
+    registerAdapter(VaccineScheduleModelAdapter());
   }
 }
 
@@ -24,5 +25,6 @@ extension IsolatedHiveRegistrar on IsolatedHiveInterface {
     registerAdapter(GrowthRecordModelAdapter());
     registerAdapter(HealthJournalModelAdapter());
     registerAdapter(UserModelAdapter());
+    registerAdapter(VaccineScheduleModelAdapter());
   }
 }
