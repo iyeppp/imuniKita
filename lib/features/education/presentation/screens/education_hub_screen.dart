@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../data/datasources/education_mock_datasource.dart';
 import '../../data/models/article_model.dart';
@@ -28,6 +29,16 @@ class EducationHubScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
+          // `/education` adalah route top-level. Bila dibuka tanpa riwayat
+          // (mis. deep link), tidak ada halaman untuk di-`pop` — karena itu
+          // tombol kembali selalu disediakan dan jatuh ke Dashboard.
+          leading: IconButton(
+            tooltip: 'Kembali',
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.canPop()
+                ? context.pop()
+                : context.go(AppRoutes.dashboard),
+          ),
           title: Text(
             'Edukasi',
             style: GoogleFonts.poppins(fontWeight: FontWeight.bold),

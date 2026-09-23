@@ -168,8 +168,10 @@ class DashboardScreen extends ConsumerWidget {
                         _buildMenuCard(context, 'Kalender', Icons.calendar_month, AppColors.teal, AppRoutes.calendar),
                         _buildMenuCard(context, 'Tumbuh Kembang', Icons.bar_chart, AppColors.coral, AppRoutes.growth),
                         _buildMenuCard(context, 'Jurnal Sehat', Icons.book_outlined, AppColors.yellow, AppRoutes.journal),
-                        _buildMenuCard(context, 'Edukasi', Icons.menu_book, AppColors.pinkLogo, AppRoutes.education),
-                        _buildMenuCard(context, 'ImuniBot 🤖', Icons.chat_bubble_outline, Colors.purple, AppRoutes.chatbot),
+                        // Edukasi & ImuniBot adalah layar sekunder (tanpa bottom nav) — dibuka
+                        // dengan `push` agar AppBar menampilkan tombol kembali ke Dashboard.
+                        _buildMenuCard(context, 'Edukasi', Icons.menu_book, AppColors.pinkLogo, AppRoutes.education, push: true),
+                        _buildMenuCard(context, 'ImuniBot 🤖', Icons.chat_bubble_outline, Colors.purple, AppRoutes.chatbot, push: true),
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -239,9 +241,9 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMenuCard(BuildContext context, String title, IconData icon, Color color, String route) {
+  Widget _buildMenuCard(BuildContext context, String title, IconData icon, Color color, String route, {bool push = false}) {
     return GestureDetector(
-      onTap: () => context.go(route),
+      onTap: () => push ? context.push(route) : context.go(route),
       child: Card(
         color: color.withValues(alpha: 0.1),
         shape: RoundedRectangleBorder(
