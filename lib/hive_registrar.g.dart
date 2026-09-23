@@ -5,11 +5,15 @@
 import 'package:hive_ce/hive_ce.dart';
 import 'package:imunikita/features/auth/data/models/user_model.dart';
 import 'package:imunikita/features/baby_profile/data/models/baby_model.dart';
+import 'package:imunikita/features/growth/data/models/growth_record_model.dart';
+import 'package:imunikita/features/health_journal/data/models/health_journal_model.dart';
 import 'package:imunikita/features/immunization/data/models/vaccine_schedule_model.dart';
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
     registerAdapter(BabyModelAdapter());
+    registerAdapter(GrowthRecordModelAdapter());
+    registerAdapter(HealthJournalModelAdapter());
     registerAdapter(UserModelAdapter());
     registerAdapter(VaccineScheduleModelAdapter());
   }
@@ -18,6 +22,8 @@ extension HiveRegistrar on HiveInterface {
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
     registerAdapter(BabyModelAdapter());
+    registerAdapter(GrowthRecordModelAdapter());
+    registerAdapter(HealthJournalModelAdapter());
     registerAdapter(UserModelAdapter());
     registerAdapter(VaccineScheduleModelAdapter());
   }
