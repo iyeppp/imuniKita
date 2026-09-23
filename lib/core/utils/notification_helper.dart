@@ -1,3 +1,5 @@
+import '../constants/app_constants.dart';
+
 /// Utilitas penjadwalan notifikasi pengingat imunisasi H-7 & H-1.
 ///
 /// Semua perhitungan tanggal/ID di sini bersifat murni (pure function) agar
@@ -11,7 +13,7 @@ abstract class NotificationHelper {
   static DateTime reminderDate({
     required DateTime tanggalTarget,
     required int daysBefore,
-    int hour = 8,
+    int hour = AppConstants.reminderHour,
   }) {
     final date = DateTime(
       tanggalTarget.year,

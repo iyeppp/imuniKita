@@ -15,9 +15,19 @@ class ImmunizationRepositoryImpl implements IImmunizationRepository {
   Future<List<VaccineScheduleEntity>> getSchedulesByBaby(String babyId) async {
     try {
       final models = await _localDatasource.getByBaby(babyId);
-      return models.map((m) => m.toEntity()).toList();
+      return models.map(_toEntity).toList();
     } catch (_) {
       throw const LocalStorageFailure('Gagal memuat jadwal imunisasi.');
+    }
+  }
+
+  @override
+  Future<VaccineScheduleEntity?> getScheduleById(String scheduleId) async {
+    try {
+      final model = await _localDatasource.getById(scheduleId);
+      return model == null ? null : _toEntity(model);
+    } catch (_) {
+      throw const LocalStorageFailure('Gagal memuat detail jadwal imunisasi.');
     }
   }
 
@@ -40,9 +50,34 @@ class ImmunizationRepositoryImpl implements IImmunizationRepository {
       final updated = await _localDatasource.update(
         VaccineScheduleModel.fromEntity(schedule),
       );
-      return updated.toEntity();
+      return _toEntity(updated);
     } catch (_) {
       throw const LocalStorageFailure('Gagal memperbarui jadwal imunisasi.');
     }
+  }
+
+  @override
+  Future<void> deleteSchedulesByBaby(String babyId) async {
+    try {
+      await _localDatasource.deleteByBaby(babyId);
+    } catch (_) {
+      throw const LocalStorageFailure('Gagal menghapus jadwal imunisasi.');
+    }
+  }
+
+  /// Model → entity sekaligus menormalkan status.
+  ///
+  /// Jadwal `BELUM` yang tanggal targetnya sudah lewat dihitung `TERLEWAT`
+  /// (Temuan #3). Normalisasi dilakukan **saat membaca**, bukan disimpan:
+  /// nilainya otomatis ikut berubah begitu hari berganti, tanpa penulisan
+  /// ulang ke Hive dan tanpa migrasi data.
+  VaccineScheduleEntity _toEntity(VaccineScheduleModel model) {
+    final entity = model.toEntity();
+    final efektif = VaccineStatus.effective(
+      status: entity.status,
+      tanggalTarget: entity.tanggalTarget,
+    );
+
+    return efektif == entity.status ? entity : entity.copyWith(status: efektif);
   }
 }

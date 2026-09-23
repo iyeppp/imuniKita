@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../widgets/neo_button.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -43,7 +44,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('seen_onboarding', true);
+    await prefs.setBool(AppConstants.prefSeenOnboarding, true);
     if (mounted) {
       context.go(AppRoutes.login);
     }

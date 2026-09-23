@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../data/models/user_model.dart';
 import '../utils/auth_validators.dart';
 import '../utils/snackbar_helper.dart';
@@ -55,7 +56,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     await Future.delayed(const Duration(milliseconds: 1200));
 
     try {
-      final userBox = await Hive.openBox<UserModel>('userBox');
+      final userBox = await Hive.openBox<UserModel>(AppConstants.usersBox);
 
       final localId = const Uuid().v4();
       final newUser = UserModel(
@@ -72,9 +73,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       // Save to SharedPreferences session wrapper
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('is_logged_in', true);
-      await prefs.setString('user_id', localId);
-      await prefs.setString('user_name', newUser.namaLengkap);
+      await prefs.setBool(AppConstants.prefIsLoggedIn, true);
+      await prefs.setString(AppConstants.prefUserId, localId);
+      await prefs.setString(AppConstants.prefUserName, newUser.namaLengkap);
 
       if (mounted) {
         SnackbarHelper.showSuccess(

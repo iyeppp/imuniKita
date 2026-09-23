@@ -5,9 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
-import '../../../baby_profile/presentation/providers/baby_provider.dart';
+import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../providers/immunization_provider.dart';
-import '../../data/models/vaccine_schedule_model.dart';
+import '../../domain/entities/vaccine_schedule_entity.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -30,7 +30,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final babiesAsync = ref.watch(babyNotifierProvider);
+    final babyAsync = ref.watch(activeBabyProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -43,33 +43,32 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           )
         ],
       ),
-      body: babiesAsync.when(
-        data: (babies) {
-          if (babies.isEmpty) {
+      body: babyAsync.when(
+        data: (currentBaby) {
+          if (currentBaby == null) {
             return const Center(child: Text('Silakan tambahkan profil anak terlebih dahulu.'));
           }
-          final currentBaby = babies.first;
           final schedulesAsync = ref.watch(immunizationProvider(currentBaby.babyId));
 
           return schedulesAsync.when(
             data: (schedules) {
               // Filtering logics
               final filteredSchedules = schedules.where((s) {
-                if (_selectedFilter == 'Terjadwal') return s.status == 'BELUM';
-                if (_selectedFilter == 'Selesai') return s.status == 'SELESAI';
-                if (_selectedFilter == 'Terlewat') return s.status == 'TERLEWAT';
+                if (_selectedFilter == 'Terjadwal') return s.status == VaccineStatus.belum;
+                if (_selectedFilter == 'Selesai') return s.status == VaccineStatus.selesai;
+                if (_selectedFilter == 'Terlewat') return s.status == VaccineStatus.terlewat;
                 return true;
               }).toList();
 
               // Events specific day finder
-              List<VaccineScheduleModel> getEventsForDay(DateTime day) {
+              List<VaccineScheduleEntity> getEventsForDay(DateTime day) {
                 return schedules.where((s) => isSameDay(s.tanggalTarget, day)).toList();
               }
 
               return Column(
                 children: [
                   // Table Calendar Widget Integration
-                  TableCalendar<VaccineScheduleModel>(
+                  TableCalendar<VaccineScheduleEntity>(
                     firstDay: DateTime.now().subtract(const Duration(days: 365)),
                     lastDay: DateTime.now().add(const Duration(days: 1825)),
                     focusedDay: _focusedDay,
@@ -97,8 +96,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: events.map((event) {
                             Color dotColor = AppColors.teal;
-                            if (event.status == 'SELESAI') dotColor = AppColors.green;
-                            if (event.status == 'TERLEWAT') dotColor = AppColors.red;
+                            if (event.status == VaccineStatus.selesai) dotColor = AppColors.green;
+                            if (event.status == VaccineStatus.terlewat) dotColor = AppColors.red;
                             return Container(
                               margin: const EdgeInsets.symmetric(horizontal: 1),
                               width: 7,
@@ -153,9 +152,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                             subtitle: Text('Target: ${item.usiaBulanTarget} Bulan'),
                             trailing: Chip(
                               label: Text(item.status),
-                              backgroundColor: item.status == 'SELESAI' 
+                              backgroundColor: item.status == VaccineStatus.selesai 
                                   ? AppColors.green.withValues(alpha: 0.2) 
-                                  : (item.status == 'TERLEWAT' ? AppColors.red.withValues(alpha: 0.2) : AppColors.teal.withValues(alpha: 0.2)),
+                                  : (item.status == VaccineStatus.terlewat ? AppColors.red.withValues(alpha: 0.2) : AppColors.teal.withValues(alpha: 0.2)),
                             ),
                             onTap: () => context.go('/calendar/detail/${item.scheduleId}'),
                           ),

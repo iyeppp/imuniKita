@@ -4,7 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../../../baby_profile/presentation/providers/baby_provider.dart';
+import '../../../immunization/domain/entities/vaccine_schedule_entity.dart';
 import '../../../immunization/presentation/providers/immunization_provider.dart';
 import '../../../growth/presentation/providers/growth_provider.dart';
 
@@ -13,14 +15,14 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final babiesAsync = ref.watch(babyNotifierProvider);
+    final babyAsync = ref.watch(activeBabyProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: babiesAsync.when(
-          data: (babies) {
-            if (babies.isEmpty) {
+        child: babyAsync.when(
+          data: (currentBaby) {
+            if (currentBaby == null) {
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
@@ -44,7 +46,6 @@ class DashboardScreen extends ConsumerWidget {
               );
             }
 
-            final currentBaby = babies.first;
             final schedulesAsync = ref.watch(immunizationProvider(currentBaby.babyId));
             final growthAsync = ref.watch(growthProvider(currentBaby.babyId));
 
@@ -105,7 +106,7 @@ class DashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 8),
                     schedulesAsync.when(
                       data: (schedules) {
-                        final upcoming = schedules.where((s) => s.status == 'BELUM').toList();
+                        final upcoming = schedules.where((s) => s.status == VaccineStatus.belum).toList();
                         if (upcoming.isEmpty) {
                           return const Card(
                             child: Padding(
@@ -167,7 +168,10 @@ class DashboardScreen extends ConsumerWidget {
                         _buildMenuCard(context, 'Kalender', Icons.calendar_month, AppColors.teal, AppRoutes.calendar),
                         _buildMenuCard(context, 'Tumbuh Kembang', Icons.bar_chart, AppColors.coral, AppRoutes.growth),
                         _buildMenuCard(context, 'Jurnal Sehat', Icons.book_outlined, AppColors.yellow, AppRoutes.journal),
-                        _buildMenuCard(context, 'ImuniBot 🤖', Icons.chat_bubble_outline, Colors.purple, AppRoutes.chatbot),
+                        // Edukasi & ImuniBot adalah layar sekunder (tanpa bottom nav) — dibuka
+                        // dengan `push` agar AppBar menampilkan tombol kembali ke Dashboard.
+                        _buildMenuCard(context, 'Edukasi', Icons.menu_book, AppColors.pinkLogo, AppRoutes.education, push: true),
+                        _buildMenuCard(context, 'ImuniBot 🤖', Icons.chat_bubble_outline, Colors.purple, AppRoutes.chatbot, push: true),
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -237,9 +241,9 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMenuCard(BuildContext context, String title, IconData icon, Color color, String route) {
+  Widget _buildMenuCard(BuildContext context, String title, IconData icon, Color color, String route, {bool push = false}) {
     return GestureDetector(
-      onTap: () => context.go(route),
+      onTap: () => push ? context.push(route) : context.go(route),
       child: Card(
         color: color.withValues(alpha: 0.1),
         shape: RoundedRectangleBorder(

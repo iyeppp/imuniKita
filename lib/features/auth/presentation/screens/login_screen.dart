@@ -5,6 +5,7 @@ import 'package:hive_ce/hive_ce.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../data/models/user_model.dart';
 import '../utils/auth_validators.dart';
 import '../utils/snackbar_helper.dart';
@@ -44,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
     await Future.delayed(const Duration(milliseconds: 1200));
 
     try {
-      final userBox = await Hive.openBox<UserModel>('userBox');
+      final userBox = await Hive.openBox<UserModel>(AppConstants.usersBox);
 
       if (userBox.isEmpty) {
         if (mounted) {
@@ -70,9 +71,9 @@ class _LoginScreenState extends State<LoginScreen> {
       if (matchedUser != null) {
         // Successful login
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('is_logged_in', true);
-        await prefs.setString('user_id', matchedUser.localId);
-        await prefs.setString('user_name', matchedUser.namaLengkap);
+        await prefs.setBool(AppConstants.prefIsLoggedIn, true);
+        await prefs.setString(AppConstants.prefUserId, matchedUser.localId);
+        await prefs.setString(AppConstants.prefUserName, matchedUser.namaLengkap);
 
         if (mounted) {
           SnackbarHelper.showSuccess(

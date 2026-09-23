@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
-import '../../../baby_profile/presentation/providers/baby_provider.dart';
+import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../providers/journal_provider.dart';
 
 class JournalListScreen extends ConsumerWidget {
@@ -12,17 +12,16 @@ class JournalListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final babiesAsync = ref.watch(babyNotifierProvider);
+    final babyAsync = ref.watch(activeBabyProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text('Jurnal Kesehatan', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
       ),
-      body: babiesAsync.when(
-        data: (babies) {
-          if (babies.isEmpty) return const Center(child: Text('Belum ada profil anak.'));
-          final currentBaby = babies.first;
+      body: babyAsync.when(
+        data: (currentBaby) {
+          if (currentBaby == null) return const Center(child: Text('Belum ada profil anak.'));
           final journalsAsync = ref.watch(journalProvider(currentBaby.babyId));
 
           return journalsAsync.when(

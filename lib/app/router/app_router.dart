@@ -7,6 +7,7 @@ import '../../features/auth/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/baby_profile/presentation/screens/add_baby_screen.dart';
+import '../../features/baby_profile/presentation/screens/baby_detail_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/immunization/presentation/screens/calendar_screen.dart';
 import '../../features/immunization/presentation/screens/vaccine_timeline_screen.dart';
@@ -15,6 +16,10 @@ import '../../features/growth/presentation/screens/growth_chart_screen.dart';
 import '../../features/growth/presentation/screens/add_growth_record_screen.dart';
 import '../../features/health_journal/presentation/screens/journal_list_screen.dart';
 import '../../features/health_journal/presentation/screens/add_journal_screen.dart';
+import '../../features/education/presentation/screens/education_hub_screen.dart';
+import '../../features/education/presentation/screens/article_detail_screen.dart';
+import '../../features/education/presentation/screens/quiz_screen.dart';
+import '../../features/auth/presentation/screens/settings_screen.dart';
 
 // ---------------------------------------------------------------------------
 // Placeholder — diganti dengan screen asli saat Sprint 1–4
@@ -50,6 +55,8 @@ abstract class AppRoutes {
 
   // Baby profile
   static const addBaby = '/add-baby';
+
+  static const babyDetail = '/baby/detail/:id';
 
   // Main tabs
   static const dashboard = '/dashboard';
@@ -109,6 +116,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const AddBabyScreen(),
       ),
 
+      GoRoute(
+        path: AppRoutes.babyDetail,
+        builder: (_, state) => BabyDetailScreen(
+          babyId: state.pathParameters['id'] ?? '',
+        ),
+      ),
+
       // ── Dashboard ──────────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.dashboard,
@@ -160,17 +174,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // ── Edukasi (nested) ───────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.education,
-        builder: (_, _) => const _PlaceholderScreen('Education Hub'),
+        builder: (_, _) => const EducationHubScreen(),
         routes: [
           GoRoute(
             path: 'article/:id',
-            builder: (_, state) =>
-                _PlaceholderScreen('Artikel — ${state.pathParameters['id']}'),
+            builder: (_, state) => ArticleDetailScreen(
+              articleId: state.pathParameters['id'] ?? '',
+            ),
           ),
           GoRoute(
             path: 'quiz/:id',
             builder: (_, state) =>
-                _PlaceholderScreen('Kuis — ${state.pathParameters['id']}'),
+                QuizScreen(quizId: state.pathParameters['id'] ?? ''),
           ),
         ],
       ),
@@ -190,7 +205,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // ── Settings ───────────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.settings,
-        builder: (_, _) => const _PlaceholderScreen('Settings & Profil'),
+        builder: (_, _) => const SettingsScreen(),
       ),
     ],
   );
