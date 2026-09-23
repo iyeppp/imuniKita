@@ -29,6 +29,9 @@ abstract class AppConstants {
   /// Penanda Onboarding sudah pernah dilewati/dituntaskan.
   static const String prefSeenOnboarding = 'seen_onboarding';
 
+  /// ID bayi yang sedang dipilih — dipakai lintas screen sebagai "bayi aktif".
+  static const String prefActiveBabyId = 'active_baby_id';
+
   /// Preferensi notifikasi pengingat (diatur di layar Profil & Pengaturan).
   static const String prefNotificationsEnabled = 'notifications_enabled';
 

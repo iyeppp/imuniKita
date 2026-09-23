@@ -7,6 +7,7 @@ import '../../features/auth/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/baby_profile/presentation/screens/add_baby_screen.dart';
+import '../../features/baby_profile/presentation/screens/baby_detail_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/immunization/presentation/screens/calendar_screen.dart';
 import '../../features/immunization/presentation/screens/vaccine_timeline_screen.dart';
@@ -54,6 +55,8 @@ abstract class AppRoutes {
 
   // Baby profile
   static const addBaby = '/add-baby';
+
+  static const babyDetail = '/baby/detail/:id';
 
   // Main tabs
   static const dashboard = '/dashboard';
@@ -111,6 +114,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.addBaby,
         builder: (_, _) => const AddBabyScreen(),
+      ),
+
+      GoRoute(
+        path: AppRoutes.babyDetail,
+        builder: (_, state) => BabyDetailScreen(
+          babyId: state.pathParameters['id'] ?? '',
+        ),
       ),
 
       // ── Dashboard ──────────────────────────────────────────────────────

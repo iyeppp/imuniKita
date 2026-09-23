@@ -30,6 +30,15 @@ class VaccineLocalDatasource {
     await box.putAll({for (final m in models) m.scheduleId: m});
   }
 
+  Future<void> deleteByBaby(String babyId) async {
+    final box = await _openBox();
+    final ids = box.values
+        .where((s) => s.babyId == babyId)
+        .map((s) => s.scheduleId)
+        .toList();
+    await box.deleteAll(ids);
+  }
+
   Future<VaccineScheduleModel> update(VaccineScheduleModel model) async {
     final box = await _openBox();
     await box.put(model.scheduleId, model);

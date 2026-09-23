@@ -23,6 +23,15 @@ class JournalNotifier extends FamilyAsyncNotifier<List<HealthJournalModel>, Stri
     await box.delete(journalId);
     ref.invalidateSelf();
   }
+
+
+  /// Hapus seluruh jurnal bayi ini (dipakai saat bayi dihapus).
+  Future<void> deleteAllForBaby() async {
+    final box = await Hive.openBox<HealthJournalModel>(AppConstants.healthJournalsBox);
+    final ids = box.values.where((j) => j.babyId == arg).map((j) => j.journalId).toList();
+    await box.deleteAll(ids);
+    ref.invalidateSelf();
+  }
 }
 
 final journalProvider = AsyncNotifierProviderFamily<JournalNotifier, List<HealthJournalModel>, String>(

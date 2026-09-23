@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../../../baby_profile/presentation/providers/baby_provider.dart';
 import '../../../immunization/domain/entities/vaccine_schedule_entity.dart';
 import '../../../immunization/presentation/providers/immunization_provider.dart';
@@ -14,14 +15,14 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final babiesAsync = ref.watch(babyNotifierProvider);
+    final babyAsync = ref.watch(activeBabyProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: babiesAsync.when(
-          data: (babies) {
-            if (babies.isEmpty) {
+        child: babyAsync.when(
+          data: (currentBaby) {
+            if (currentBaby == null) {
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
@@ -45,7 +46,6 @@ class DashboardScreen extends ConsumerWidget {
               );
             }
 
-            final currentBaby = babies.first;
             final schedulesAsync = ref.watch(immunizationProvider(currentBaby.babyId));
             final growthAsync = ref.watch(growthProvider(currentBaby.babyId));
 

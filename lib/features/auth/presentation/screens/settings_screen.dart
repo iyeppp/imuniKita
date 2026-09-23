@@ -13,6 +13,7 @@ import '../../../../core/utils/age_calculator.dart';
 import '../../../../injection/dependency_injection.dart';
 import '../../../../widgets/confirm_dialog.dart';
 import '../../../baby_profile/domain/entities/baby_entity.dart';
+import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../../../baby_profile/presentation/providers/baby_provider.dart';
 import '../../../immunization/domain/entities/vaccine_schedule_entity.dart';
 import '../../../immunization/presentation/providers/immunization_provider.dart';
@@ -270,6 +271,19 @@ class _DaftarAnak extends ConsumerWidget {
       data: (babies) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (babies.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Text(
+                'Anak "Aktif" adalah yang dipantau di Dashboard, Kalender, '
+                'Pertumbuhan, dan Jurnal.',
+                style: GoogleFonts.poppins(
+                  fontSize: 11.5,
+                  color: AppColors.textHint,
+                  height: 1.4,
+                ),
+              ),
+            ),
           if (babies.isEmpty)
             Card(
               child: Padding(
@@ -320,6 +334,9 @@ class _KartuAnak extends ConsumerWidget {
         ?.where((s) => s.status == VaccineStatus.selesai)
         .length;
 
+    final aktif =
+        ref.watch(activeBabyProvider).asData?.value?.babyId == baby.babyId;
+
     final file = baby.fotoProfilPath == null
         ? null
         : File(baby.fotoProfilPath!);
@@ -333,63 +350,127 @@ class _KartuAnak extends ConsumerWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundColor: AppColors.teal.withValues(alpha: 0.15),
-              backgroundImage: fotoProfil,
-              child: fotoProfil != null
-                  ? null
-                  : Text(
-                      baby.namaAnak.trim().isEmpty
-                          ? '?'
-                          : baby.namaAnak.trim()[0].toUpperCase(),
-                      style: GoogleFonts.baloo2(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.tealDark,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => context.push('/baby/detail/${baby.babyId}'),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: AppColors.teal.withValues(alpha: 0.15),
+                backgroundImage: fotoProfil,
+                child: fotoProfil != null
+                    ? null
+                    : Text(
+                        baby.namaAnak.trim().isEmpty
+                            ? '?'
+                            : baby.namaAnak.trim()[0].toUpperCase(),
+                        style: GoogleFonts.baloo2(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.tealDark,
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            baby.namaAnak,
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.darkText,
+                            ),
+                          ),
+                        ),
+                        if (aktif) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.green.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: AppColors.green),
+                            ),
+                            child: Text(
+                              'Aktif',
+                              style: GoogleFonts.poppins(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.green,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${AgeCalculator.label(baby.tanggalLahir)} · $gender',
+                      style: GoogleFonts.poppins(
+                        fontSize: 11.5,
+                        color: AppColors.textSecondary,
                       ),
                     ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    baby.namaAnak,
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.darkText,
+                    const SizedBox(height: 4),
+                    Text(
+                      jadwal == null
+                          ? 'Memuat jadwal imunisasi…'
+                          : 'Imunisasi selesai: ${selesai ?? 0}/${jadwal.length}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        color: AppColors.textHint,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${AgeCalculator.label(baby.tanggalLahir)} · $gender',
-                    style: GoogleFonts.poppins(
-                      fontSize: 11.5,
-                      color: AppColors.textSecondary,
+                    const SizedBox(height: 2),
+                    Text(
+                      'Ketuk untuk ubah atau hapus',
+                      style: GoogleFonts.poppins(
+                        fontSize: 10.5,
+                        color: AppColors.textHint,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    jadwal == null
-                        ? 'Memuat jadwal imunisasi…'
-                        : 'Imunisasi selesai: ${selesai ?? 0}/${jadwal.length}',
+                  ],
+                ),
+              ),
+              if (!aktif)
+                TextButton(
+                  onPressed: () => _aktifkan(context, ref),
+                  child: Text(
+                    'Aktifkan',
                     style: GoogleFonts.poppins(
                       fontSize: 11,
-                      color: AppColors.textHint,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ],
-              ),
-            ),
-          ],
+                ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Future<void> _aktifkan(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+
+    await ref.read(activeBabyProvider.notifier).selectBaby(baby.babyId);
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text('${baby.namaAnak} kini menjadi anak aktif.'),
+        backgroundColor: AppColors.green,
       ),
     );
   }

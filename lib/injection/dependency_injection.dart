@@ -6,6 +6,7 @@ import '../features/baby_profile/domain/repositories/i_baby_repository.dart';
 import '../features/baby_profile/domain/usecases/add_baby_usecase.dart';
 import '../features/baby_profile/domain/usecases/get_babies_usecase.dart';
 import '../features/baby_profile/domain/usecases/update_baby_usecase.dart';
+import '../features/baby_profile/domain/usecases/delete_baby_usecase.dart';
 import '../features/immunization/data/datasources/vaccine_local_datasource.dart';
 import '../features/immunization/data/repositories/immunization_repository_impl.dart';
 import '../features/immunization/domain/repositories/i_immunization_repository.dart';
@@ -38,6 +39,10 @@ final getBabiesUseCaseProvider = Provider<GetBabiesUseCase>((ref) {
 
 final updateBabyUseCaseProvider = Provider<UpdateBabyUseCase>((ref) {
   return UpdateBabyUseCase(ref.watch(babyRepositoryProvider));
+});
+
+final deleteBabyUseCaseProvider = Provider<DeleteBabyUseCase>((ref) {
+  return DeleteBabyUseCase(ref.watch(babyRepositoryProvider));
 });
 
 // ── Immunization ────────────────────────────────────────────────────────

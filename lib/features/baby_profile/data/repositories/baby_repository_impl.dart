@@ -54,4 +54,13 @@ class BabyRepositoryImpl implements IBabyRepository {
       throw const LocalStorageFailure('Gagal memperbarui profil bayi.');
     }
   }
+
+  @override
+  Future<void> deleteBaby(String babyId) async {
+    try {
+      await _localDatasource.delete(babyId);
+    } catch (_) {
+      throw const LocalStorageFailure('Gagal menghapus profil bayi.');
+    }
+  }
 }

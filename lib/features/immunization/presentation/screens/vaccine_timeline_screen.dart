@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import '../../../baby_profile/presentation/providers/baby_provider.dart';
+import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../providers/immunization_provider.dart';
 import '../../domain/entities/vaccine_schedule_entity.dart';
 import '../../../../app/theme/app_colors.dart';
@@ -12,17 +12,16 @@ class VaccineTimelineScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final babiesAsync = ref.watch(babyNotifierProvider);
+    final babyAsync = ref.watch(activeBabyProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text('Timeline Imunisasi', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
       ),
-      body: babiesAsync.when(
-        data: (babies) {
-          if (babies.isEmpty) return const Center(child: Text('Belum ada profil anak.'));
-          final currentBaby = babies.first;
+      body: babyAsync.when(
+        data: (currentBaby) {
+          if (currentBaby == null) return const Center(child: Text('Belum ada profil anak.'));
           final schedulesAsync = ref.watch(immunizationProvider(currentBaby.babyId));
 
           return schedulesAsync.when(

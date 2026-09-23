@@ -17,4 +17,7 @@ abstract class IBabyRepository {
 
   /// Perbarui data bayi yang sudah ada.
   Future<BabyEntity> updateBaby(BabyEntity baby);
+
+  /// Hapus profil bayi beserta data turunannya (setelah konfirmasi user).
+  Future<void> deleteBaby(String babyId);
 }

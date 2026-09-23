@@ -21,4 +21,8 @@ abstract class IImmunizationRepository {
 
   /// Perbarui satu jadwal (mis. tandai selesai + catatan KIPI).
   Future<VaccineScheduleEntity> updateSchedule(VaccineScheduleEntity schedule);
+
+
+  /// Hapus seluruh jadwal milik [babyId] (dipakai saat profil bayi dihapus).
+  Future<void> deleteSchedulesByBaby(String babyId);
 }

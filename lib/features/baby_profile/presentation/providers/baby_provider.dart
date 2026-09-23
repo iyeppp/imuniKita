@@ -31,7 +31,22 @@ class BabyNotifier extends AsyncNotifier<List<BabyEntity>> {
     await ref.read(updateBabyUseCaseProvider).execute(baby);
     ref.invalidateSelf();
   }
+
+  /// Hapus profil bayi. Data turunan (jadwal, pertumbuhan, jurnal) dibersihkan
+  /// pemanggil lewat provider masing-masing fitur — lihat `BabyDetailScreen`.
+  Future<void> deleteBaby(String babyId) async {
+    await ref.read(deleteBabyUseCaseProvider).execute(babyId);
+    ref.invalidateSelf();
+  }
 }
 
 final babyNotifierProvider =
     AsyncNotifierProvider<BabyNotifier, List<BabyEntity>>(BabyNotifier.new);
+
+/// Detail satu bayi berdasarkan id — dipakai `BabyDetailScreen` (Temuan #21).
+final babyByIdProvider = FutureProvider.family<BabyEntity?, String>((
+  ref,
+  babyId,
+) {
+  return ref.read(babyRepositoryProvider).getBabyById(babyId);
+});

@@ -40,6 +40,14 @@ class ImmunizationNotifier
     ref.invalidateSelf();
     ref.invalidate(vaccineScheduleByIdProvider(scheduleId));
   }
+
+  /// Hapus seluruh jadwal bayi ini — dipakai saat profil bayi dihapus.
+  Future<void> deleteAllForBaby() async {
+    await ref
+        .read(immunizationRepositoryProvider)
+        .deleteSchedulesByBaby(arg);
+    ref.invalidateSelf();
+  }
 }
 
 final immunizationProvider =

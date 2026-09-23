@@ -56,6 +56,15 @@ class ImmunizationRepositoryImpl implements IImmunizationRepository {
     }
   }
 
+  @override
+  Future<void> deleteSchedulesByBaby(String babyId) async {
+    try {
+      await _localDatasource.deleteByBaby(babyId);
+    } catch (_) {
+      throw const LocalStorageFailure('Gagal menghapus jadwal imunisasi.');
+    }
+  }
+
   /// Model → entity sekaligus menormalkan status.
   ///
   /// Jadwal `BELUM` yang tanggal targetnya sudah lewat dihitung `TERLEWAT`

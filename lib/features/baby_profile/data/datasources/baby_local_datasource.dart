@@ -34,6 +34,11 @@ class BabyLocalDatasource {
     return model;
   }
 
+  Future<void> delete(String babyId) async {
+    final box = await _openBox();
+    await box.delete(babyId);
+  }
+
   Future<BabyModel> update(BabyModel model) async {
     final box = await _openBox();
     await box.put(model.babyId, model);

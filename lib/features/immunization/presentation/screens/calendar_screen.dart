@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
-import '../../../baby_profile/presentation/providers/baby_provider.dart';
+import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../providers/immunization_provider.dart';
 import '../../domain/entities/vaccine_schedule_entity.dart';
 
@@ -30,7 +30,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final babiesAsync = ref.watch(babyNotifierProvider);
+    final babyAsync = ref.watch(activeBabyProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -43,12 +43,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           )
         ],
       ),
-      body: babiesAsync.when(
-        data: (babies) {
-          if (babies.isEmpty) {
+      body: babyAsync.when(
+        data: (currentBaby) {
+          if (currentBaby == null) {
             return const Center(child: Text('Silakan tambahkan profil anak terlebih dahulu.'));
           }
-          final currentBaby = babies.first;
           final schedulesAsync = ref.watch(immunizationProvider(currentBaby.babyId));
 
           return schedulesAsync.when(

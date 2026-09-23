@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../app/theme/app_colors.dart';
-import '../../../baby_profile/presentation/providers/baby_provider.dart';
+import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../providers/growth_provider.dart';
 import '../../data/models/growth_record_model.dart';
 
@@ -68,15 +68,14 @@ class _AddGrowthRecordScreenState extends ConsumerState<AddGrowthRecordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final babiesAsync = ref.watch(babyNotifierProvider);
+    final babyAsync = ref.watch(activeBabyProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(title: Text('Tambah Pengukuran', style: GoogleFonts.poppins(fontWeight: FontWeight.bold))),
-      body: babiesAsync.when(
-        data: (babies) {
-          if (babies.isEmpty) return const Center(child: Text('Belum ada profil anak.'));
-          final currentBaby = babies.first;
+      body: babyAsync.when(
+        data: (currentBaby) {
+          if (currentBaby == null) return const Center(child: Text('Belum ada profil anak.'));
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),

@@ -30,6 +30,16 @@ class LocalStorageService {
   static Future<void> setCurrentUserName(String nama) async =>
       (await instance).setString(AppConstants.prefUserName, nama);
 
+  /// ID bayi yang sedang dipilih (bayi aktif).
+  static Future<String?> getActiveBabyId() async =>
+      (await instance).getString(AppConstants.prefActiveBabyId);
+
+  static Future<void> setActiveBabyId(String babyId) async =>
+      (await instance).setString(AppConstants.prefActiveBabyId, babyId);
+
+  static Future<void> clearActiveBabyId() async =>
+      (await instance).remove(AppConstants.prefActiveBabyId);
+
   /// Hapus data sesi login (dipakai tombol "Keluar" di layar Profil).
   ///
   /// Key `seen_onboarding` sengaja **tidak** dihapus agar user yang logout
