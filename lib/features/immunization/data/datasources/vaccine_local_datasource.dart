@@ -20,6 +20,11 @@ class VaccineLocalDatasource {
     return list;
   }
 
+  Future<VaccineScheduleModel?> getById(String scheduleId) async {
+    final box = await _openBox();
+    return box.get(scheduleId);
+  }
+
   Future<void> saveAll(List<VaccineScheduleModel> models) async {
     final box = await _openBox();
     await box.putAll({for (final m in models) m.scheduleId: m});

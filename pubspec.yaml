@@ -16,6 +16,9 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
+# Versi aplikasi. Sinkronkan dengan `AppConstants.appVersion`
+# (`lib/core/constants/app_constants.dart`) — dipakai untuk menampilkan versi di
+# layar Profil & Pengaturan. Belum memakai `package_info_plus` (fase UAS).
 version: 1.0.0+1
 
 environment:
@@ -87,6 +90,14 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+
+  # ── Dependency Overrides ────────────────────────────────────────────────────
+  # `flutter_html` 3.0.0 memanggil API internal `package:html/src/query_selector.dart`
+  # (fungsi top-level `matches()`). Fungsi itu DIHAPUS pada `html` 0.15.7 sehingga
+  # kompilasi gagal: "Method not found: 'matches'". Pin ke 0.15.6 (masih memenuhi
+  # constraint `^0.15.5` milik flutter_html) sampai upstream diperbaiki.
+dependency_overrides:
+  html: 0.15.6
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

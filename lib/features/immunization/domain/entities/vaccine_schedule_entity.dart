@@ -3,6 +3,38 @@ abstract class VaccineStatus {
   static const String belum = 'BELUM';
   static const String selesai = 'SELESAI';
   static const String terlewat = 'TERLEWAT';
+
+  /// Status **efektif** pada tanggal [now] (default: hari ini).
+  ///
+  /// Jadwal [belum] yang tanggal targetnya sudah lewat dihitung [terlewat].
+  /// Perhitungan dilakukan saat data dibaca (bukan disimpan), sehingga status
+  /// ikut berubah begitu hari berganti tanpa perlu migrasi/penulisan ulang.
+  ///
+  /// Jadwal yang jatuh **hari ini** tetap [belum] — belum bisa disebut terlewat.
+  /// Status selain [belum] (mis. sudah [selesai]) tidak pernah ditimpa.
+  static String effective({
+    required String status,
+    required DateTime tanggalTarget,
+    DateTime? now,
+  }) {
+    if (status != belum) return status;
+
+    final today = _dateOnly(now ?? DateTime.now());
+    return _dateOnly(tanggalTarget).isBefore(today) ? terlewat : belum;
+  }
+
+  /// `true` bila jadwal sudah terlewat pada tanggal [now].
+  static bool isOverdue({
+    required String status,
+    required DateTime tanggalTarget,
+    DateTime? now,
+  }) =>
+      effective(status: status, tanggalTarget: tanggalTarget, now: now) ==
+      terlewat;
+
+  /// Bandingkan tanggal saja (tanpa jam) agar hasil konsisten di hari yang sama.
+  static DateTime _dateOnly(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
 }
 
 /// Entity domain — satu baris jadwal imunisasi milik seorang bayi.

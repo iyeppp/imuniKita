@@ -15,6 +15,10 @@ import '../../features/growth/presentation/screens/growth_chart_screen.dart';
 import '../../features/growth/presentation/screens/add_growth_record_screen.dart';
 import '../../features/health_journal/presentation/screens/journal_list_screen.dart';
 import '../../features/health_journal/presentation/screens/add_journal_screen.dart';
+import '../../features/education/presentation/screens/education_hub_screen.dart';
+import '../../features/education/presentation/screens/article_detail_screen.dart';
+import '../../features/education/presentation/screens/quiz_screen.dart';
+import '../../features/auth/presentation/screens/settings_screen.dart';
 
 // ---------------------------------------------------------------------------
 // Placeholder — diganti dengan screen asli saat Sprint 1–4
@@ -160,17 +164,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // ── Edukasi (nested) ───────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.education,
-        builder: (_, _) => const _PlaceholderScreen('Education Hub'),
+        builder: (_, _) => const EducationHubScreen(),
         routes: [
           GoRoute(
             path: 'article/:id',
-            builder: (_, state) =>
-                _PlaceholderScreen('Artikel — ${state.pathParameters['id']}'),
+            builder: (_, state) => ArticleDetailScreen(
+              articleId: state.pathParameters['id'] ?? '',
+            ),
           ),
           GoRoute(
             path: 'quiz/:id',
             builder: (_, state) =>
-                _PlaceholderScreen('Kuis — ${state.pathParameters['id']}'),
+                QuizScreen(quizId: state.pathParameters['id'] ?? ''),
           ),
         ],
       ),
@@ -190,7 +195,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // ── Settings ───────────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.settings,
-        builder: (_, _) => const _PlaceholderScreen('Settings & Profil'),
+        builder: (_, _) => const SettingsScreen(),
       ),
     ],
   );

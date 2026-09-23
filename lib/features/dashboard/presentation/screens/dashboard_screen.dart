@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../baby_profile/presentation/providers/baby_provider.dart';
+import '../../../immunization/domain/entities/vaccine_schedule_entity.dart';
 import '../../../immunization/presentation/providers/immunization_provider.dart';
 import '../../../growth/presentation/providers/growth_provider.dart';
 
@@ -105,7 +106,7 @@ class DashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 8),
                     schedulesAsync.when(
                       data: (schedules) {
-                        final upcoming = schedules.where((s) => s.status == 'BELUM').toList();
+                        final upcoming = schedules.where((s) => s.status == VaccineStatus.belum).toList();
                         if (upcoming.isEmpty) {
                           return const Card(
                             child: Padding(
@@ -167,6 +168,7 @@ class DashboardScreen extends ConsumerWidget {
                         _buildMenuCard(context, 'Kalender', Icons.calendar_month, AppColors.teal, AppRoutes.calendar),
                         _buildMenuCard(context, 'Tumbuh Kembang', Icons.bar_chart, AppColors.coral, AppRoutes.growth),
                         _buildMenuCard(context, 'Jurnal Sehat', Icons.book_outlined, AppColors.yellow, AppRoutes.journal),
+                        _buildMenuCard(context, 'Edukasi', Icons.menu_book, AppColors.pinkLogo, AppRoutes.education),
                         _buildMenuCard(context, 'ImuniBot 🤖', Icons.chat_bubble_outline, Colors.purple, AppRoutes.chatbot),
                       ],
                     ),

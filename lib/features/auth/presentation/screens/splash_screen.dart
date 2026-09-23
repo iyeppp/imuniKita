@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../widgets/confetti_dots_painter.dart';
 
 /// Splash Screen ImuniKita (Design System v1.0).
@@ -121,8 +122,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
       try {
         final prefs = await SharedPreferences.getInstance();
-        final isLoggedIn = prefs.getBool('is_logged_in') ?? false;
-        final seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
+        final isLoggedIn = prefs.getBool(AppConstants.prefIsLoggedIn) ?? false;
+        final seenOnboarding = prefs.getBool(AppConstants.prefSeenOnboarding) ?? false;
 
         if (!mounted) return;
 

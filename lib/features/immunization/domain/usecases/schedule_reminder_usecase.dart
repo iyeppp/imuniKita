@@ -1,3 +1,4 @@
+import '../../../../core/services/local_storage_service.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/notification_helper.dart';
 import '../entities/vaccine_schedule_entity.dart';
@@ -14,6 +15,10 @@ class ScheduleReminderUseCase {
     required String namaAnak,
     required List<VaccineScheduleEntity> schedules,
   }) async {
+    // Hormati preferensi "Notifikasi Pengingat" di layar Profil & Pengaturan:
+    // bila user mematikannya, tidak ada pengingat baru yang didaftarkan.
+    if (!await LocalStorageService.isNotificationEnabled()) return;
+
     for (final schedule in schedules) {
       if (schedule.status != VaccineStatus.belum) continue;
 
