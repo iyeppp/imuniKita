@@ -68,6 +68,10 @@ dependencies:
   # Deep link / URL
   url_launcher: ^6.3.2
 
+  # Peta (Direktori Faskes)
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+
   # UI
   fl_chart: ^0.68.0
   table_calendar: ^3.1.2

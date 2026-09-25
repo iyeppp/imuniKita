@@ -178,11 +178,16 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: IconButton(
+          tooltip: 'Kembali',
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go(AppRoutes.dashboard),
+        ),
         title: Text(
           'Tambah Profil Bayi',
           style: GoogleFonts.baloo2(fontWeight: FontWeight.w700),
         ),
-        automaticallyImplyLeading: context.canPop(),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

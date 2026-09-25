@@ -20,28 +20,8 @@ import '../../features/education/presentation/screens/education_hub_screen.dart'
 import '../../features/education/presentation/screens/article_detail_screen.dart';
 import '../../features/education/presentation/screens/quiz_screen.dart';
 import '../../features/auth/presentation/screens/settings_screen.dart';
-
-// ---------------------------------------------------------------------------
-// Placeholder — diganti dengan screen asli saat Sprint 1–4
-// ---------------------------------------------------------------------------
-class _PlaceholderScreen extends StatelessWidget {
-  final String label;
-  const _PlaceholderScreen(this.label);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(label)),
-      body: Center(
-        child: Text(
-          '$label\n(coming soon)',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-      ),
-    );
-  }
-}
+import '../../features/faskes/presentation/screens/faskes_screen.dart';
+import '../../features/chatbot/presentation/screens/chatbot_screen.dart';
 
 // ---------------------------------------------------------------------------
 // Route path constants
@@ -118,9 +98,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       GoRoute(
         path: AppRoutes.babyDetail,
-        builder: (_, state) => BabyDetailScreen(
-          babyId: state.pathParameters['id'] ?? '',
-        ),
+        builder: (_, state) =>
+            BabyDetailScreen(babyId: state.pathParameters['id'] ?? ''),
       ),
 
       // ── Dashboard ──────────────────────────────────────────────────────
@@ -132,7 +111,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // ── Imunisasi & Kalender (nested) ──────────────────────────────────
       GoRoute(
         path: AppRoutes.calendar,
-        builder: (_, _) => const CalendarScreen(),
+        builder: (_, state) {
+          DateTime? initialDate;
+          if (state.extra is DateTime) {
+            initialDate = state.extra as DateTime;
+          } else if (state.uri.queryParameters['date'] != null) {
+            initialDate = DateTime.tryParse(state.uri.queryParameters['date']!);
+          }
+          return CalendarScreen(
+            key: ValueKey(initialDate?.toIso8601String() ?? 'default'),
+            initialDate: initialDate,
+          );
+        },
         routes: [
           GoRoute(
             path: 'timeline',
@@ -164,10 +154,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.journal,
         builder: (_, _) => const JournalListScreen(),
         routes: [
-          GoRoute(
-            path: 'add',
-            builder: (_, _) => const AddJournalScreen(),
-          ),
+          GoRoute(path: 'add', builder: (_, _) => const AddJournalScreen()),
         ],
       ),
 
@@ -191,15 +178,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
 
       // ── Direktori Faskes ───────────────────────────────────────────────
-      GoRoute(
-        path: AppRoutes.faskes,
-        builder: (_, _) => const _PlaceholderScreen('Direktori Faskes'),
-      ),
+      GoRoute(path: AppRoutes.faskes, builder: (_, _) => const FaskesScreen()),
 
       // ── Chatbot ────────────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.chatbot,
-        builder: (_, _) => const _PlaceholderScreen('ImuniBot 🤖'),
+        builder: (_, _) => const ChatbotScreen(),
       ),
 
       // ── Settings ───────────────────────────────────────────────────────

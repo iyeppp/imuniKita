@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../data/models/quiz_model.dart';
 import '../../data/models/quiz_score_model.dart';
@@ -84,6 +85,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       return Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
+          leading: IconButton(
+            tooltip: 'Kembali',
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.canPop()
+                ? context.pop()
+                : context.go(AppRoutes.education),
+          ),
           title: Text(
             'Kuis',
             style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
@@ -101,6 +109,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: IconButton(
+          tooltip: 'Kembali',
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.canPop()
+              ? context.pop()
+              : context.go(AppRoutes.education),
+        ),
         title: Text(
           _selesai ? 'Hasil Kuis' : kuis.judul,
           maxLines: 1,

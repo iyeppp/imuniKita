@@ -94,8 +94,8 @@ class SettingsScreen extends ConsumerWidget {
         onTap: (index) {
           if (index == 0) context.go(AppRoutes.dashboard);
           if (index == 1) context.go(AppRoutes.calendar);
-          if (index == 2) context.go(AppRoutes.growth);
-          if (index == 3) context.go(AppRoutes.journal);
+          if (index == 2) context.go(AppRoutes.faskes);
+          if (index == 3) context.go(AppRoutes.chatbot);
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
@@ -104,10 +104,13 @@ class SettingsScreen extends ConsumerWidget {
             label: 'Kalender',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Pertumbuhan',
+            icon: Icon(Icons.local_hospital_outlined),
+            label: 'Faskes',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Jurnal'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat_bubble_outline),
+            label: 'ImuniBot',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
       ),
