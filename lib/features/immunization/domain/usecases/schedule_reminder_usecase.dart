@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../../../../core/services/local_storage_service.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/utils/notification_helper.dart';
@@ -71,8 +73,13 @@ class ScheduleReminderUseCase {
             flagH1Updated = true;
           }
           anyFlagChanged = true;
-        } catch (_) {
-          // Non-fatal: gagal jadwalkan notifikasi tidak hentikan alur
+        } catch (e) {
+          // Non-fatal: gagal jadwalkan notifikasi tidak hentikan alur, tetapi
+          // dicatat agar kegagalan (mis. izin alarm ditolak) tidak senyap.
+          debugPrint(
+            'ScheduleReminderUseCase: gagal menjadwalkan '
+            '${schedule.namaVaksin} H-$daysBefore — $e',
+          );
         }
       }
 
@@ -85,8 +92,12 @@ class ScheduleReminderUseCase {
               reminderH1Sent: flagH1Updated,
             ),
           );
-        } catch (_) {
-          // Non-fatal: gagal simpan flag tidak hentikan alur
+        } catch (e) {
+          // Non-fatal: flag hanya penanda anti-duplikasi; kegagalan simpan
+          // dicatat agar tidak menutupi masalah storage.
+          debugPrint(
+            'ScheduleReminderUseCase: gagal menyimpan flag pengingat — $e',
+          );
         }
       }
     }

@@ -22,18 +22,22 @@ class ImmunizationNotifier
     }
 
     // Auto-generate seluruh jadwal jika bayi ada tetapi belum punya jadwal
-    try {
-      final baby = await ref.read(babyRepositoryProvider).getBabyById(arg);
-      if (baby != null) {
-        return await ref
-            .read(generateScheduleUseCaseProvider)
-            .execute(babyId: baby.babyId, tanggalLahir: baby.tanggalLahir);
-      }
-    } catch (_) {
-      // Non-fatal jika repository baby belum tersedia
-    }
+    // (mis. data jadwal terhapus / dibuat sebelum fitur ini ada).
+    //
+    // Fix Bug #31: kegagalan tidak lagi ditelan diam-diam (dulu `catch (_)`
+    // membuat kalender tampak kosong tanpa pesan) sehingga `AsyncError` bisa
+    // ditampilkan layar lewat `ErrorStateWidget` + tombol coba lagi.
+    final baby = await ref.read(babyRepositoryProvider).getBabyById(arg);
+    if (baby == null) return schedules;
 
-    return schedules;
+    // Bug #34: generate + penjadwalan pengingat lewat satu use case bersama.
+    return ref
+        .read(syncBabyScheduleUseCaseProvider)
+        .execute(
+          babyId: baby.babyId,
+          namaAnak: baby.namaAnak,
+          tanggalLahir: baby.tanggalLahir,
+        );
   }
 
   /// Perbarui satu jadwal -- dipakai layar Detail Vaksin saat menandai
@@ -82,9 +86,7 @@ class ImmunizationNotifier
 
   /// Hapus seluruh jadwal bayi ini -- dipakai saat profil bayi dihapus.
   Future<void> deleteAllForBaby() async {
-    await ref
-        .read(immunizationRepositoryProvider)
-        .deleteSchedulesByBaby(arg);
+    await ref.read(immunizationRepositoryProvider).deleteSchedulesByBaby(arg);
     ref.invalidateSelf();
   }
 }

@@ -39,8 +39,9 @@ abstract class VaccineStatus {
 
 /// Entity domain — satu baris jadwal imunisasi milik seorang bayi.
 ///
-/// Dibuat otomatis oleh `GenerateScheduleUseCase` saat bayi didaftarkan,
-/// lalu diperbarui `MarkVaccineDoneUseCase` (Sprint 2) saat status berubah.
+/// Dibuat otomatis oleh `GenerateScheduleUseCase` saat bayi didaftarkan, lalu
+/// diperbarui saat statusnya berubah (lewat `ImmunizationNotifier.updateStatus`,
+/// yang sekaligus membatalkan pengingat H-7/H-1 bila ditandai `SELESAI`).
 class VaccineScheduleEntity {
   const VaccineScheduleEntity({
     required this.scheduleId,
@@ -82,6 +83,10 @@ class VaccineScheduleEntity {
     String? catatanReaksi,
     bool? reminderH7Sent,
     bool? reminderH1Sent,
+    // Temuan #37: field nullable perlu flag eksplisit agar bisa dikosongkan
+    // (`?? this.x` saja tidak pernah bisa men-set null).
+    bool clearTanggalRealisasi = false,
+    bool clearCatatanReaksi = false,
   }) {
     return VaccineScheduleEntity(
       scheduleId: scheduleId,
@@ -91,8 +96,12 @@ class VaccineScheduleEntity {
       usiaBulanTarget: usiaBulanTarget,
       tanggalTarget: tanggalTarget,
       status: status ?? this.status,
-      tanggalRealisasi: tanggalRealisasi ?? this.tanggalRealisasi,
-      catatanReaksi: catatanReaksi ?? this.catatanReaksi,
+      tanggalRealisasi: clearTanggalRealisasi
+          ? null
+          : (tanggalRealisasi ?? this.tanggalRealisasi),
+      catatanReaksi: clearCatatanReaksi
+          ? null
+          : (catatanReaksi ?? this.catatanReaksi),
       reminderH7Sent: reminderH7Sent ?? this.reminderH7Sent,
       reminderH1Sent: reminderH1Sent ?? this.reminderH1Sent,
     );

@@ -6,8 +6,9 @@ import '../models/baby_model.dart';
 /// Sumber data lokal profil bayi via Hive CE.
 ///
 /// `[UAS]`: akan didampingi `baby_remote_datasource.dart` (Firestore) —
-/// lihat dev plan §1.1 & §6.1. `BabyRepositoryImpl` yang memutuskan sumber
-/// mana yang dipakai lewat `AppConstants.isUASPhase`.
+/// lihat dev plan §1.1 & §6.1. Pemilihan sumber dilakukan di factory repository
+/// saat fase UAS dimulai (dulu dirujuk ke `AppConstants.isUASPhase` yang kini
+/// dihapus karena tak pernah dipakai — Temuan #44).
 class BabyLocalDatasource {
   const BabyLocalDatasource();
 

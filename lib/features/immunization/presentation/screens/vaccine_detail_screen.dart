@@ -6,16 +6,18 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/router/app_router.dart';
+import '../../../../core/constants/health_gejala.dart';
 import '../../../../widgets/custom_text_field.dart';
 import '../../../../widgets/empty_state_widget.dart';
 import '../../../../widgets/error_state_widget.dart';
 import '../../../../widgets/loading_overlay.dart';
 import '../../../../widgets/section_header.dart';
 import '../../../../widgets/status_badge.dart';
-import '../../../health_journal/data/models/health_journal_model.dart';
+import '../../../health_journal/domain/entities/health_journal_entity.dart';
 import '../../../health_journal/presentation/providers/journal_provider.dart';
 import '../../domain/entities/vaccine_schedule_entity.dart';
 import '../providers/immunization_provider.dart';
+import '../widgets/vaccine_status_style.dart';
 
 class VaccineDetailScreen extends ConsumerStatefulWidget {
   final String scheduleId;
@@ -35,13 +37,7 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
   /// Menahan interaksi selama update status + simpan jurnal berjalan.
   bool _menyimpan = false;
 
-  final List<String> _daftarGejala = [
-    'Demam',
-    'Bengkak',
-    'Rewel',
-    'Muntah',
-    'Ruam Merah',
-  ];
+  final List<String> _daftarGejala = HealthGejala.daftar;
 
   @override
   void dispose() {
@@ -71,7 +67,7 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
 
       // 2. Otomatis catat ke Jurnal Kesehatan dan tautkan ke jadwal ini.
       final journalId = const Uuid().v4();
-      final newJournal = HealthJournalModel(
+      final newJournal = HealthJournalEntity(
         journalId: journalId,
         babyId: schedule.babyId,
         vaccineScheduleId: widget.scheduleId,
@@ -167,11 +163,7 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
                               ),
                               StatusBadge(
                                 label: item.status,
-                                color: item.status == VaccineStatus.selesai
-                                    ? AppColors.green
-                                    : (item.status == VaccineStatus.terlewat
-                                          ? AppColors.red
-                                          : AppColors.teal),
+                                color: VaccineStatusStyle.color(item.status),
                               ),
                             ],
                           ),

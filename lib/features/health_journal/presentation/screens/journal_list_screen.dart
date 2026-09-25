@@ -54,7 +54,14 @@ class JournalListScreen extends ConsumerWidget {
       body: babyAsync.when(
         data: (currentBaby) {
           if (currentBaby == null) {
-            return const Center(child: Text('Belum ada profil anak.'));
+            return EmptyStateWidget(
+              icon: Icons.child_care,
+              title: 'Belum ada profil anak',
+              message:
+                  'Tambahkan profil anak untuk mencatat jurnal kesehatannya.',
+              actionLabel: 'Tambah Profil Anak',
+              onAction: () => context.push(AppRoutes.addBaby),
+            );
           }
           final journalsAsync = ref.watch(journalProvider(currentBaby.babyId));
 

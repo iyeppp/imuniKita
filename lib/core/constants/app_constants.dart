@@ -5,12 +5,6 @@
 abstract class AppConstants {
   static const String appName = 'ImuniKita';
 
-  /// Feature flag fase pengembangan.
-  ///
-  /// - `false` → **Fase UTS**: data dibaca dari Hive CE / mock lokal.
-  /// - `true`  → **Fase UAS**: repository beralih ke Firestore / backend.
-  static const bool isUASPhase = false;
-
   // ── Nama Box Hive CE ──────────────────────────────────────────────────
   /// Box user — nama sudah dipakai sejak Sprint 1 (login/register), jangan diubah.
   static const String usersBox = 'userBox';

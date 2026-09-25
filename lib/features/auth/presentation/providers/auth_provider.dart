@@ -1,59 +1,47 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_ce/hive_ce.dart';
 
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/errors/failures.dart';
 import '../../../../core/services/local_storage_service.dart';
 import '../../../../core/services/notification_service.dart';
-import '../../data/models/user_model.dart';
+import '../../../../injection/dependency_injection.dart';
+import '../../domain/entities/user_entity.dart';
+import '../../domain/usecases/login_usecase.dart';
 
 // Provider ditulis manual (tanpa codegen) mengikuti pola seluruh aplikasi —
 // lihat dev plan §2.
 
 // ── Profil user yang sedang login ────────────────────────────────────────
 
-/// Akun yang sedang login, dibaca dari Hive CE `userBox` memakai
-/// `user_id` di SharedPreferences.
+/// Akun yang sedang login (Temuan #22: dibaca lewat repository auth, bukan
+/// `Hive.openBox` langsung dari presentation layer).
 ///
 /// Mengembalikan `null` bila sesi tidak ada (mis. setelah logout) sehingga
 /// layar yang mem-`watch` provider ini tetap aman dibuka.
-class CurrentUserNotifier extends AsyncNotifier<UserModel?> {
+class CurrentUserNotifier extends AsyncNotifier<UserEntity?> {
   @override
-  Future<UserModel?> build() async {
-    final userId = await LocalStorageService.getCurrentUserId();
-    if (userId == null) return null;
+  Future<UserEntity?> build() =>
+      ref.read(getCurrentUserUseCaseProvider).execute();
 
-    final box = await Hive.openBox<UserModel>(AppConstants.usersBox);
-    return box.get(userId);
+  /// Masuk memakai email. Hasilnya membedakan "belum ada akun" dan
+  /// "email tidak terdaftar" agar layar bisa memberi arahan yang tepat.
+  Future<LoginResult> login(String email) async {
+    final hasil = await ref.read(loginUseCaseProvider).execute(email);
+    if (hasil.berhasil) ref.invalidateSelf();
+    return hasil;
+  }
+
+  /// Daftarkan akun baru (sekaligus membuat sesi).
+  Future<UserEntity> register(UserEntity user) async {
+    final saved = await ref.read(registerUseCaseProvider).execute(user);
+    ref.invalidateSelf();
+    return saved;
   }
 
   /// Simpan perubahan profil dari layar Profil & Pengaturan.
   ///
-  /// Menolak email yang sudah dipakai akun lain: `LoginScreen` mencocokkan
-  /// akun berdasarkan email, jadi duplikat akan membuat login ambigu.
-  Future<void> updateProfile(UserModel updated) async {
-    final box = await Hive.openBox<UserModel>(AppConstants.usersBox);
-    if (box.isEmpty) {
-      throw const NotFoundFailure('Akun tidak ditemukan di perangkat ini.');
-    }
-
-    final email = updated.email.trim().toLowerCase();
-    final bentrok = box.values.any(
-      (user) =>
-          user.localId != updated.localId &&
-          user.email.trim().toLowerCase() == email,
-    );
-    if (bentrok) {
-      throw const ValidationFailure(
-        'Email tersebut sudah dipakai akun lain di perangkat ini.',
-      );
-    }
-
-    updated.email = email;
-    await box.put(updated.localId, updated);
-
-    // Agar sapaan/sesi di layar lain ikut memakai nama terbaru.
-    await LocalStorageService.setCurrentUserName(updated.namaLengkap);
+  /// Menolak email yang sudah dipakai akun lain (aturan bisnis ada di
+  /// `AuthRepositoryImpl`).
+  Future<void> updateProfile(UserEntity updated) async {
+    await ref.read(updateProfileUseCaseProvider).execute(updated);
     ref.invalidateSelf();
   }
 
@@ -63,7 +51,7 @@ class CurrentUserNotifier extends AsyncNotifier<UserModel?> {
   /// Pengingat yang sudah terjadwal ikut dibatalkan supaya notifikasi bayi
   /// milik akun ini tidak muncul lagi setelah keluar (Temuan #19).
   Future<void> logout() async {
-    await LocalStorageService.clearSession();
+    await ref.read(logoutUseCaseProvider).execute();
 
     try {
       await NotificationService.cancelAllNotifications();
@@ -77,7 +65,7 @@ class CurrentUserNotifier extends AsyncNotifier<UserModel?> {
 }
 
 final currentUserProvider =
-    AsyncNotifierProvider<CurrentUserNotifier, UserModel?>(
+    AsyncNotifierProvider<CurrentUserNotifier, UserEntity?>(
       CurrentUserNotifier.new,
     );
 

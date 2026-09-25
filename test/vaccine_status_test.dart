@@ -7,12 +7,39 @@ import 'package:imunikita/features/immunization/data/datasources/vaccine_local_d
 import 'package:imunikita/features/immunization/data/models/vaccine_schedule_model.dart';
 import 'package:imunikita/features/immunization/data/repositories/immunization_repository_impl.dart';
 import 'package:imunikita/features/immunization/domain/entities/vaccine_schedule_entity.dart';
+import 'package:imunikita/features/immunization/presentation/widgets/vaccine_status_style.dart';
+import 'package:imunikita/app/theme/app_colors.dart';
 import 'package:imunikita/hive_registrar.g.dart';
 
 /// Test Temuan #3 — status jadwal imunisasi yang sudah lewat harus terbaca
 /// `TERLEWAT`, tanpa mengubah data yang tersimpan di Hive.
 void main() {
   final hariIni = DateTime(2026, 9, 24);
+
+  group('VaccineStatusStyle (#33)', () {
+    test('SELESAI → hijau, TERLEWAT → merah', () {
+      expect(VaccineStatusStyle.color(VaccineStatus.selesai), AppColors.green);
+      expect(VaccineStatusStyle.color(VaccineStatus.terlewat), AppColors.red);
+    });
+
+    test('BELUM konsisten dengan marker kalender (teal), bukan kuning', () {
+      expect(
+        VaccineStatusStyle.color(VaccineStatus.belum),
+        AppColors.statusScheduled,
+      );
+      expect(
+        VaccineStatusStyle.color(VaccineStatus.belum),
+        isNot(AppColors.yellow),
+      );
+    });
+
+    test('status tak dikenal jatuh ke warna terjadwal', () {
+      expect(
+        VaccineStatusStyle.color('STATUS_LAIN'),
+        AppColors.statusScheduled,
+      );
+    });
+  });
 
   group('VaccineStatus.effective', () {
     test('jadwal yang belum lewat tetap BELUM', () {

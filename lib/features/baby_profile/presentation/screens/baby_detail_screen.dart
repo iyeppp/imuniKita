@@ -141,8 +141,9 @@ class _FormKelolaBayiState extends ConsumerState<_FormKelolaBayi> {
 
       // Tanggal lahir berubah → seluruh jadwal imunisasi harus dihitung ulang,
       // kalau tidak tanggal target vaksin tetap mengikuti tanggal lahir lama.
+      var jumlahJadwal = 0;
       if (tanggalBerubah) {
-        await _hitungUlangJadwal(babyId, nama);
+        jumlahJadwal = await _hitungUlangJadwal(babyId, nama);
       }
 
       ref.invalidate(babyByIdProvider(babyId));
@@ -152,7 +153,7 @@ class _FormKelolaBayiState extends ConsumerState<_FormKelolaBayi> {
         SnackBar(
           content: Text(
             tanggalBerubah
-                ? 'Profil diperbarui & 13 jadwal imunisasi dihitung ulang.'
+                ? 'Profil diperbarui & $jumlahJadwal jadwal imunisasi dihitung ulang.'
                 : 'Profil ${widget.baby.namaAnak} berhasil diperbarui.',
           ),
           backgroundColor: AppColors.green,
@@ -174,21 +175,18 @@ class _FormKelolaBayiState extends ConsumerState<_FormKelolaBayi> {
     }
   }
 
-  /// Bersihkan jadwal lama lalu bangun ulang 13 jadwal dari tanggal lahir baru.
-  Future<void> _hitungUlangJadwal(String babyId, String nama) async {
+  /// Bersihkan jadwal lama lalu bangun ulang seluruh jadwal dari tanggal lahir
+  /// baru. Mengembalikan jumlah jadwal yang dibuat (Temuan #47: agar pesan ke
+  /// user tidak lagi menulis "13" secara hardcoded).
+  Future<int> _hitungUlangJadwal(String babyId, String nama) async {
     await ref.read(immunizationProvider(babyId).notifier).deleteAllForBaby();
 
+    // Bug #34: generate + penjadwalan pengingat lewat satu use case bersama.
     final jadwal = await ref
-        .read(generateScheduleUseCaseProvider)
-        .execute(babyId: babyId, tanggalLahir: _tanggalLahir);
+        .read(syncBabyScheduleUseCaseProvider)
+        .execute(babyId: babyId, namaAnak: nama, tanggalLahir: _tanggalLahir);
 
-    try {
-      await ref
-          .read(scheduleReminderUseCaseProvider)
-          .execute(namaAnak: nama, schedules: jadwal);
-    } catch (_) {
-      // Non-fatal — sama seperti alur Tambah Bayi (izin alarm bisa ditolak).
-    }
+    return jadwal.length;
   }
 
   Future<void> _jadikanAktif() async {

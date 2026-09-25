@@ -7,11 +7,12 @@ import 'package:uuid/uuid.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../widgets/custom_text_field.dart';
+import '../../../../widgets/empty_state_widget.dart';
 import '../../../../widgets/error_state_widget.dart';
 import '../../../../widgets/loading_overlay.dart';
 import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../providers/growth_provider.dart';
-import '../../data/models/growth_record_model.dart';
+import '../../domain/entities/growth_record_entity.dart';
 
 class AddGrowthRecordScreen extends ConsumerStatefulWidget {
   const AddGrowthRecordScreen({super.key});
@@ -45,6 +46,7 @@ class _AddGrowthRecordScreenState extends ConsumerState<AddGrowthRecordScreen> {
       lastDate: DateTime.now(),
     );
     if (picked != null && picked != _tanggalPengukuran) {
+      if (!mounted) return;
       setState(() {
         _tanggalPengukuran = picked;
       });
@@ -56,7 +58,7 @@ class _AddGrowthRecordScreenState extends ConsumerState<AddGrowthRecordScreen> {
 
     setState(() => _menyimpan = true);
 
-    final record = GrowthRecordModel(
+    final record = GrowthRecordEntity(
       recordId: const Uuid().v4(),
       babyId: babyId,
       tanggalPengukuran: _tanggalPengukuran,
@@ -112,7 +114,13 @@ class _AddGrowthRecordScreenState extends ConsumerState<AddGrowthRecordScreen> {
       body: babyAsync.when(
         data: (currentBaby) {
           if (currentBaby == null) {
-            return const Center(child: Text('Belum ada profil anak.'));
+            return EmptyStateWidget(
+              icon: Icons.child_care,
+              title: 'Belum ada profil anak',
+              message: 'Tambahkan profil anak sebelum mencatat pengukuran.',
+              actionLabel: 'Tambah Profil Anak',
+              onAction: () => context.push(AppRoutes.addBaby),
+            );
           }
 
           return LoadingOverlay(

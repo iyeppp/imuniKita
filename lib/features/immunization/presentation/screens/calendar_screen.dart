@@ -16,6 +16,7 @@ import '../../../../widgets/vaccine_card.dart';
 import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../providers/immunization_provider.dart';
 import '../../domain/entities/vaccine_schedule_entity.dart';
+import '../widgets/vaccine_status_style.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   final DateTime? initialDate;
@@ -234,13 +235,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                               mainAxisSize: MainAxisSize.min,
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: events.take(4).map((event) {
-                                Color dotColor = AppColors.teal;
-                                if (event.status == VaccineStatus.selesai) {
-                                  dotColor = AppColors.green;
-                                } else if (event.status ==
-                                    VaccineStatus.terlewat) {
-                                  dotColor = AppColors.red;
-                                }
+                                final dotColor = VaccineStatusStyle.color(
+                                  event.status,
+                                );
                                 return Container(
                                   margin: const EdgeInsets.symmetric(
                                     horizontal: 1.5,
@@ -351,12 +348,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                             itemCount: filteredSchedules.length,
                             itemBuilder: (context, index) {
                               final item = filteredSchedules[index];
-                              final warnaStatus =
-                                  item.status == VaccineStatus.selesai
-                                  ? AppColors.green
-                                  : (item.status == VaccineStatus.terlewat
-                                        ? AppColors.red
-                                        : AppColors.yellow);
+                              final warnaStatus = VaccineStatusStyle.color(
+                                item.status,
+                              );
 
                               return VaccineCard(
                                 schedule: item,
@@ -370,9 +364,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                   label: item.status,
                                   color: warnaStatus,
                                   compact: true,
-                                  textColor: item.status == VaccineStatus.belum
-                                      ? AppColors.darkText
-                                      : null,
                                 ),
                                 onTap: () => context.push(
                                   '/calendar/detail/${item.scheduleId}',

@@ -58,24 +58,55 @@ class _FaskesScreenState extends ConsumerState<FaskesScreen> {
   }
 
   Future<void> _openTel(String nomor) async {
-    final uri = Uri.parse('tel:$nomor');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
+    await _launch(
+      Uri.parse('tel:$nomor'),
+      gagal: 'Tidak dapat membuka aplikasi telepon.',
+    );
   }
 
   Future<void> _openMaps(FaskesModel f) async {
     final geoUri = Uri.parse(
       'geo:${f.lat},${f.lng}?q=${Uri.encodeComponent(f.nama)}',
     );
-    if (await canLaunchUrl(geoUri)) {
-      await launchUrl(geoUri);
-      return;
+    if (await _launch(geoUri, gagal: '')) return;
+
+    // Fallback ke Google Maps web bila aplikasi peta tidak tersedia/terjangkau.
+    await _launch(
+      Uri.parse('https://maps.google.com/?q=${f.lat},${f.lng}'),
+      gagal: 'Tidak dapat membuka tautan peta.',
+      external: true,
+    );
+  }
+
+  /// Buka [uri] lewat aplikasi eksternal.
+  ///
+  /// Mengembalikan `true` bila berhasil. `launchUrl` mengembalikan `false`
+  /// (atau melempar `PlatformException`) bila tidak ada aplikasi yang bisa
+  /// menangani URI — kegagalan itu kini dilaporkan lewat snackbar, tidak lagi
+  /// senyap seperti pemakaian `canLaunchUrl` sebelumnya.
+  Future<bool> _launch(
+    Uri uri, {
+    required String gagal,
+    bool external = true,
+  }) async {
+    try {
+      if (await launchUrl(
+        uri,
+        mode: external
+            ? LaunchMode.externalApplication
+            : LaunchMode.platformDefault,
+      )) {
+        return true;
+      }
+    } catch (_) {
+      // dilanjutkan ke pesan gagal di bawah
     }
-    final webUri = Uri.parse('https://maps.google.com/?q=${f.lat},${f.lng}');
-    if (await canLaunchUrl(webUri)) {
-      await launchUrl(webUri, mode: LaunchMode.externalApplication);
+
+    if (gagal.isNotEmpty && mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(gagal)));
     }
+    return false;
   }
 
   void _showDetail(FaskesModel faskes) {

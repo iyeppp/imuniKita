@@ -1,50 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
-import '../../../../core/constants/app_constants.dart';
+import '../../../../injection/dependency_injection.dart';
 import '../widgets/neo_button.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
   final List<Map<String, dynamic>> _slides = [
     {
       'title': 'Pantau Imunisasi Buah Hati',
-      'description':
-          'Catat dan pantau riwayat imunisasi anak dengan mudah demi perlindungan optimal sejak lahir.',
+      'description': 'Catat dan pantau riwayat imunisasi anak dengan mudah demi perlindungan optimal sejak lahir.',
       'icon': Icons.child_care,
       'color': AppColors.coral,
     },
     {
       'title': 'Pengingat Otomatis H-7 & H-1',
-      'description':
-          'Jangan lewatkan jadwal penting. Aplikasi akan memberikan notifikasi otomatis sebelum hari imunisasi.',
+      'description': 'Jangan lewatkan jadwal penting. Aplikasi akan memberikan notifikasi otomatis sebelum hari imunisasi.',
       'icon': Icons.calendar_month,
       'color': AppColors.teal,
     },
     {
       'title': 'Pantau Tumbuh Kembang si Kecil',
-      'description':
-          'Pantau grafik berat badan, tinggi badan, dan lingkar kepala sesuai standar referensi WHO.',
+      'description': 'Pantau grafik berat badan, tinggi badan, dan lingkar kepala sesuai standar referensi WHO.',
       'icon': Icons.bar_chart,
       'color': AppColors.yellow,
     },
   ];
 
   Future<void> _completeOnboarding() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(AppConstants.prefSeenOnboarding, true);
+    // Temuan #22: penanda onboarding disimpan lewat use case auth.
+    await ref.read(markOnboardingSeenUseCaseProvider).execute();
     if (mounted) {
       context.go(AppRoutes.login);
     }
@@ -69,8 +67,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Align(
               alignment: Alignment.topRight,
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: _currentPage < _slides.length - 1
                     ? TextButton(
                         onPressed: _completeOnboarding,
@@ -108,11 +108,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           width: 200,
                           height: 200,
                           decoration: BoxDecoration(
-                            color: (slide['color'] as Color)
-                                .withValues(alpha: 0.2),
+                            color: (slide['color'] as Color).withValues(
+                              alpha: 0.2,
+                            ),
                             shape: BoxShape.circle,
-                            border:
-                                Border.all(color: AppColors.darkText, width: 3),
+                            border: Border.all(
+                              color: AppColors.darkText,
+                              width: 3,
+                            ),
                             boxShadow: const [
                               BoxShadow(
                                 color: AppColors.darkText,
@@ -162,8 +165,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
             // Page Indicator Dots and Action Buttons
             Padding(
-              padding:
-                  EdgeInsets.fromLTRB(32, 16, 32, media.padding.bottom + 24),
+              padding: EdgeInsets.fromLTRB(
+                32,
+                16,
+                32,
+                media.padding.bottom + 24,
+              ),
               child: Column(
                 children: [
                   // Animated Page Indicator Dots
@@ -181,8 +188,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               ? AppColors.teal
                               : AppColors.grey.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(5),
-                          border:
-                              Border.all(color: AppColors.darkText, width: 1.5),
+                          border: Border.all(
+                            color: AppColors.darkText,
+                            width: 1.5,
+                          ),
                         ),
                       );
                     }),

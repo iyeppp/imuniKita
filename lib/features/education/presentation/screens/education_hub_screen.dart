@@ -475,6 +475,17 @@ class _KuisCard extends StatelessWidget {
                       color: AppColors.textHint,
                     ),
                   ),
+                  // Temuan #15: tampilkan riwayat percobaan bila sudah > 1×.
+                  if ((skor?.totalPercobaan ?? 1) > 1) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      '· Dikerjakan ${skor!.totalPercobaan}×',
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        color: AppColors.textHint,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ],

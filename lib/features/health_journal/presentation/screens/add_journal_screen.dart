@@ -6,12 +6,14 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/constants/health_gejala.dart';
 import '../../../../widgets/custom_text_field.dart';
+import '../../../../widgets/empty_state_widget.dart';
 import '../../../../widgets/error_state_widget.dart';
 import '../../../../widgets/loading_overlay.dart';
 import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../providers/journal_provider.dart';
-import '../../data/models/health_journal_model.dart';
+import '../../domain/entities/health_journal_entity.dart';
 
 class AddJournalScreen extends ConsumerStatefulWidget {
   const AddJournalScreen({super.key});
@@ -28,14 +30,7 @@ class _AddJournalScreenState extends ConsumerState<AddJournalScreen> {
   final List<String> _selectedGejala = [];
   bool _menyimpan = false;
 
-  final List<String> _daftarGejala = [
-    'Demam',
-    'Bengkak Bekas Suntik',
-    'Rewel',
-    'Muntah',
-    'Ruam Kulit',
-    'Batuk Pilek',
-  ];
+  final List<String> _daftarGejala = HealthGejala.daftar;
 
   @override
   void dispose() {
@@ -52,6 +47,7 @@ class _AddJournalScreenState extends ConsumerState<AddJournalScreen> {
       lastDate: DateTime.now(),
     );
     if (picked != null && picked != _tanggalCatatan) {
+      if (!mounted) return;
       setState(() {
         _tanggalCatatan = picked;
       });
@@ -65,7 +61,7 @@ class _AddJournalScreenState extends ConsumerState<AddJournalScreen> {
 
     final suhu = double.tryParse(_suhuController.text);
 
-    final journal = HealthJournalModel(
+    final journal = HealthJournalEntity(
       journalId: const Uuid().v4(),
       babyId: babyId,
       tanggalCatatan: _tanggalCatatan,
@@ -119,7 +115,13 @@ class _AddJournalScreenState extends ConsumerState<AddJournalScreen> {
       body: babyAsync.when(
         data: (currentBaby) {
           if (currentBaby == null) {
-            return const Center(child: Text('Belum ada profil anak.'));
+            return EmptyStateWidget(
+              icon: Icons.child_care,
+              title: 'Belum ada profil anak',
+              message: 'Tambahkan profil anak sebelum mencatat jurnal.',
+              actionLabel: 'Tambah Profil Anak',
+              onAction: () => context.push(AppRoutes.addBaby),
+            );
           }
 
           return LoadingOverlay(

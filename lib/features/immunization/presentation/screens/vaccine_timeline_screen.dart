@@ -6,8 +6,10 @@ import 'package:go_router/go_router.dart';
 import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../providers/immunization_provider.dart';
 import '../../domain/entities/vaccine_schedule_entity.dart';
+import '../widgets/vaccine_status_style.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/router/app_router.dart';
+import '../../../../widgets/empty_state_widget.dart';
 import '../../../../widgets/error_state_widget.dart';
 import '../../../../widgets/loading_overlay.dart';
 import '../../../../widgets/status_badge.dart';
@@ -37,7 +39,14 @@ class VaccineTimelineScreen extends ConsumerWidget {
       body: babyAsync.when(
         data: (currentBaby) {
           if (currentBaby == null) {
-            return const Center(child: Text('Belum ada profil anak.'));
+            return EmptyStateWidget(
+              icon: Icons.child_care,
+              title: 'Belum ada profil anak',
+              message:
+                  'Tambahkan profil anak untuk melihat timeline imunisasi.',
+              actionLabel: 'Tambah Profil Anak',
+              onAction: () => context.push(AppRoutes.addBaby),
+            );
           }
           final schedulesAsync = ref.watch(
             immunizationProvider(currentBaby.babyId),
@@ -58,12 +67,9 @@ class VaccineTimelineScreen extends ConsumerWidget {
                         children: [
                           CircleAvatar(
                             radius: 12,
-                            backgroundColor:
-                                item.status == VaccineStatus.selesai
-                                ? AppColors.green
-                                : (item.status == VaccineStatus.terlewat
-                                      ? AppColors.red
-                                      : AppColors.teal),
+                            backgroundColor: VaccineStatusStyle.color(
+                              item.status,
+                            ),
                             child: Icon(
                               item.status == VaccineStatus.selesai
                                   ? Icons.check

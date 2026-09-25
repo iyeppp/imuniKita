@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_router.dart';
+import '../../../../app/app_version_provider.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/failures.dart';
@@ -22,7 +23,7 @@ import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../../../baby_profile/presentation/providers/baby_provider.dart';
 import '../../../immunization/domain/entities/vaccine_schedule_entity.dart';
 import '../../../immunization/presentation/providers/immunization_provider.dart';
-import '../../data/models/user_model.dart';
+import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import '../utils/auth_validators.dart';
 
@@ -37,6 +38,9 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(currentUserProvider);
+    // Temuan #20: versi dibaca dari metadata platform (bukan hardcode).
+    final versi =
+        ref.watch(appVersionProvider).asData?.value ?? AppConstants.appVersion;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -77,7 +81,7 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: 20),
               Center(
                 child: Text(
-                  'ImuniKita v${AppConstants.appVersion}',
+                  'ImuniKita v$versi',
                   style: GoogleFonts.poppins(
                     fontSize: 11.5,
                     color: AppColors.textHint,
@@ -106,7 +110,7 @@ class _KartuProfil extends ConsumerWidget {
   const _KartuProfil({required this.user});
 
   /// `null` bila sesi login tidak ditemukan (mis. setelah keluar).
-  final UserModel? user;
+  final UserEntity? user;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -313,10 +317,21 @@ class _KartuAnak extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Ringkasan progres imunisasi (13 jadwal dibuat otomatis saat bayi
     // didaftarkan) — sekaligus bukti data tersimpan untuk bayi ini.
-    final jadwal = ref.watch(immunizationProvider(baby.babyId)).asData?.value;
+    final jadwalAsync = ref.watch(immunizationProvider(baby.babyId));
+    final jadwal = jadwalAsync.asData?.value;
     final selesai = jadwal
         ?.where((s) => s.status == VaccineStatus.selesai)
         .length;
+
+    // Temuan #35: jangan biarkan layar tampak "memuat" selamanya saat gagal.
+    final String ringkasanJadwal;
+    if (jadwalAsync.hasError) {
+      ringkasanJadwal = 'Gagal memuat jadwal imunisasi';
+    } else if (jadwal == null) {
+      ringkasanJadwal = 'Memuat jadwal imunisasi…';
+    } else {
+      ringkasanJadwal = 'Imunisasi selesai: ${selesai ?? 0}/${jadwal.length}';
+    }
 
     final aktif =
         ref.watch(activeBabyProvider).asData?.value?.babyId == baby.babyId;
@@ -377,12 +392,12 @@ class _KartuAnak extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      jadwal == null
-                          ? 'Memuat jadwal imunisasi…'
-                          : 'Imunisasi selesai: ${selesai ?? 0}/${jadwal.length}',
+                      ringkasanJadwal,
                       style: GoogleFonts.poppins(
                         fontSize: 11,
-                        color: AppColors.textHint,
+                        color: jadwalAsync.hasError
+                            ? AppColors.error
+                            : AppColors.textHint,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -439,6 +454,10 @@ class _KartuPengaturan extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notifAsync = ref.watch(notificationEnabledProvider);
     final aktif = notifAsync.asData?.value ?? true;
+    // Temuan #35: kegagalan memuat preferensi tidak lagi disembunyikan.
+    final gagal = notifAsync.hasError;
+    final versi =
+        ref.watch(appVersionProvider).asData?.value ?? AppConstants.appVersion;
 
     return Card(
       child: Column(
@@ -461,10 +480,12 @@ class _KartuPengaturan extends ConsumerWidget {
               ),
             ),
             subtitle: Text(
-              'Pengingat otomatis H-7 & H-1 sebelum jadwal imunisasi',
+              gagal
+                  ? 'Gagal memuat preferensi notifikasi'
+                  : 'Pengingat otomatis H-7 & H-1 sebelum jadwal imunisasi',
               style: GoogleFonts.poppins(
                 fontSize: 11.5,
-                color: AppColors.textSecondary,
+                color: gagal ? AppColors.error : AppColors.textSecondary,
               ),
             ),
           ),
@@ -480,13 +501,13 @@ class _KartuPengaturan extends ConsumerWidget {
               ),
             ),
             subtitle: Text(
-              'ImuniKita versi ${AppConstants.appVersion}',
+              'ImuniKita versi $versi',
               style: GoogleFonts.poppins(
                 fontSize: 11.5,
                 color: AppColors.textSecondary,
               ),
             ),
-            onTap: () => _tampilkanTentang(context),
+            onTap: () => _tampilkanTentang(context, versi),
           ),
         ],
       ),
@@ -566,18 +587,8 @@ Future<int> _daftarkanUlangPengingat(WidgetRef ref) async {
   final babies = await ref.read(babyNotifierProvider.future);
   if (babies.isEmpty) return 0;
 
-  final repository = ref.read(immunizationRepositoryProvider);
-  final useCase = ref.read(scheduleReminderUseCaseProvider);
-
-  var jumlah = 0;
-  for (final baby in babies) {
-    final schedules = await repository.getSchedulesByBaby(baby.babyId);
-    if (schedules.isEmpty) continue;
-
-    await useCase.execute(namaAnak: baby.namaAnak, schedules: schedules);
-    jumlah += schedules.where((s) => s.status == VaccineStatus.belum).length;
-  }
-  return jumlah;
+  // Bug #34: loop lintas-bayi dipindahkan ke `RescheduleAllRemindersUseCase`.
+  return ref.read(rescheduleAllRemindersUseCaseProvider).execute(babies);
 }
 
 /// Keluar dari akun — selalu lewat konfirmasi karena sesi akan dihapus.
@@ -606,7 +617,7 @@ Future<void> _keluar(BuildContext context, WidgetRef ref) async {
 }
 
 /// Dialog info singkat aplikasi + versi.
-Future<void> _tampilkanTentang(BuildContext context) {
+Future<void> _tampilkanTentang(BuildContext context, String versi) {
   return showDialog<void>(
     context: context,
     builder: (dialogContext) => AlertDialog(
@@ -628,7 +639,7 @@ Future<void> _tampilkanTentang(BuildContext context) {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Versi ${AppConstants.appVersion}',
+            'Versi $versi',
             style: GoogleFonts.poppins(
               fontSize: 12.5,
               fontWeight: FontWeight.w600,
@@ -659,7 +670,7 @@ Future<void> _tampilkanTentang(BuildContext context) {
 }
 
 /// Buka form sunting profil (bottom sheet).
-Future<void> _bukaFormEditProfil(BuildContext context, UserModel akun) {
+Future<void> _bukaFormEditProfil(BuildContext context, UserEntity akun) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -674,7 +685,7 @@ Future<void> _bukaFormEditProfil(BuildContext context, UserModel akun) {
 class _FormEditProfil extends ConsumerStatefulWidget {
   const _FormEditProfil({required this.akun});
 
-  final UserModel akun;
+  final UserEntity akun;
 
   @override
   ConsumerState<_FormEditProfil> createState() => _FormEditProfilState();
@@ -720,7 +731,7 @@ class _FormEditProfilState extends ConsumerState<_FormEditProfil> {
       await ref
           .read(currentUserProvider.notifier)
           .updateProfile(
-            UserModel(
+            UserEntity(
               localId: widget.akun.localId,
               namaLengkap: _nama.text.trim(),
               email: _email.text.trim(),

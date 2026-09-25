@@ -63,12 +63,30 @@ class QuizScoreNotifier extends AsyncNotifier<Map<String, QuizScoreModel>> {
     return {for (final skor in box.values) skor.quizId: skor};
   }
 
-  /// Simpan skor terbaru; menimpa skor kuis yang sama bila diulang.
+  /// Simpan hasil percobaan terbaru.
+  ///
+  /// Temuan #15: skor lama tidak lagi ditimpa — percobaan dihitung dan skor
+  /// tiap percobaan disimpan di `riwayatSkor`, sehingga user bisa melihat
+  /// perkembangan nilainya.
   Future<void> saveScore(QuizScoreModel skor) async {
     final box = await Hive.openBox<QuizScoreModel>(
       AppConstants.educationQuizScoresBox,
     );
-    await box.put(skor.quizId, skor);
+
+    final lama = box.get(skor.quizId);
+    final riwayat = <int>[...?lama?.riwayatSkor, skor.skor];
+
+    await box.put(
+      skor.quizId,
+      QuizScoreModel(
+        quizId: skor.quizId,
+        skor: skor.skor,
+        totalSoal: skor.totalSoal,
+        tanggalPengerjaan: skor.tanggalPengerjaan,
+        attemptCount: (lama?.attemptCount ?? 0) + 1,
+        riwayatSkor: riwayat,
+      ),
+    );
     ref.invalidateSelf();
   }
 }

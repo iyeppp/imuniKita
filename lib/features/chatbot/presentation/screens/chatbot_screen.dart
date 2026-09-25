@@ -67,6 +67,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
       isDestructive: true,
     );
     if (confirmed) {
+      if (!mounted) return;
       ref.read(chatProvider.notifier).clearMessages();
     }
   }
@@ -349,7 +350,9 @@ class _ChatBubble extends StatelessWidget {
               message.text,
               style: GoogleFonts.poppins(
                 fontSize: 14,
-                color: AppColors.warmWhite,
+                // Kontras: teks gelap di atas teal jauh lebih terbaca daripada
+                // `warmWhite` (yang hanya ±2:1 — di bawah ambang WCAG).
+                color: AppColors.darkText,
                 height: 1.45,
               ),
             ),

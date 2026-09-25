@@ -31,8 +31,11 @@ abstract class NotificationHelper {
   /// Dart tidak dijamin stabil lintas proses/isolate).
   static int notificationId(String scheduleId, int daysBefore) {
     final offset = supportedDaysBefore.indexOf(daysBefore);
-    final base = _fnv1a(scheduleId) % 1000000;
-    return (base * 10) + (offset < 0 ? 9 : offset);
+    // Ruang ID diperbesar (100 juta) agar tabrakan antar `scheduleId` makin
+    // kecil, lalu dikali 2 + offset supaya H-7 dan H-1 jadwal yang sama tidak
+    // pernah bertabrakan (Temuan #45). Hasil tetap jauh di bawah batas int32.
+    final base = _fnv1a(scheduleId) % 100000000;
+    return (base * 2) + (offset < 0 ? 9 : offset);
   }
 
   /// Judul notifikasi.
