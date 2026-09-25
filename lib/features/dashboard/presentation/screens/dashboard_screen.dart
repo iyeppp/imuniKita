@@ -189,6 +189,15 @@ class DashboardScreen extends ConsumerWidget {
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: AppColors.teal,
                                       foregroundColor: Colors.white,
+                                      // Theme global memakai
+                                      // `minimumSize: Size(infinity, 52)` (tombol
+                                      // selebar layar). Di dalam `Row`, sumbu
+                                      // utama tak terbatas sehingga lebar
+                                      // infinity itu memicu assertion
+                                      // "BoxConstraints forces an infinite
+                                      // width" (dashboard bayi >18 bulan
+                                      // kosong). Pakai lebar intrinsik.
+                                      minimumSize: const Size(0, 52),
                                     ),
                                     onPressed: () =>
                                         context.push(AppRoutes.calendar),
