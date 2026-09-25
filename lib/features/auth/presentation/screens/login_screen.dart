@@ -3,14 +3,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_ce/hive_ce.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../widgets/custom_text_field.dart';
 import '../../data/models/user_model.dart';
 import '../utils/auth_validators.dart';
 import '../utils/snackbar_helper.dart';
 import '../widgets/app_logo_pill.dart';
-import '../widgets/labeled_text_field.dart';
 import '../widgets/neo_button.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -73,7 +74,10 @@ class _LoginScreenState extends State<LoginScreen> {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool(AppConstants.prefIsLoggedIn, true);
         await prefs.setString(AppConstants.prefUserId, matchedUser.localId);
-        await prefs.setString(AppConstants.prefUserName, matchedUser.namaLengkap);
+        await prefs.setString(
+          AppConstants.prefUserName,
+          matchedUser.namaLengkap,
+        );
 
         if (mounted) {
           SnackbarHelper.showSuccess(
@@ -140,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 36),
 
                   // Email Input Field
-                  LabeledTextField(
+                  CustomTextField(
                     label: 'Email',
                     controller: _emailController,
                     hint: 'nama@email.com',
@@ -154,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 20),
 
                   // Password Input Field
-                  LabeledTextField(
+                  CustomTextField(
                     label: 'Password',
                     controller: _passwordController,
                     hint: '••••••••',

@@ -3,10 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-import 'package:go_router/go_router.dart';
-
-import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../widgets/app_bottom_nav_bar.dart';
 import '../../../../widgets/confirm_dialog.dart';
 import '../../data/models/chat_message_model.dart';
 import '../providers/chatbot_provider.dart';
@@ -94,31 +92,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
           _buildInputBar(chatState.isLoading),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 3,
-        onTap: (index) {
-          if (index == 0) context.go(AppRoutes.dashboard);
-          if (index == 1) context.go(AppRoutes.calendar);
-          if (index == 2) context.go(AppRoutes.faskes);
-          if (index == 4) context.go(AppRoutes.settings);
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: 'Kalender',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.local_hospital_outlined),
-            label: 'Faskes',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: 'ImuniBot',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
-      ),
+      bottomNavigationBar: const AppBottomNavBar(currentIndex: 3),
     );
   }
 

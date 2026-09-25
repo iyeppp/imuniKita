@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,7 +9,14 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/age_calculator.dart';
 import '../../../../injection/dependency_injection.dart';
+import '../../../../widgets/app_bottom_nav_bar.dart';
+import '../../../../widgets/baby_avatar.dart';
 import '../../../../widgets/confirm_dialog.dart';
+import '../../../../widgets/custom_text_field.dart';
+import '../../../../widgets/error_state_widget.dart';
+import '../../../../widgets/loading_overlay.dart';
+import '../../../../widgets/section_header.dart';
+import '../../../../widgets/status_badge.dart';
 import '../../../baby_profile/domain/entities/baby_entity.dart';
 import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../../../baby_profile/presentation/providers/baby_provider.dart';
@@ -20,7 +25,6 @@ import '../../../immunization/presentation/providers/immunization_provider.dart'
 import '../../data/models/user_model.dart';
 import '../providers/auth_provider.dart';
 import '../utils/auth_validators.dart';
-import '../widgets/labeled_text_field.dart';
 
 /// Settings / Profile (poin 8.1) — `lib/features/auth/presentation/screens/settings_screen.dart`.
 ///
@@ -55,11 +59,17 @@ class SettingsScreen extends ConsumerWidget {
               _KartuProfil(user: user),
               const SizedBox(height: 24),
 
-              const _JudulSeksi('Anak Terdaftar'),
+              const SectionHeader(
+                title: 'Anak Terdaftar',
+                padding: EdgeInsets.only(bottom: 10),
+              ),
               const _DaftarAnak(),
               const SizedBox(height: 24),
 
-              const _JudulSeksi('Pengaturan'),
+              const SectionHeader(
+                title: 'Pengaturan',
+                padding: EdgeInsets.only(bottom: 10),
+              ),
               const _KartuPengaturan(),
               const SizedBox(height: 24),
 
@@ -77,43 +87,13 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              'Gagal memuat profil: $err',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(color: AppColors.textSecondary),
-            ),
-          ),
+        loading: () => const AppLoadingIndicator(),
+        error: (err, _) => ErrorStateWidget(
+          message: 'Gagal memuat profil: $err',
+          onRetry: () => ref.invalidate(currentUserProvider),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 4,
-        onTap: (index) {
-          if (index == 0) context.go(AppRoutes.dashboard);
-          if (index == 1) context.go(AppRoutes.calendar);
-          if (index == 2) context.go(AppRoutes.faskes);
-          if (index == 3) context.go(AppRoutes.chatbot);
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: 'Kalender',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.local_hospital_outlined),
-            label: 'Faskes',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: 'ImuniBot',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
-      ),
+      bottomNavigationBar: const AppBottomNavBar(currentIndex: 4),
     );
   }
 }
@@ -313,11 +293,12 @@ class _DaftarAnak extends ConsumerWidget {
       ),
       loading: () => const Padding(
         padding: EdgeInsets.all(16),
-        child: Center(child: CircularProgressIndicator()),
+        child: AppLoadingIndicator(size: 28),
       ),
-      error: (err, _) => Text(
-        'Gagal memuat data anak: $err',
-        style: GoogleFonts.poppins(fontSize: 12.5, color: AppColors.error),
+      error: (err, _) => ErrorStateWidget(
+        compact: true,
+        title: 'Gagal memuat data anak',
+        message: '$err',
       ),
     );
   }
@@ -340,13 +321,6 @@ class _KartuAnak extends ConsumerWidget {
     final aktif =
         ref.watch(activeBabyProvider).asData?.value?.babyId == baby.babyId;
 
-    final file = baby.fotoProfilPath == null
-        ? null
-        : File(baby.fotoProfilPath!);
-    final ImageProvider? fotoProfil = (file != null && file.existsSync())
-        ? FileImage(file)
-        : null;
-
     final gender = baby.jenisKelamin == BabyGender.laki
         ? 'Laki-laki'
         : 'Perempuan';
@@ -360,22 +334,10 @@ class _KartuAnak extends ConsumerWidget {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              CircleAvatar(
+              BabyAvatar(
                 radius: 24,
-                backgroundColor: AppColors.teal.withValues(alpha: 0.15),
-                backgroundImage: fotoProfil,
-                child: fotoProfil != null
-                    ? null
-                    : Text(
-                        baby.namaAnak.trim().isEmpty
-                            ? '?'
-                            : baby.namaAnak.trim()[0].toUpperCase(),
-                        style: GoogleFonts.baloo2(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.tealDark,
-                        ),
-                      ),
+                name: baby.namaAnak,
+                photoPath: baby.fotoProfilPath,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -396,24 +358,11 @@ class _KartuAnak extends ConsumerWidget {
                         ),
                         if (aktif) ...[
                           const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.green.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: AppColors.green),
-                            ),
-                            child: Text(
-                              'Aktif',
-                              style: GoogleFonts.poppins(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.green,
-                              ),
-                            ),
+                          const StatusBadge(
+                            label: 'Aktif',
+                            color: AppColors.green,
+                            icon: Icons.check_circle,
+                            compact: true,
                           ),
                         ],
                       ],
@@ -558,27 +507,6 @@ class _TombolKeluar extends ConsumerWidget {
       ),
       icon: const Icon(Icons.logout, size: 18),
       label: const Text('Keluar'),
-    );
-  }
-}
-
-class _JudulSeksi extends StatelessWidget {
-  const _JudulSeksi(this.judul);
-
-  final String judul;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Text(
-        judul,
-        style: GoogleFonts.baloo2(
-          fontSize: 17,
-          fontWeight: FontWeight.bold,
-          color: AppColors.darkText,
-        ),
-      ),
     );
   }
 }
@@ -859,7 +787,7 @@ class _FormEditProfilState extends ConsumerState<_FormEditProfil> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                LabeledTextField(
+                CustomTextField(
                   label: 'Nama Lengkap',
                   controller: _nama,
                   hint: 'Nama orang tua',
@@ -867,7 +795,7 @@ class _FormEditProfilState extends ConsumerState<_FormEditProfil> {
                       AuthValidators.required(value, 'Nama lengkap'),
                 ),
                 const SizedBox(height: 16),
-                LabeledTextField(
+                CustomTextField(
                   label: 'Email',
                   controller: _email,
                   hint: 'nama@email.com',
@@ -875,7 +803,7 @@ class _FormEditProfilState extends ConsumerState<_FormEditProfil> {
                   validator: AuthValidators.email,
                 ),
                 const SizedBox(height: 16),
-                LabeledTextField(
+                CustomTextField(
                   label: 'Nomor HP',
                   controller: _telepon,
                   hint: '08xxxxxxxxxx',
@@ -884,7 +812,7 @@ class _FormEditProfilState extends ConsumerState<_FormEditProfil> {
                       AuthValidators.required(value, 'Nomor HP'),
                 ),
                 const SizedBox(height: 16),
-                LabeledTextField(
+                CustomTextField(
                   label: 'Kota',
                   controller: _kota,
                   hint: 'Contoh: Bandung',

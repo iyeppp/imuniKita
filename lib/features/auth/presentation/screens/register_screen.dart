@@ -4,13 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_ce/hive_ce.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
+
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../widgets/custom_text_field.dart';
 import '../../data/models/user_model.dart';
 import '../utils/auth_validators.dart';
 import '../utils/snackbar_helper.dart';
-import '../widgets/labeled_text_field.dart';
 import '../widgets/neo_button.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -108,9 +109,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         leading: IconButton(
           tooltip: 'Kembali',
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.canPop()
-              ? context.pop()
-              : context.go(AppRoutes.login),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go(AppRoutes.login),
         ),
       ),
       body: SafeArea(
@@ -144,17 +144,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 32),
 
                   // Full Name Field
-                  LabeledTextField(
+                  CustomTextField(
                     label: 'Nama Lengkap',
                     controller: _nameController,
                     hint: 'Nama Lengkap Anda',
                     keyboardType: TextInputType.name,
-                    validator: (val) => AuthValidators.required(val, 'Nama lengkap'),
+                    validator: (val) =>
+                        AuthValidators.required(val, 'Nama lengkap'),
                   ),
                   const SizedBox(height: 16),
 
                   // Email Field
-                  LabeledTextField(
+                  CustomTextField(
                     label: 'Email',
                     controller: _emailController,
                     hint: 'nama@email.com',
@@ -164,17 +165,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 16),
 
                   // Phone Number Field
-                  LabeledTextField(
+                  CustomTextField(
                     label: 'Nomor HP',
                     controller: _phoneController,
                     hint: '081234567890',
                     keyboardType: TextInputType.phone,
-                    validator: (val) => AuthValidators.required(val, 'Nomor HP'),
+                    validator: (val) =>
+                        AuthValidators.required(val, 'Nomor HP'),
                   ),
                   const SizedBox(height: 16),
 
                   // City Field
-                  LabeledTextField(
+                  CustomTextField(
                     label: 'Kota Tempat Tinggal',
                     controller: _cityController,
                     hint: 'Contoh: Jakarta',
@@ -183,7 +185,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 16),
 
                   // Password Field
-                  LabeledTextField(
+                  CustomTextField(
                     label: 'Password',
                     controller: _passwordController,
                     hint: '••••••••',
@@ -203,7 +205,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 16),
 
                   // Confirm Password Field
-                  LabeledTextField(
+                  CustomTextField(
                     label: 'Konfirmasi Password',
                     controller: _confirmPasswordController,
                     hint: '••••••••',
@@ -215,8 +217,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             : Icons.visibility_outlined,
                         color: AppColors.darkText,
                       ),
-                      onPressed: () => setState(() =>
-                          _obscureConfirmPassword = !_obscureConfirmPassword),
+                      onPressed: () => setState(
+                        () =>
+                            _obscureConfirmPassword = !_obscureConfirmPassword,
+                      ),
                     ),
                     validator: (val) => AuthValidators.confirmPassword(
                       val,

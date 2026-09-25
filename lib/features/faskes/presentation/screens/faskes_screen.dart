@@ -5,10 +5,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:go_router/go_router.dart';
-
-import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../widgets/app_bottom_nav_bar.dart';
+import '../../../../widgets/empty_state_widget.dart';
+import '../../../../widgets/status_badge.dart';
 import '../../data/datasources/faskes_mock_datasource.dart';
 import '../../data/models/faskes_model.dart';
 import '../providers/faskes_provider.dart';
@@ -125,31 +125,7 @@ class _FaskesScreenState extends ConsumerState<FaskesScreen> {
         ],
       ),
       body: _showMap ? _buildMapView() : _buildListView(),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 2,
-        onTap: (index) {
-          if (index == 0) context.go(AppRoutes.dashboard);
-          if (index == 1) context.go(AppRoutes.calendar);
-          if (index == 3) context.go(AppRoutes.chatbot);
-          if (index == 4) context.go(AppRoutes.settings);
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: 'Kalender',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.local_hospital_outlined),
-            label: 'Faskes',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: 'ImuniBot',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
-      ),
+      bottomNavigationBar: const AppBottomNavBar(currentIndex: 2),
     );
   }
 
@@ -236,8 +212,13 @@ class _FaskesScreenState extends ConsumerState<FaskesScreen> {
         // List kartu atau empty state
         Expanded(
           child: filtered.isEmpty
-              ? _EmptyState(
-                  onReset: () {
+              ? EmptyStateWidget(
+                  icon: Icons.search_off_rounded,
+                  title: 'Tidak ada faskes ditemukan',
+                  message: 'Coba ubah kata kunci atau pilih tipe yang lain.',
+                  actionLabel: 'Reset Filter',
+                  actionIcon: Icons.refresh_rounded,
+                  onAction: () {
                     ref.read(faskesTipeProvider.notifier).state =
                         FaskesTipe.semua;
                     _searchCtrl.clear();
@@ -479,21 +460,11 @@ class _TipeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = _badgeColor(tipe);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
-      ),
-      child: Text(
-        tipe,
-        style: GoogleFonts.poppins(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
-      ),
+    return StatusBadge(
+      label: tipe,
+      color: color,
+      compact: true,
+      style: StatusBadgeStyle.soft,
     );
   }
 
@@ -667,62 +638,4 @@ class _InfoRow extends StatelessWidget {
 
 // ── Empty State ───────────────────────────────────────────────────────────
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.onReset});
-
-  final VoidCallback onReset;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.search_off_rounded, size: 64, color: AppColors.divider),
-            const SizedBox(height: 16),
-            Text(
-              'Tidak ada faskes ditemukan',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.baloo2(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Coba ubah kata kunci atau pilih tipe yang lain.',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(fontSize: 13, color: AppColors.grey),
-            ),
-            const SizedBox(height: 20),
-            OutlinedButton.icon(
-              onPressed: onReset,
-              icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: Text(
-                'Reset Filter',
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.teal,
-                side: const BorderSide(color: AppColors.teal),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// Empty state Faskes kini memakai `EmptyStateWidget` global (lib/widgets).

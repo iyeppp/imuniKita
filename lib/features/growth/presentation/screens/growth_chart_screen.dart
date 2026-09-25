@@ -6,6 +6,9 @@ import 'package:fl_chart/fl_chart.dart';
 
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../widgets/empty_state_widget.dart';
+import '../../../../widgets/error_state_widget.dart';
+import '../../../../widgets/loading_overlay.dart';
 import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../providers/growth_provider.dart';
 
@@ -42,8 +45,9 @@ class _GrowthChartScreenState extends ConsumerState<GrowthChartScreen>
         leading: IconButton(
           tooltip: 'Kembali',
           icon: const Icon(Icons.arrow_back),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(AppRoutes.dashboard),
+          onPressed: () => context.canPop()
+              ? context.pop()
+              : context.go(AppRoutes.dashboard),
         ),
         title: Text(
           'Grafik Pertumbuhan',
@@ -95,28 +99,23 @@ class _GrowthChartScreenState extends ConsumerState<GrowthChartScreen>
                 ],
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, _) => Center(child: Text('Gagal: $err')),
+            loading: () => const AppLoadingIndicator(),
+            error: (err, _) => ErrorStateWidget(message: '$err'),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Gagal: $err')),
+        loading: () => const AppLoadingIndicator(),
+        error: (err, _) => ErrorStateWidget(message: '$err'),
       ),
-
     );
   }
 
   Widget _buildChartTab(List<dynamic> records, String mode) {
     if (records.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Text(
-            'Belum ada rekam data. Klik tombol + di atas untuk menambahkan.',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(color: AppColors.textSecondary),
-          ),
-        ),
+      return const EmptyStateWidget(
+        icon: Icons.show_chart,
+        title: 'Belum ada rekam data',
+        message:
+            'Klik tombol + di kanan atas untuk menambahkan pengukuran pertama.',
       );
     }
 

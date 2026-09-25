@@ -14,6 +14,7 @@ import '../../../../core/services/local_storage_service.dart';
 import '../../../../core/utils/age_calculator.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../injection/dependency_injection.dart';
+import '../../../../widgets/custom_text_field.dart';
 import '../../domain/entities/baby_entity.dart';
 import '../providers/baby_provider.dart';
 
@@ -181,8 +182,9 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
         leading: IconButton(
           tooltip: 'Kembali',
           icon: const Icon(Icons.arrow_back),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(AppRoutes.dashboard),
+          onPressed: () => context.canPop()
+              ? context.pop()
+              : context.go(AppRoutes.dashboard),
         ),
         title: Text(
           'Tambah Profil Bayi',
@@ -264,21 +266,11 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
                 const SizedBox(height: 16),
 
                 // ── Nama Anak ─────────────────────────────────────────────
-                Text(
-                  'Nama Anak',
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.darkText,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                TextFormField(
+                CustomTextField(
+                  label: 'Nama Anak',
                   controller: _nameController,
+                  hint: 'Nama Lengkap Anak',
                   keyboardType: TextInputType.name,
-                  decoration: const InputDecoration(
-                    hintText: 'Nama Lengkap Anak',
-                  ),
                   validator: (value) => value == null || value.trim().isEmpty
                       ? 'Nama anak wajib diisi'
                       : null,

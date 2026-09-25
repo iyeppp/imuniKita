@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../widgets/empty_state_widget.dart';
 import '../../data/models/quiz_model.dart';
 import '../../data/models/quiz_score_model.dart';
 import '../providers/education_provider.dart';
@@ -97,11 +98,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
           ),
         ),
-        body: Center(
-          child: Text(
-            'Kuis tidak ditemukan.',
-            style: GoogleFonts.poppins(color: AppColors.textSecondary),
-          ),
+        body: const EmptyStateWidget(
+          icon: Icons.quiz_outlined,
+          title: 'Kuis tidak ditemukan',
+          message: 'Kuis ini mungkin sudah tidak tersedia.',
         ),
       );
     }
