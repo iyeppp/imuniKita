@@ -13,14 +13,14 @@ import '../features/immunization/domain/repositories/i_immunization_repository.d
 import '../features/immunization/domain/usecases/generate_schedule_usecase.dart';
 import '../features/immunization/domain/usecases/schedule_reminder_usecase.dart';
 
-// Registry pusat Riverpod: datasource → repository → use case.
+// Registry pusat Riverpod: datasource â†’ repository â†’ use case.
 //
-// Semua provider ditulis manual (tanpa `riverpod_generator`) — lihat dev
-// plan §2 catatan konflik `build_runner` dengan `hive_ce_generator`.
+// Semua provider ditulis manual (tanpa `riverpod_generator`) â€” lihat dev
+// plan Â§2 catatan konflik `build_runner` dengan `hive_ce_generator`.
 // Screen/notifier cukup memanggil `ref.read(xUseCaseProvider)`, tidak
 // pernah menyentuh datasource/repository secara langsung.
 
-// ── Baby Profile ────────────────────────────────────────────────────────
+// â”€â”€ Baby Profile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 final babyLocalDatasourceProvider = Provider<BabyLocalDatasource>((ref) {
   return const BabyLocalDatasource();
 });
@@ -45,7 +45,7 @@ final deleteBabyUseCaseProvider = Provider<DeleteBabyUseCase>((ref) {
   return DeleteBabyUseCase(ref.watch(babyRepositoryProvider));
 });
 
-// ── Immunization ────────────────────────────────────────────────────────
+// â”€â”€ Immunization â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 final vaccineLocalDatasourceProvider = Provider<VaccineLocalDatasource>((ref) {
   return const VaccineLocalDatasource();
 });
@@ -63,5 +63,10 @@ final generateScheduleUseCaseProvider = Provider<GenerateScheduleUseCase>((
 final scheduleReminderUseCaseProvider = Provider<ScheduleReminderUseCase>((
   ref,
 ) {
-  return const ScheduleReminderUseCase();
+  // Bug #11: repository diinjek agar flag reminderH7Sent/reminderH1Sent
+  // bisa di-set setelah notifikasi berhasil dijadwalkan.
+  return ScheduleReminderUseCase(
+    repository: ref.watch(immunizationRepositoryProvider),
+  );
 });
+

@@ -192,7 +192,8 @@ abstract class AppTheme {
         selectedColor: AppColors.primary,
         labelStyle: GoogleFonts.inter(
           fontSize: 12,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
+          color: Colors.black,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),

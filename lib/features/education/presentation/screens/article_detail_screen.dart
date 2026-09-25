@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../data/models/article_model.dart';
@@ -48,6 +49,13 @@ class ArticleDetailScreen extends ConsumerWidget {
       return Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
+          leading: IconButton(
+            tooltip: 'Kembali',
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.canPop()
+                ? context.pop()
+                : context.go(AppRoutes.education),
+          ),
           title: Text(
             'Artikel',
             style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
@@ -69,6 +77,13 @@ class ArticleDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: IconButton(
+          tooltip: 'Kembali',
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.canPop()
+              ? context.pop()
+              : context.go(AppRoutes.education),
+        ),
         title: Text(
           'Artikel',
           style: GoogleFonts.poppins(fontWeight: FontWeight.bold),

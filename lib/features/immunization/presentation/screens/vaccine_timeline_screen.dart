@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../providers/immunization_provider.dart';
 import '../../domain/entities/vaccine_schedule_entity.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/router/app_router.dart';
 
 class VaccineTimelineScreen extends ConsumerWidget {
   const VaccineTimelineScreen({super.key});
@@ -17,12 +19,25 @@ class VaccineTimelineScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Timeline Imunisasi', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+        leading: IconButton(
+          tooltip: 'Kembali',
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go(AppRoutes.calendar),
+        ),
+        title: Text(
+          'Timeline Imunisasi',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
       ),
       body: babyAsync.when(
         data: (currentBaby) {
-          if (currentBaby == null) return const Center(child: Text('Belum ada profil anak.'));
-          final schedulesAsync = ref.watch(immunizationProvider(currentBaby.babyId));
+          if (currentBaby == null) {
+            return const Center(child: Text('Belum ada profil anak.'));
+          }
+          final schedulesAsync = ref.watch(
+            immunizationProvider(currentBaby.babyId),
+          );
 
           return schedulesAsync.when(
             data: (schedules) {
@@ -39,15 +54,28 @@ class VaccineTimelineScreen extends ConsumerWidget {
                         children: [
                           CircleAvatar(
                             radius: 12,
-                            backgroundColor: item.status == VaccineStatus.selesai ? AppColors.green : AppColors.teal,
+                            backgroundColor:
+                                item.status == VaccineStatus.selesai
+                                ? AppColors.green
+                                : (item.status == VaccineStatus.terlewat
+                                    ? AppColors.red
+                                    : AppColors.teal),
                             child: Icon(
-                              item.status == VaccineStatus.selesai ? Icons.check : Icons.radio_button_unchecked,
+                              item.status == VaccineStatus.selesai
+                                  ? Icons.check
+                                  : (item.status == VaccineStatus.terlewat
+                                      ? Icons.close
+                                      : Icons.radio_button_unchecked),
                               size: 14,
                               color: Colors.white,
                             ),
                           ),
                           if (index != schedules.length - 1)
-                            Container(width: 2, height: 60, color: AppColors.grey.withValues(alpha: 0.4)),
+                            Container(
+                              width: 2,
+                              height: 60,
+                              color: AppColors.grey.withValues(alpha: 0.4),
+                            ),
                         ],
                       ),
                       const SizedBox(width: 16),
@@ -62,33 +90,74 @@ class VaccineTimelineScreen extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      item.namaVaksin,
-                                      style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16),
+                                    Expanded(
+                                      child: Text(
+                                        item.namaVaksin,
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
                                     ),
-                                    Chip(
-                                      label: Text('${item.usiaBulanTarget} Bln'),
-                                      labelStyle: const TextStyle(fontSize: 10),
-                                    )
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.teal.withValues(
+                                          alpha: 0.15,
+                                        ),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: AppColors.teal.withValues(
+                                            alpha: 0.3,
+                                          ),
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        '${item.usiaBulanTarget} Bln',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                                 const SizedBox(height: 4),
-                                Text(item.deskripsi, style: GoogleFonts.poppins(fontSize: 12, color: AppColors.textSecondary)),
+                                Text(
+                                  item.deskripsi,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
                                 const SizedBox(height: 8),
                                 InkWell(
-                                  onTap: () => context.go('/calendar/detail/${item.scheduleId}'),
+                                  onTap: () => context.push(
+                                    '/calendar/detail/${item.scheduleId}',
+                                  ),
                                   child: Text(
                                     'Lihat Detail ›',
-                                    style: GoogleFonts.poppins(color: AppColors.teal, fontWeight: FontWeight.bold, fontSize: 13),
+                                    style: GoogleFonts.poppins(
+                                      color: AppColors.teal,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
                                   ),
-                                )
+                                ),
                               ],
                             ),
                           ),
                         ),
-                      )
+                      ),
                     ],
                   );
                 },

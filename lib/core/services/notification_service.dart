@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:go_router/go_router.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 /// Service terpusat untuk semua operasi notifikasi lokal.
@@ -10,11 +11,20 @@ class NotificationService {
   static final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
 
-  // Channel ID untuk Android — harus konsisten agar notifikasi tidak duplikat
+  // Channel ID untuk Android -- harus konsisten agar notifikasi tidak duplikat
   static const _channelId = 'imunikita_reminders';
   static const _channelName = 'Pengingat Imunisasi';
   static const _channelDesc =
       'Notifikasi pengingat jadwal imunisasi H-7 dan H-1';
+
+  /// GoRouter instance -- di-set dari [app.dart] setelah router dibuat.
+  /// Dipakai oleh [_onNotificationTap] untuk navigasi ke VaccineDetailScreen
+  /// (Fix Bug #6). Tidak di-set lewat constructor agar tetap kompatibel
+  /// dengan static pattern yang sudah ada.
+  static GoRouter? _router;
+
+  /// Daftarkan router untuk navigasi dari notifikasi tap.
+  static void setRouter(GoRouter router) => _router = router;
 
   /// Inisialisasi plugin. Dipanggil sekali di [main].
   static Future<void> init() async {
@@ -47,9 +57,18 @@ class NotificationService {
   }
 
   /// Callback saat user mengetuk notifikasi.
-  /// TODO(Sprint 2): navigasi ke VaccineDetailScreen via GoRouter.
+  /// Fix Bug #6: navigasi ke VaccineDetailScreen menggunakan payload (scheduleId).
   static void _onNotificationTap(NotificationResponse response) {
-    // payload berisi vaccineScheduleId
+    final scheduleId = response.payload;
+    if (scheduleId == null || scheduleId.isEmpty) return;
+
+    // Navigasi ke layar detail vaksin lewat router yang sudah di-set.
+    // Non-fatal bila router belum tersedia (mis. notif diterima sebelum app init).
+    try {
+      _router?.go('/calendar/detail/$scheduleId');
+    } catch (_) {
+      // Abaikan jika navigasi gagal
+    }
   }
 
   /// Jadwalkan notifikasi pada [scheduledDate].

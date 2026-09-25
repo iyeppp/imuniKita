@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
+import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../providers/journal_provider.dart';
@@ -75,7 +76,18 @@ class _AddJournalScreenState extends ConsumerState<AddJournalScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text('Tambah Jurnal Sehat', style: GoogleFonts.poppins(fontWeight: FontWeight.bold))),
+      appBar: AppBar(
+        leading: IconButton(
+          tooltip: 'Kembali',
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go(AppRoutes.journal),
+        ),
+        title: Text(
+          'Tambah Jurnal Sehat',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
+      ),
       body: babyAsync.when(
         data: (currentBaby) {
           if (currentBaby == null) return const Center(child: Text('Belum ada profil anak.'));

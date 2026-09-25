@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -35,6 +37,12 @@ class BabyDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: IconButton(
+          tooltip: 'Kembali',
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go(AppRoutes.settings),
+        ),
         title: Text(
           'Kelola Profil Anak',
           style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
@@ -251,6 +259,14 @@ class _FormKelolaBayiState extends ConsumerState<_FormKelolaBayi> {
         widget.baby.babyId;
     final sibuk = _menyimpan || _menghapus;
 
+    final babyFile = widget.baby.fotoProfilPath == null
+        ? null
+        : File(widget.baby.fotoProfilPath!);
+    final ImageProvider? babyPhoto =
+        (babyFile != null && babyFile.existsSync())
+            ? FileImage(babyFile)
+            : null;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       child: Form(
@@ -268,15 +284,18 @@ class _FormKelolaBayiState extends ConsumerState<_FormKelolaBayi> {
                   children: [
                     CircleAvatar(
                       radius: 30,
-                      backgroundColor: AppColors.teal,
-                      child: Text(
-                        inisial,
-                        style: GoogleFonts.baloo2(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                        ),
-                      ),
+                      backgroundColor: AppColors.teal.withValues(alpha: 0.15),
+                      backgroundImage: babyPhoto,
+                      child: babyPhoto != null
+                          ? null
+                          : Text(
+                              inisial,
+                              style: GoogleFonts.baloo2(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.tealDark,
+                              ),
+                            ),
                     ),
                     const SizedBox(width: 14),
                     Expanded(

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/router/app_router.dart';
 import '../../../health_journal/data/models/health_journal_model.dart';
 import '../../../health_journal/presentation/providers/journal_provider.dart';
 import '../../domain/entities/vaccine_schedule_entity.dart';
@@ -94,6 +95,12 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: IconButton(
+          tooltip: 'Kembali',
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go(AppRoutes.calendar),
+        ),
         title: Text(
           'Detail Imunisasi',
           style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
@@ -138,6 +145,26 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
                             fontSize: 14,
                           ),
                         ),
+                        const SizedBox(height: 4),
+                        // Tanggal target -- Fix checklist #3.3
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.calendar_today_outlined,
+                              size: 14,
+                              color: AppColors.teal,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Tanggal Target: ${item.tanggalTarget.day}/${item.tanggalTarget.month}/${item.tanggalTarget.year}',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: AppColors.teal,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 8),
                         Text(
                           item.deskripsi,
@@ -146,6 +173,33 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
                             color: AppColors.textSecondary,
                           ),
                         ),
+                        if (item.status != VaccineStatus.selesai) ...[
+                          const SizedBox(height: 12),
+                          const Divider(),
+                          const SizedBox(height: 4),
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: AppColors.teal),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            icon: const Icon(
+                              Icons.local_hospital,
+                              color: AppColors.teal,
+                              size: 18,
+                            ),
+                            label: Text(
+                              'Cari Lokasi Faskes Imunisasi',
+                              style: GoogleFonts.poppins(
+                                color: AppColors.teal,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                            onPressed: () => context.go(AppRoutes.faskes),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -240,19 +294,47 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
                 ] else ...[
                   Card(
                     color: AppColors.green.withValues(alpha: 0.1),
-                    child: const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Row(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.check_circle,
-                            color: AppColors.green,
-                            size: 28,
+                          const Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                color: AppColors.green,
+                                size: 28,
+                              ),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Imunisasi ini telah berhasil diselesaikan. ✓',
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(width: 12),
-                          Text(
-                            'Imunisasi ini telah berhasil diselesaikan dan dicatat. ✓',
-                          ),
+                          if (item.tanggalRealisasi != null) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              'Tanggal diberikan: ${item.tanggalRealisasi!.day}/${item.tanggalRealisasi!.month}/${item.tanggalRealisasi!.year}',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                          if (item.catatanReaksi != null &&
+                              item.catatanReaksi!.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              'Catatan: ${item.catatanReaksi}',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),

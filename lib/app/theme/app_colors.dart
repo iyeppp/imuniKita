@@ -37,8 +37,8 @@ abstract class AppColors {
   static const Color secondaryLighter = Color(0xFFFFECE6);
 
   static const Color background = cream;
-  static const Color surface    = warmWhite;
-  static const Color border     = darkText;
+  static const Color surface    = Colors.white;
+  static const Color border     = Color(0xFFE2E8F0);
   static const Color divider    = Color(0xFFE5E7EB);
 
   static const Color textPrimary   = darkText;
