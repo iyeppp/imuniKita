@@ -6,6 +6,12 @@ import 'package:fl_chart/fl_chart.dart';
 
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/constants/who_growth_reference.dart';
+import '../../../../widgets/empty_state_widget.dart';
+import '../../../../widgets/error_state_widget.dart';
+import '../../../../widgets/loading_overlay.dart';
+import '../../domain/entities/growth_record_entity.dart';
+import '../../../baby_profile/domain/entities/baby_entity.dart';
 import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../providers/growth_provider.dart';
 
@@ -42,8 +48,9 @@ class _GrowthChartScreenState extends ConsumerState<GrowthChartScreen>
         leading: IconButton(
           tooltip: 'Kembali',
           icon: const Icon(Icons.arrow_back),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(AppRoutes.dashboard),
+          onPressed: () => context.canPop()
+              ? context.pop()
+              : context.go(AppRoutes.dashboard),
         ),
         title: Text(
           'Grafik Pertumbuhan',
@@ -80,89 +87,139 @@ class _GrowthChartScreenState extends ConsumerState<GrowthChartScreen>
       body: babyAsync.when(
         data: (currentBaby) {
           if (currentBaby == null) {
-            return const Center(child: Text('Belum ada profil anak.'));
+            return EmptyStateWidget(
+              icon: Icons.child_care,
+              title: 'Belum ada profil anak',
+              message:
+                  'Tambahkan profil anak untuk melihat grafik pertumbuhan.',
+              actionLabel: 'Tambah Profil Anak',
+              onAction: () => context.push(AppRoutes.addBaby),
+            );
           }
           final recordsAsync = ref.watch(growthProvider(currentBaby.babyId));
+
+          final isLakiLaki = currentBaby.jenisKelamin == BabyGender.laki;
 
           return recordsAsync.when(
             data: (records) {
               return TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildChartTab(records, 'BB'),
-                  _buildChartTab(records, 'TB'),
-                  _buildChartTab(records, 'LK'),
+                  _buildChartTab(
+                    records,
+                    'BB',
+                    tanggalLahir: currentBaby.tanggalLahir,
+                    isLakiLaki: isLakiLaki,
+                  ),
+                  _buildChartTab(
+                    records,
+                    'TB',
+                    tanggalLahir: currentBaby.tanggalLahir,
+                    isLakiLaki: isLakiLaki,
+                  ),
+                  _buildChartTab(
+                    records,
+                    'LK',
+                    tanggalLahir: currentBaby.tanggalLahir,
+                    isLakiLaki: isLakiLaki,
+                  ),
                 ],
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, _) => Center(child: Text('Gagal: $err')),
+            loading: () => const AppLoadingIndicator(),
+            error: (err, _) => ErrorStateWidget(message: '$err'),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Gagal: $err')),
+        loading: () => const AppLoadingIndicator(),
+        error: (err, _) => ErrorStateWidget(message: '$err'),
       ),
-
     );
   }
 
-  Widget _buildChartTab(List<dynamic> records, String mode) {
+  /// Sumbu X grafik = **usia (bulan)** saat pengukuran, sehingga titik anak
+  /// bisa dibandingkan langsung dengan kurva referensi WHO (Temuan #8).
+  /// Titik lingkar kepala yang kosong dilewati, bukan diplot 0 (Temuan #47).
+  Widget _buildChartTab(
+    List<GrowthRecordEntity> records,
+    String mode, {
+    required DateTime tanggalLahir,
+    required bool isLakiLaki,
+  }) {
     if (records.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Text(
-            'Belum ada rekam data. Klik tombol + di atas untuk menambahkan.',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(color: AppColors.textSecondary),
-          ),
-        ),
+      return const EmptyStateWidget(
+        icon: Icons.show_chart,
+        title: 'Belum ada rekam data',
+        message:
+            'Klik tombol + di kanan atas untuk menambahkan pengukuran pertama.',
       );
     }
 
-    // Prepare line chart coordinates data mapping arrays
-    List<FlSpot> spots = [];
-    double maxY = 40;
-    double minY = 0;
-    double whoRef = 7.0;
+    final who = WhoGrowthReference.forMode(mode, isLakiLaki: isLakiLaki);
 
-    for (int i = 0; i < records.length; i++) {
-      final r = records[i];
-      double val = 0;
-      if (mode == 'BB') {
-        val = r.beratBadan;
-        whoRef = 7.0;
-        // Dynamically expand maxY so data never clips above the chart
-        final dataMax = spots.isNotEmpty
-            ? spots.map((s) => s.y).reduce((a, b) => a > b ? a : b)
-            : 0.0;
-        maxY = (dataMax > 23 ? dataMax + 3 : 25).ceilToDouble();
-      } else if (mode == 'TB') {
-        val = r.tinggiBadan;
-        whoRef = 65.0;
-        maxY = 120;
-        minY = 30;
-      } else if (mode == 'LK') {
-        val = r.lingkarKepala ?? 0;
-        whoRef = 40.0;
-        maxY = 60;
-        minY = 20;
+    double? nilaiUntuk(GrowthRecordEntity r) => switch (mode) {
+      'BB' => r.beratBadan,
+      'TB' => r.tinggiBadan,
+      'LK' => r.lingkarKepala,
+      _ => null,
+    };
+
+    final spots = <FlSpot>[];
+    for (final r in records) {
+      final nilai = nilaiUntuk(r);
+      if (nilai == null) continue; // lingkar kepala opsional
+      final bulan =
+          r.tanggalPengukuran.difference(tanggalLahir).inDays / 30.4375;
+      spots.add(FlSpot(bulan < 0 ? 0 : bulan, nilai));
+    }
+
+    if (spots.isEmpty) {
+      return const EmptyStateWidget(
+        icon: Icons.show_chart,
+        title: 'Belum ada data untuk grafik ini',
+        message: 'Lingkar kepala belum pernah diisi pada pengukuran mana pun.',
+      );
+    }
+
+    final maxBulan = spots.map((s) => s.x).reduce((a, b) => a > b ? a : b);
+
+    // Kurva referensi WHO (median, −2SD, +2SD) sepanjang rentang data anak.
+    List<FlSpot> kurva(double? Function(double) ambil) {
+      final titik = <FlSpot>[];
+      if (who == null) return titik;
+      final batas = maxBulan < who.maxMonth
+          ? maxBulan
+          : who.maxMonth.toDouble();
+      for (var bulan = 0.0; bulan <= batas; bulan += 1) {
+        final nilai = ambil(bulan);
+        if (nilai != null) titik.add(FlSpot(bulan, nilai));
       }
-
-      spots.add(FlSpot(i.toDouble(), val));
+      return titik;
     }
 
-    // Final maxY check after all spots are added
-    if (mode == 'BB' && spots.isNotEmpty) {
-      final dataMax = spots.map((s) => s.y).reduce((a, b) => a > b ? a : b);
-      maxY = (dataMax > 23 ? dataMax + 3 : 25).ceilToDouble();
-    }
+    final medianSpots = kurva((b) => who?.medianAt(b));
+    final minus2Spots = kurva((b) => who?.minus2SdAt(b));
+    final plus2Spots = kurva((b) => who?.plus2SdAt(b));
+
+    final semuaNilai = [
+      ...spots.map((s) => s.y),
+      ...medianSpots.map((s) => s.y),
+      ...minus2Spots.map((s) => s.y),
+      ...plus2Spots.map((s) => s.y),
+    ];
+    final nilaiMin = semuaNilai.reduce((a, b) => a < b ? a : b);
+    final nilaiMax = semuaNilai.reduce((a, b) => a > b ? a : b);
+    final rentang = (nilaiMax - nilaiMin).abs();
+    final margin = rentang < 5 ? 1.0 : rentang * 0.15;
+
+    const warnaWho = Color(0xFF16A34A); // green-700
+    final modeLabel = who?.label ?? mode;
+    final unit = who?.unit ?? '';
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // Header descriptive panel cards text summaries
+          // Ringkasan pengukuran terakhir
           Card(
             child: Padding(
               padding: const EdgeInsets.all(12.0),
@@ -174,11 +231,7 @@ class _GrowthChartScreenState extends ConsumerState<GrowthChartScreen>
                     style: GoogleFonts.poppins(fontSize: 13),
                   ),
                   Text(
-                    mode == 'BB'
-                        ? '${records.last.beratBadan} kg'
-                        : (mode == 'TB'
-                              ? '${records.last.tinggiBadan} cm'
-                              : '${records.last.lingkarKepala ?? "-"} cm'),
+                    '${nilaiUntuk(records.last)?.toStringAsFixed(1) ?? '-'} $unit',
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -191,19 +244,46 @@ class _GrowthChartScreenState extends ConsumerState<GrowthChartScreen>
           ),
           const SizedBox(height: 24),
 
-          // High Performance interactive fl_chart Line Chart curves widget implementation block
           Expanded(
             child: LineChart(
               LineChartData(
-                minY: minY,
-                maxY: maxY,
+                minX: 0,
+                maxX: maxBulan < 1 ? 1 : maxBulan,
+                minY: nilaiMin - margin,
+                maxY: nilaiMax + margin,
                 gridData: const FlGridData(show: true),
-                titlesData: const FlTitlesData(
-                  topTitles: AxisTitles(
+                titlesData: FlTitlesData(
+                  topTitles: const AxisTitles(
                     sideTitles: SideTitles(showTitles: false),
                   ),
-                  rightTitles: AxisTitles(
+                  rightTitles: const AxisTitles(
                     sideTitles: SideTitles(showTitles: false),
+                  ),
+                  bottomTitles: AxisTitles(
+                    axisNameWidget: Text(
+                      'usia (bulan)',
+                      style: GoogleFonts.poppins(
+                        fontSize: 10,
+                        color: AppColors.textHint,
+                      ),
+                    ),
+                    sideTitles: const SideTitles(
+                      showTitles: true,
+                      reservedSize: 24,
+                    ),
+                  ),
+                  leftTitles: AxisTitles(
+                    axisNameWidget: Text(
+                      ' $modeLabel ($unit)',
+                      style: GoogleFonts.poppins(
+                        fontSize: 10,
+                        color: AppColors.textHint,
+                      ),
+                    ),
+                    sideTitles: const SideTitles(
+                      showTitles: true,
+                      reservedSize: 38,
+                    ),
                   ),
                 ),
                 borderData: FlBorderData(
@@ -211,7 +291,7 @@ class _GrowthChartScreenState extends ConsumerState<GrowthChartScreen>
                   border: Border.all(color: AppColors.border, width: 1),
                 ),
                 lineBarsData: [
-                  // Actual child metrics line chart plot curve values
+                  // Data anak
                   LineChartBarData(
                     spots: spots,
                     isCurved: true,
@@ -219,30 +299,48 @@ class _GrowthChartScreenState extends ConsumerState<GrowthChartScreen>
                     barWidth: 4,
                     dotData: const FlDotData(show: true),
                   ),
-                  // WHO Standard reference overlay — lebih tebal & solid agar mudah terlihat
-                  LineChartBarData(
-                    spots: List.generate(
-                      records.length,
-                      (index) => FlSpot(index.toDouble(), whoRef),
+                  // Median WHO
+                  if (medianSpots.isNotEmpty)
+                    LineChartBarData(
+                      spots: medianSpots,
+                      isCurved: true,
+                      color: warnaWho,
+                      barWidth: 2.5,
+                      dotData: const FlDotData(show: false),
                     ),
-                    isCurved: false,
-                    color: const Color(0xFF16A34A), // green-700 solid
-                    barWidth: 2.5,
-                    dashArray: [8, 4],
-                    dotData: const FlDotData(show: false),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      color: const Color(0xFF16A34A).withValues(alpha: 0.07),
+                  // −2SD WHO
+                  if (minus2Spots.isNotEmpty)
+                    LineChartBarData(
+                      spots: minus2Spots,
+                      isCurved: true,
+                      color: warnaWho.withValues(alpha: 0.55),
+                      barWidth: 1.5,
+                      dashArray: [6, 4],
+                      dotData: const FlDotData(show: false),
                     ),
-                  ),
+                  // +2SD WHO
+                  if (plus2Spots.isNotEmpty)
+                    LineChartBarData(
+                      spots: plus2Spots,
+                      isCurved: true,
+                      color: warnaWho.withValues(alpha: 0.55),
+                      barWidth: 1.5,
+                      dashArray: [6, 4],
+                      dotData: const FlDotData(show: false),
+                    ),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 12),
           Text(
-            '*Garis putus-putus hijau menunjukkan batas median referensi standar WHO',
-            style: GoogleFonts.poppins(fontSize: 11, color: AppColors.textHint),
+            '*Garis hijau = median, −2SD, dan +2SD WHO Child Growth Standards '
+            '(${isLakiLaki ? 'laki-laki' : 'perempuan'}, 0–24 bulan) — indikatif, '
+            'bukan diagnosis.',
+            style: GoogleFonts.poppins(
+              fontSize: 10.5,
+              color: AppColors.textHint,
+            ),
           ),
         ],
       ),

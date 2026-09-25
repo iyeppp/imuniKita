@@ -14,6 +14,7 @@ import '../../../../core/services/local_storage_service.dart';
 import '../../../../core/utils/age_calculator.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../injection/dependency_injection.dart';
+import '../../../../widgets/custom_text_field.dart';
 import '../../domain/entities/baby_entity.dart';
 import '../providers/baby_provider.dart';
 
@@ -55,6 +56,7 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
         imageQuality: 80,
       );
       if (picked != null) {
+        if (!mounted) return;
         setState(() => _fotoProfilPath = picked.path);
       }
     } catch (e) {
@@ -73,6 +75,7 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
       helpText: 'Pilih Tanggal Lahir',
     );
     if (picked != null) {
+      if (!mounted) return;
       setState(() {
         _tanggalLahir = picked;
         _showDateError = false;
@@ -124,35 +127,21 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
           .read(babyNotifierProvider.notifier)
           .addBaby(baby);
 
-      // 2. Generate seluruh jadwal imunisasi nasional untuk bayi ini.
+      // 2. Bangun seluruh jadwal imunisasi + daftarkan pengingat H-7/H-1.
+      //    Bug #34: satu alur (`SyncBabyScheduleUseCase`) agar tidak divergen
+      //    dengan Kelola Profil Anak & auto-generate di provider.
       final schedules = await ref
-          .read(generateScheduleUseCaseProvider)
+          .read(syncBabyScheduleUseCaseProvider)
           .execute(
             babyId: savedBaby.babyId,
+            namaAnak: savedBaby.namaAnak,
             tanggalLahir: savedBaby.tanggalLahir,
           );
 
-      // 3. Daftarkan notifikasi pengingat H-7 & H-1 untuk tiap jadwal.
-      //    Sengaja non-fatal: bila izin alarm/notifikasi ditolak OS (umum di
-      //    Android 14+), profil & jadwal tetap tersimpan dan user tetap
-      //    diarahkan ke Dashboard.
-      var reminderFailed = false;
-      try {
-        await ref
-            .read(scheduleReminderUseCaseProvider)
-            .execute(namaAnak: savedBaby.namaAnak, schedules: schedules);
-      } catch (_) {
-        reminderFailed = true;
-      }
-
       if (!mounted) return;
       _showSnackBar(
-        reminderFailed
-            ? 'Profil ${savedBaby.namaAnak} tersimpan & ${schedules.length} '
-                  'jadwal dibuat. Catatan: notifikasi pengingat belum aktif '
-                  '(izin alarm/notifikasi belum diberikan).'
-            : 'Profil ${savedBaby.namaAnak} berhasil disimpan! '
-                  '${schedules.length} jadwal imunisasi telah dibuat.',
+        'Profil ${savedBaby.namaAnak} berhasil disimpan! '
+        '${schedules.length} jadwal imunisasi telah dibuat.',
       );
       context.go(AppRoutes.dashboard);
     } catch (e) {
@@ -181,8 +170,9 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
         leading: IconButton(
           tooltip: 'Kembali',
           icon: const Icon(Icons.arrow_back),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(AppRoutes.dashboard),
+          onPressed: () => context.canPop()
+              ? context.pop()
+              : context.go(AppRoutes.dashboard),
         ),
         title: Text(
           'Tambah Profil Bayi',
@@ -264,21 +254,11 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
                 const SizedBox(height: 16),
 
                 // ── Nama Anak ─────────────────────────────────────────────
-                Text(
-                  'Nama Anak',
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.darkText,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                TextFormField(
+                CustomTextField(
+                  label: 'Nama Anak',
                   controller: _nameController,
+                  hint: 'Nama Lengkap Anak',
                   keyboardType: TextInputType.name,
-                  decoration: const InputDecoration(
-                    hintText: 'Nama Lengkap Anak',
-                  ),
                   validator: (value) => value == null || value.trim().isEmpty
                       ? 'Nama anak wajib diisi'
                       : null,

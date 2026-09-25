@@ -45,17 +45,33 @@ class LocalStorageService {
   /// Key `seen_onboarding` sengaja **tidak** dihapus agar user yang logout
   /// langsung diarahkan ke Login, bukan mengulang Onboarding. Data domain
   /// (Hive CE) juga tetap tersimpan.
+  ///
+  /// Fix Bug #41: `active_baby_id` ikut dibersihkan — sebelumnya pilihan bayi
+  /// aktif milik akun sebelumnya terbawa ke akun berikutnya di perangkat yang
+  /// sama (preferensi antar-akun bocor).
   static Future<void> clearSession() async {
     final prefs = await instance;
     await prefs.remove(AppConstants.prefIsLoggedIn);
     await prefs.remove(AppConstants.prefUserId);
     await prefs.remove(AppConstants.prefUserName);
+    await prefs.remove(AppConstants.prefActiveBabyId);
   }
 
   /// Preferensi notifikasi pengingat H-7 & H-1 — default **aktif**.
+  ///
+  /// Temuan #19: key disimpan **per pengguna** (`notifications_enabled_<userId>`)
+  /// agar preferensi satu akun tidak terbawa ke akun lain di perangkat yang
+  /// sama. Bila belum ada sesi login, dipakai key dasar sebagai fallback.
+  static Future<String> _notificationPrefKey() async {
+    final userId = await getCurrentUserId();
+    return userId == null
+        ? AppConstants.prefNotificationsEnabled
+        : '${AppConstants.prefNotificationsEnabled}_$userId';
+  }
+
   static Future<bool> isNotificationEnabled() async =>
-      (await instance).getBool(AppConstants.prefNotificationsEnabled) ?? true;
+      (await instance).getBool(await _notificationPrefKey()) ?? true;
 
   static Future<void> setNotificationEnabled(bool enabled) async =>
-      (await instance).setBool(AppConstants.prefNotificationsEnabled, enabled);
+      (await instance).setBool(await _notificationPrefKey(), enabled);
 }

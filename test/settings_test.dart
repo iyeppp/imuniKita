@@ -8,6 +8,7 @@ import 'package:imunikita/core/constants/app_constants.dart';
 import 'package:imunikita/core/errors/failures.dart';
 import 'package:imunikita/core/services/local_storage_service.dart';
 import 'package:imunikita/features/auth/data/models/user_model.dart';
+import 'package:imunikita/features/auth/domain/entities/user_entity.dart';
 import 'package:imunikita/features/auth/presentation/providers/auth_provider.dart';
 import 'package:imunikita/hive_registrar.g.dart';
 import 'package:imunikita/widgets/confirm_dialog.dart';
@@ -85,7 +86,9 @@ void main() {
       await store.setString(AppConstants.prefUserId, 'user-1');
       await store.setString(AppConstants.prefUserName, 'Ibu Sari');
       await store.setBool(AppConstants.prefSeenOnboarding, true);
+      // Dinonaktifkan untuk user-1 (Temuan #19 → key per pengguna).
       await LocalStorageService.setNotificationEnabled(false);
+      await LocalStorageService.setActiveBabyId('baby-1');
 
       await LocalStorageService.clearSession();
 
@@ -94,6 +97,31 @@ void main() {
       expect(await LocalStorageService.getCurrentUserName(), isNull);
       // Tidak ikut terhapus → user logout langsung ke Login, bukan Onboarding.
       expect(store.getBool(AppConstants.prefSeenOnboarding), isTrue);
+      // Fix Bug #41: pilihan bayi aktif ikut dibersihkan agar tidak bocor ke
+      // akun berikutnya di perangkat yang sama.
+      expect(await LocalStorageService.getActiveBabyId(), isNull);
+      // Tanpa sesi, preferensi kembali ke key dasar (default aktif) — preferensi
+      // milik user-1 tetap tersimpan untuk login berikutnya.
+      expect(await LocalStorageService.isNotificationEnabled(), isTrue);
+      expect(
+        store.getBool('${AppConstants.prefNotificationsEnabled}_user-1'),
+        isFalse,
+      );
+    });
+
+    test('preferensi notifikasi tidak terbawa antar-akun (#19)', () async {
+      final store = await prefs();
+
+      store.setString(AppConstants.prefUserId, 'user-1');
+      await LocalStorageService.setNotificationEnabled(false);
+      expect(await LocalStorageService.isNotificationEnabled(), isFalse);
+
+      // Ganti akun di perangkat yang sama → kembali ke default aktif.
+      store.setString(AppConstants.prefUserId, 'user-2');
+      expect(await LocalStorageService.isNotificationEnabled(), isTrue);
+
+      // Kembali ke akun pertama → preferensinya tetap tersimpan.
+      store.setString(AppConstants.prefUserId, 'user-1');
       expect(await LocalStorageService.isNotificationEnabled(), isFalse);
     });
   });
@@ -131,7 +159,7 @@ void main() {
         await container
             .read(currentUserProvider.notifier)
             .updateProfile(
-              UserModel(
+              UserEntity(
                 localId: user.localId,
                 namaLengkap: 'Ibu Sari Wijaya',
                 email: 'sari.baru@email.com',
@@ -169,7 +197,7 @@ void main() {
         () => container
             .read(currentUserProvider.notifier)
             .updateProfile(
-              UserModel(
+              UserEntity(
                 localId: user.localId,
                 namaLengkap: user.namaLengkap,
                 email: 'budi@email.com',

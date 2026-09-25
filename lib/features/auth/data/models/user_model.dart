@@ -1,5 +1,7 @@
 import 'package:hive_ce/hive_ce.dart';
 
+import '../../domain/entities/user_entity.dart';
+
 part 'user_model.g.dart';
 
 @HiveType(typeId: 0)
@@ -30,4 +32,24 @@ class UserModel extends HiveObject {
     this.lokasiKota,
     required this.createdAt,
   });
+
+  /// Konversi ke entity domain (dipakai repository saat membaca dari Hive).
+  UserEntity toEntity() => UserEntity(
+    localId: localId,
+    namaLengkap: namaLengkap,
+    email: email,
+    nomorTelepon: nomorTelepon,
+    lokasiKota: lokasiKota,
+    createdAt: createdAt,
+  );
+
+  /// Konversi dari entity domain (dipakai repository saat menulis ke Hive).
+  factory UserModel.fromEntity(UserEntity entity) => UserModel(
+    localId: entity.localId,
+    namaLengkap: entity.namaLengkap,
+    email: entity.email,
+    nomorTelepon: entity.nomorTelepon,
+    lokasiKota: entity.lokasiKota,
+    createdAt: entity.createdAt,
+  );
 }

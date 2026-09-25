@@ -3,11 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
+
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/constants/health_gejala.dart';
+import '../../../../widgets/custom_text_field.dart';
+import '../../../../widgets/empty_state_widget.dart';
+import '../../../../widgets/error_state_widget.dart';
+import '../../../../widgets/loading_overlay.dart';
 import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../providers/journal_provider.dart';
-import '../../data/models/health_journal_model.dart';
+import '../../domain/entities/health_journal_entity.dart';
 
 class AddJournalScreen extends ConsumerStatefulWidget {
   const AddJournalScreen({super.key});
@@ -22,8 +28,9 @@ class _AddJournalScreenState extends ConsumerState<AddJournalScreen> {
   final TextEditingController _suhuController = TextEditingController();
   DateTime _tanggalCatatan = DateTime.now();
   final List<String> _selectedGejala = [];
+  bool _menyimpan = false;
 
-  final List<String> _daftarGejala = ['Demam', 'Bengkak Bekas Suntik', 'Rewel', 'Muntah', 'Ruam Kulit', 'Batuk Pilek'];
+  final List<String> _daftarGejala = HealthGejala.daftar;
 
   @override
   void dispose() {
@@ -40,6 +47,7 @@ class _AddJournalScreenState extends ConsumerState<AddJournalScreen> {
       lastDate: DateTime.now(),
     );
     if (picked != null && picked != _tanggalCatatan) {
+      if (!mounted) return;
       setState(() {
         _tanggalCatatan = picked;
       });
@@ -49,9 +57,11 @@ class _AddJournalScreenState extends ConsumerState<AddJournalScreen> {
   Future<void> _saveJournal(String babyId) async {
     if (!_formKey.currentState!.validate()) return;
 
+    setState(() => _menyimpan = true);
+
     final suhu = double.tryParse(_suhuController.text);
 
-    final journal = HealthJournalModel(
+    final journal = HealthJournalEntity(
       journalId: const Uuid().v4(),
       babyId: babyId,
       tanggalCatatan: _tanggalCatatan,
@@ -60,13 +70,27 @@ class _AddJournalScreenState extends ConsumerState<AddJournalScreen> {
       gejala: List.from(_selectedGejala),
     );
 
-    await ref.read(journalProvider(babyId).notifier).addJournal(journal);
+    try {
+      await ref.read(journalProvider(babyId).notifier).addJournal(journal);
 
-    if (mounted) {
+      if (!mounted) return;
+      setState(() => _menyimpan = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Catatan jurnal kesehatan berhasil disimpan! 📝'), backgroundColor: AppColors.green),
+        const SnackBar(
+          content: Text('Catatan jurnal kesehatan berhasil disimpan! 📝'),
+          backgroundColor: AppColors.green,
+        ),
       );
       context.pop();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _menyimpan = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menyimpan catatan jurnal: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 
@@ -90,87 +114,131 @@ class _AddJournalScreenState extends ConsumerState<AddJournalScreen> {
       ),
       body: babyAsync.when(
         data: (currentBaby) {
-          if (currentBaby == null) return const Center(child: Text('Belum ada profil anak.'));
+          if (currentBaby == null) {
+            return EmptyStateWidget(
+              icon: Icons.child_care,
+              title: 'Belum ada profil anak',
+              message: 'Tambahkan profil anak sebelum mencatat jurnal.',
+              actionLabel: 'Tambah Profil Anak',
+              onAction: () => context.push(AppRoutes.addBaby),
+            );
+          }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      ListTile(
-                        title: Text('Tanggal Kejadian:', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 14)),
-                        subtitle: Text('${_tanggalCatatan.day}/${_tanggalCatatan.month}/${_tanggalCatatan.year}'),
-                        trailing: const Icon(Icons.calendar_today, color: AppColors.yellow),
-                        onTap: () => _selectDate(context),
-                      ),
-                      const Divider(),
-                      const SizedBox(height: 16),
+          return LoadingOverlay(
+            isLoading: _menyimpan,
+            message: 'Menyimpan catatan…',
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        ListTile(
+                          title: Text(
+                            'Tanggal Kejadian:',
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          subtitle: Text(
+                            '${_tanggalCatatan.day}/${_tanggalCatatan.month}/${_tanggalCatatan.year}',
+                          ),
+                          trailing: const Icon(
+                            Icons.calendar_today,
+                            color: AppColors.yellow,
+                          ),
+                          onTap: () => _selectDate(context),
+                        ),
+                        const Divider(),
+                        const SizedBox(height: 16),
 
-                      TextFormField(
-                        controller: _suhuController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(labelText: 'Suhu Tubuh (°C) - Opsional', hintText: 'Contoh: 36.8'),
-                        validator: (value) {
-                          if (value != null && value.isNotEmpty) {
-                            final val = double.tryParse(value);
-                            if (val == null || val < 35 || val > 42) return 'Masukkan suhu tubuh valid antara 35 - 42°C';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
+                        CustomTextField(
+                          label: 'Suhu Tubuh (°C) - Opsional',
+                          controller: _suhuController,
+                          hint: 'Contoh: 36.8',
+                          keyboardType: TextInputType.number,
+                          enabled: !_menyimpan,
+                          validator: (value) {
+                            if (value != null && value.isNotEmpty) {
+                              final val = double.tryParse(value);
+                              if (val == null || val < 35 || val > 42) {
+                                return 'Masukkan suhu tubuh valid antara 35 - 42°C';
+                              }
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 20),
 
-                      Text('Pilih Gejala yang Timbul:', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.darkText)),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 4,
-                        children: _daftarGejala.map((gejala) {
-                          final isSelected = _selectedGejala.contains(gejala);
-                          return FilterChip(
-                            label: Text(gejala),
-                            selected: isSelected,
-                            onSelected: (selected) {
-                              setState(() {
-                                if (selected) {
-                                  _selectedGejala.add(gejala);
-                                } else {
-                                  _selectedGejala.remove(gejala);
-                                }
-                              });
-                            },
-                          );
-                        }).toList(),
-                      ),
-                      const SizedBox(height: 20),
+                        Text(
+                          'Pilih Gejala yang Timbul:',
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: AppColors.darkText,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 4,
+                          children: _daftarGejala.map((gejala) {
+                            final isSelected = _selectedGejala.contains(gejala);
+                            return FilterChip(
+                              label: Text(gejala),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                setState(() {
+                                  if (selected) {
+                                    _selectedGejala.add(gejala);
+                                  } else {
+                                    _selectedGejala.remove(gejala);
+                                  }
+                                });
+                              },
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 20),
 
-                      TextFormField(
-                        controller: _catatanController,
-                        maxLines: 4,
-                        decoration: const InputDecoration(labelText: 'Catatan Keluhan / Kondisi Kesehatan Bebas', hintText: 'Tulis deskripsi kondisi kesehatan anak di sini...'),
-                        validator: (value) => value == null || value.trim().isEmpty ? 'Isi catatan keluhan wajib diisi' : null,
-                      ),
-                      const SizedBox(height: 32),
+                        CustomTextField(
+                          label: 'Catatan Keluhan / Kondisi Kesehatan Bebas',
+                          controller: _catatanController,
+                          hint: 'Tulis deskripsi kondisi kesehatan anak di sini...',
+                          maxLines: 4,
+                          enabled: !_menyimpan,
+                          validator: (value) =>
+                              value == null || value.trim().isEmpty
+                              ? 'Isi catatan keluhan wajib diisi'
+                              : null,
+                        ),
+                        const SizedBox(height: 32),
 
-                      ElevatedButton(
-                        onPressed: () => _saveJournal(currentBaby.babyId),
-                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.yellow, foregroundColor: AppColors.darkText),
-                        child: const Text('Simpan Catatan Jurnal'),
-                      )
-                    ],
+                        ElevatedButton(
+                          onPressed: _menyimpan
+                              ? null
+                              : () => _saveJournal(currentBaby.babyId),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.yellow,
+                            foregroundColor: AppColors.darkText,
+                          ),
+                          child: const Text('Simpan Catatan Jurnal'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Gagal: $err')),
+        loading: () => const AppLoadingIndicator(),
+        error: (err, _) => ErrorStateWidget(message: '$err'),
       ),
     );
   }

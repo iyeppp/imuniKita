@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../widgets/empty_state_widget.dart';
 import '../../data/models/quiz_model.dart';
 import '../../data/models/quiz_score_model.dart';
 import '../providers/education_provider.dart';
@@ -97,11 +98,38 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
           ),
         ),
-        body: Center(
-          child: Text(
-            'Kuis tidak ditemukan.',
-            style: GoogleFonts.poppins(color: AppColors.textSecondary),
+        body: const EmptyStateWidget(
+          icon: Icons.quiz_outlined,
+          title: 'Kuis tidak ditemukan',
+          message: 'Kuis ini mungkin sudah tidak tersedia.',
+        ),
+      );
+    }
+
+    // Temuan #47: jaga-jaga bila suatu kuis tidak punya soal — sebelumnya
+    // `kuis.soal[_index]` akan melempar RangeError dan pembagian progres NaN.
+    if (kuis.soal.isEmpty) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          leading: IconButton(
+            tooltip: 'Kembali',
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.canPop()
+                ? context.pop()
+                : context.go(AppRoutes.education),
           ),
+          title: Text(
+            kuis.judul,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+          ),
+        ),
+        body: const EmptyStateWidget(
+          icon: Icons.quiz_outlined,
+          title: 'Kuis belum punya soal',
+          message: 'Kuis ini masih kosong. Coba pilih kuis lain, ya.',
         ),
       );
     }
@@ -355,6 +383,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         ? 0
         : ((_jumlahBenar / kuis.totalSoal) * 100).round();
 
+    // Temuan #15: riwayat percobaan tersimpan di provider.
+    final skorTersimpan = ref
+        .watch(quizScoresProvider)
+        .asData
+        ?.value[kuis.quizId];
+
     final (label, warnaBadge) = switch (persentase) {
       >= 80 => ('Excellent 🏆', AppColors.green),
       >= 60 => ('Good 👍', AppColors.yellow),
@@ -417,6 +451,20 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 20),
+          // Temuan #15: tampilkan percobaan ke-berapa & skor terbaik.
+          if (skorTersimpan != null)
+            Center(
+              child: Text(
+                'Percobaan ke-${skorTersimpan.totalPercobaan}'
+                '${skorTersimpan.totalPercobaan > 1 ? ' · skor terbaik ${skorTersimpan.skorTerbaik}/${skorTersimpan.totalSoal}' : ''}',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
           const SizedBox(height: 20),
           Card(
             child: Padding(

@@ -26,6 +26,14 @@
 		<string>$(FLUTTER_BUILD_NUMBER)</string>
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
+		<!-- Izin foto/kamera untuk `image_picker` (profil bayi). Tanpa key ini,
+		     iOS menolak akses dan aplikasi berhenti saat memilih foto. -->
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>ImuniKita memerlukan akses galeri untuk memilih foto profil anak.</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>ImuniKita memerlukan izin menyimpan foto ke galeri Anda.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>ImuniKita memerlukan akses kamera untuk memotret foto profil anak.</string>
 		<key>UIApplicationSceneManifest</key>
 		<dict>
 			<key>UIApplicationSupportsMultipleScenes</key>

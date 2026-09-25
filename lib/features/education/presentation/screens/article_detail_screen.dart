@@ -4,10 +4,13 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../widgets/empty_state_widget.dart';
+import '../../../../widgets/section_header.dart';
 import '../../data/models/article_model.dart';
 import '../providers/education_provider.dart';
 import '../widgets/education_kategori_badge.dart';
@@ -24,21 +27,28 @@ class ArticleDetailScreen extends ConsumerWidget {
 
   /// Tombol share artikel.
   ///
-  /// Fase UTS menyalin judul + kategori ke clipboard karena belum ada URL
-  /// publik artikel (konten masih mock) dan `share_plus` tidak ada di pubspec
-  /// dev plan §7. UAS: ganti ke deep link artikel via `share_plus`.
+  /// Temuan #13: memakai **share sheet native** (`share_plus`) agar user bisa
+  /// mengirim artikel ke aplikasi lain, bukan hanya menyalin ke clipboard.
+  /// Bila platform tidak menyediakan share sheet (mis. desktop tanpa
+  /// implementasi), otomatis jatuh kembali ke clipboard.
   Future<void> _bagikan(BuildContext context, ArticleModel artikel) async {
     final messenger = ScaffoldMessenger.of(context);
-    await Clipboard.setData(
-      ClipboardData(
-        text:
-            'ImuniKita — ${artikel.judul} '
-            '(kategori ${artikel.kategori}, ${artikel.estimasiBacaMenit} menit baca)',
-      ),
-    );
-    messenger.showSnackBar(
-      const SnackBar(content: Text('Informasi artikel disalin ke clipboard.')),
-    );
+    final teks =
+        'ImuniKita — ${artikel.judul} '
+        '(kategori ${artikel.kategori}, ${artikel.estimasiBacaMenit} menit baca)';
+
+    try {
+      await Share.share(teks, subject: artikel.judul);
+    } catch (_) {
+      await Clipboard.setData(ClipboardData(text: teks));
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Menu berbagi tidak tersedia — info artikel disalin ke clipboard.',
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -61,11 +71,10 @@ class ArticleDetailScreen extends ConsumerWidget {
             style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
           ),
         ),
-        body: Center(
-          child: Text(
-            'Artikel tidak ditemukan.',
-            style: GoogleFonts.poppins(color: AppColors.textSecondary),
-          ),
+        body: const EmptyStateWidget(
+          icon: Icons.article_outlined,
+          title: 'Artikel tidak ditemukan',
+          message: 'Artikel ini mungkin sudah tidak tersedia.',
         ),
       );
     }
@@ -154,15 +163,10 @@ class ArticleDetailScreen extends ConsumerWidget {
 
                   // Artikel terkait
                   if (terkait.isNotEmpty) ...[
-                    Text(
-                      'Artikel Terkait',
-                      style: GoogleFonts.baloo2(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.darkText,
-                      ),
+                    const SectionHeader(
+                      title: 'Artikel Terkait',
+                      padding: EdgeInsets.only(bottom: 10),
                     ),
-                    const SizedBox(height: 10),
                     ...terkait.map((item) => _TerkaitCard(artikel: item)),
                   ],
                 ],

@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hive_ce/hive_ce.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
+
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../data/models/user_model.dart';
+import '../../../../core/errors/failures.dart';
+import '../../../../widgets/custom_text_field.dart';
+import '../../domain/entities/user_entity.dart';
+import '../providers/auth_provider.dart';
 import '../utils/auth_validators.dart';
 import '../utils/snackbar_helper.dart';
-import '../widgets/labeled_text_field.dart';
 import '../widgets/neo_button.dart';
 
-class RegisterScreen extends StatefulWidget {
+class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -45,56 +46,45 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
+  /// Temuan #22: registrasi kini lewat `RegisterUseCase`
+  /// (`currentUserProvider.notifier.register`), bukan Hive/SharedPreferences
+  /// langsung dari layar.
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
-    // Simulate registration loading state
-    await Future.delayed(const Duration(milliseconds: 1200));
+    // Delay singkat agar transisi tombol terasa halus (perilaku lama).
+    await Future.delayed(const Duration(milliseconds: 600));
 
     try {
-      final userBox = await Hive.openBox<UserModel>(AppConstants.usersBox);
+      final saved = await ref
+          .read(currentUserProvider.notifier)
+          .register(
+            UserEntity(
+              localId: const Uuid().v4(),
+              namaLengkap: _nameController.text.trim(),
+              email: _emailController.text.trim().toLowerCase(),
+              nomorTelepon: _phoneController.text.trim(),
+              lokasiKota: _cityController.text.trim(),
+              createdAt: DateTime.now(),
+            ),
+          );
 
-      final localId = const Uuid().v4();
-      final newUser = UserModel(
-        localId: localId,
-        namaLengkap: _nameController.text.trim(),
-        email: _emailController.text.trim().toLowerCase(),
-        nomorTelepon: _phoneController.text.trim(),
-        lokasiKota: _cityController.text.trim(),
-        createdAt: DateTime.now(),
+      if (!mounted) return;
+      SnackbarHelper.showSuccess(
+        context,
+        'Registrasi berhasil! Selamat bergabung, ${saved.namaLengkap}.',
       );
-
-      // Save to Hive CE database
-      await userBox.put(localId, newUser);
-
-      // Save to SharedPreferences session wrapper
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool(AppConstants.prefIsLoggedIn, true);
-      await prefs.setString(AppConstants.prefUserId, localId);
-      await prefs.setString(AppConstants.prefUserName, newUser.namaLengkap);
-
-      if (mounted) {
-        SnackbarHelper.showSuccess(
-          context,
-          'Registrasi berhasil! Selamat bergabung, ${newUser.namaLengkap}.',
-        );
-        // Redirect to AddBaby screen as specified
-        context.go(AppRoutes.addBaby);
-      }
+      context.go(AppRoutes.addBaby);
     } catch (e) {
-      if (mounted) {
-        SnackbarHelper.showError(context, 'Gagal mendaftar: $e');
-      }
+      if (!mounted) return;
+      SnackbarHelper.showError(
+        context,
+        e is Failure ? e.message : 'Gagal mendaftar: $e',
+      );
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -108,9 +98,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         leading: IconButton(
           tooltip: 'Kembali',
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.canPop()
-              ? context.pop()
-              : context.go(AppRoutes.login),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go(AppRoutes.login),
         ),
       ),
       body: SafeArea(
@@ -144,17 +133,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 32),
 
                   // Full Name Field
-                  LabeledTextField(
+                  CustomTextField(
                     label: 'Nama Lengkap',
                     controller: _nameController,
                     hint: 'Nama Lengkap Anda',
                     keyboardType: TextInputType.name,
-                    validator: (val) => AuthValidators.required(val, 'Nama lengkap'),
+                    validator: (val) =>
+                        AuthValidators.required(val, 'Nama lengkap'),
                   ),
                   const SizedBox(height: 16),
 
                   // Email Field
-                  LabeledTextField(
+                  CustomTextField(
                     label: 'Email',
                     controller: _emailController,
                     hint: 'nama@email.com',
@@ -164,17 +154,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 16),
 
                   // Phone Number Field
-                  LabeledTextField(
+                  CustomTextField(
                     label: 'Nomor HP',
                     controller: _phoneController,
                     hint: '081234567890',
                     keyboardType: TextInputType.phone,
-                    validator: (val) => AuthValidators.required(val, 'Nomor HP'),
+                    validator: (val) =>
+                        AuthValidators.required(val, 'Nomor HP'),
                   ),
                   const SizedBox(height: 16),
 
                   // City Field
-                  LabeledTextField(
+                  CustomTextField(
                     label: 'Kota Tempat Tinggal',
                     controller: _cityController,
                     hint: 'Contoh: Jakarta',
@@ -183,7 +174,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 16),
 
                   // Password Field
-                  LabeledTextField(
+                  CustomTextField(
                     label: 'Password',
                     controller: _passwordController,
                     hint: '••••••••',
@@ -203,7 +194,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 16),
 
                   // Confirm Password Field
-                  LabeledTextField(
+                  CustomTextField(
                     label: 'Konfirmasi Password',
                     controller: _confirmPasswordController,
                     hint: '••••••••',
@@ -215,8 +206,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             : Icons.visibility_outlined,
                         color: AppColors.darkText,
                       ),
-                      onPressed: () => setState(() =>
-                          _obscureConfirmPassword = !_obscureConfirmPassword),
+                      onPressed: () => setState(
+                        () =>
+                            _obscureConfirmPassword = !_obscureConfirmPassword,
+                      ),
                     ),
                     validator: (val) => AuthValidators.confirmPassword(
                       val,

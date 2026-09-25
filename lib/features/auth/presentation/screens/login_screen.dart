@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hive_ce/hive_ce.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../data/models/user_model.dart';
+import '../../../../core/errors/failures.dart';
+import '../../../../widgets/custom_text_field.dart';
+import '../../domain/usecases/login_usecase.dart';
+import '../providers/auth_provider.dart';
 import '../utils/auth_validators.dart';
 import '../utils/snackbar_helper.dart';
 import '../widgets/app_logo_pill.dart';
-import '../widgets/labeled_text_field.dart';
 import '../widgets/neo_button.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -34,73 +35,51 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  /// Temuan #22: seluruh logika auth dipindahkan ke use case
+  /// (`LoginUseCase` lewat `currentUserProvider`); layar tidak lagi
+  /// membuka `Hive.openBox`/`SharedPreferences` sendiri.
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
-    // Simulate short loading delay
-    await Future.delayed(const Duration(milliseconds: 1200));
+    // Delay singkat agar transisi tombol terasa halus (perilaku lama).
+    await Future.delayed(const Duration(milliseconds: 600));
 
     try {
-      final userBox = await Hive.openBox<UserModel>(AppConstants.usersBox);
+      final hasil = await ref
+          .read(currentUserProvider.notifier)
+          .login(_emailController.text);
 
-      if (userBox.isEmpty) {
-        if (mounted) {
+      if (!mounted) return;
+
+      switch (hasil.status) {
+        case LoginStatus.belumAdaAkun:
           SnackbarHelper.showError(
             context,
             'Belum ada akun terdaftar. Dialihkan ke halaman pendaftaran.',
           );
           context.go(AppRoutes.register);
-        }
-        return;
-      }
-
-      // Check if user with matching email exists
-      UserModel? matchedUser;
-      for (var user in userBox.values) {
-        if (user.email.trim().toLowerCase() ==
-            _emailController.text.trim().toLowerCase()) {
-          matchedUser = user;
-          break;
-        }
-      }
-
-      if (matchedUser != null) {
-        // Successful login
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool(AppConstants.prefIsLoggedIn, true);
-        await prefs.setString(AppConstants.prefUserId, matchedUser.localId);
-        await prefs.setString(AppConstants.prefUserName, matchedUser.namaLengkap);
-
-        if (mounted) {
-          SnackbarHelper.showSuccess(
-            context,
-            'Selamat datang kembali, ${matchedUser.namaLengkap}!',
-          );
-          context.go(AppRoutes.dashboard);
-        }
-      } else {
-        // User not found or incorrect info
-        if (mounted) {
+        case LoginStatus.emailTidakDitemukan:
           SnackbarHelper.showError(
             context,
             'Email salah atau tidak terdaftar!',
           );
-        }
+        case LoginStatus.sukses:
+          SnackbarHelper.showSuccess(
+            context,
+            'Selamat datang kembali, ${hasil.user!.namaLengkap}!',
+          );
+          context.go(AppRoutes.dashboard);
       }
     } catch (e) {
-      if (mounted) {
-        SnackbarHelper.showError(context, 'Terjadi kesalahan: $e');
-      }
+      if (!mounted) return;
+      SnackbarHelper.showError(
+        context,
+        e is Failure ? e.message : 'Terjadi kesalahan: $e',
+      );
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -140,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 36),
 
                   // Email Input Field
-                  LabeledTextField(
+                  CustomTextField(
                     label: 'Email',
                     controller: _emailController,
                     hint: 'nama@email.com',
@@ -154,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 20),
 
                   // Password Input Field
-                  LabeledTextField(
+                  CustomTextField(
                     label: 'Password',
                     controller: _passwordController,
                     hint: '••••••••',

@@ -1,26 +1,31 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_router.dart';
+import '../../../../app/app_version_provider.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/age_calculator.dart';
 import '../../../../injection/dependency_injection.dart';
+import '../../../../widgets/app_bottom_nav_bar.dart';
+import '../../../../widgets/baby_avatar.dart';
 import '../../../../widgets/confirm_dialog.dart';
+import '../../../../widgets/custom_text_field.dart';
+import '../../../../widgets/error_state_widget.dart';
+import '../../../../widgets/loading_overlay.dart';
+import '../../../../widgets/section_header.dart';
+import '../../../../widgets/status_badge.dart';
 import '../../../baby_profile/domain/entities/baby_entity.dart';
 import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../../../baby_profile/presentation/providers/baby_provider.dart';
 import '../../../immunization/domain/entities/vaccine_schedule_entity.dart';
 import '../../../immunization/presentation/providers/immunization_provider.dart';
-import '../../data/models/user_model.dart';
+import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import '../utils/auth_validators.dart';
-import '../widgets/labeled_text_field.dart';
 
 /// Settings / Profile (poin 8.1) — `lib/features/auth/presentation/screens/settings_screen.dart`.
 ///
@@ -33,6 +38,9 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(currentUserProvider);
+    // Temuan #20: versi dibaca dari metadata platform (bukan hardcode).
+    final versi =
+        ref.watch(appVersionProvider).asData?.value ?? AppConstants.appVersion;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -55,11 +63,17 @@ class SettingsScreen extends ConsumerWidget {
               _KartuProfil(user: user),
               const SizedBox(height: 24),
 
-              const _JudulSeksi('Anak Terdaftar'),
+              const SectionHeader(
+                title: 'Anak Terdaftar',
+                padding: EdgeInsets.only(bottom: 10),
+              ),
               const _DaftarAnak(),
               const SizedBox(height: 24),
 
-              const _JudulSeksi('Pengaturan'),
+              const SectionHeader(
+                title: 'Pengaturan',
+                padding: EdgeInsets.only(bottom: 10),
+              ),
               const _KartuPengaturan(),
               const SizedBox(height: 24),
 
@@ -67,7 +81,7 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: 20),
               Center(
                 child: Text(
-                  'ImuniKita v${AppConstants.appVersion}',
+                  'ImuniKita v$versi',
                   style: GoogleFonts.poppins(
                     fontSize: 11.5,
                     color: AppColors.textHint,
@@ -77,43 +91,13 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              'Gagal memuat profil: $err',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(color: AppColors.textSecondary),
-            ),
-          ),
+        loading: () => const AppLoadingIndicator(),
+        error: (err, _) => ErrorStateWidget(
+          message: 'Gagal memuat profil: $err',
+          onRetry: () => ref.invalidate(currentUserProvider),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 4,
-        onTap: (index) {
-          if (index == 0) context.go(AppRoutes.dashboard);
-          if (index == 1) context.go(AppRoutes.calendar);
-          if (index == 2) context.go(AppRoutes.faskes);
-          if (index == 3) context.go(AppRoutes.chatbot);
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: 'Kalender',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.local_hospital_outlined),
-            label: 'Faskes',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: 'ImuniBot',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
-      ),
+      bottomNavigationBar: const AppBottomNavBar(currentIndex: 4),
     );
   }
 }
@@ -126,7 +110,7 @@ class _KartuProfil extends ConsumerWidget {
   const _KartuProfil({required this.user});
 
   /// `null` bila sesi login tidak ditemukan (mis. setelah keluar).
-  final UserModel? user;
+  final UserEntity? user;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -313,11 +297,12 @@ class _DaftarAnak extends ConsumerWidget {
       ),
       loading: () => const Padding(
         padding: EdgeInsets.all(16),
-        child: Center(child: CircularProgressIndicator()),
+        child: AppLoadingIndicator(size: 28),
       ),
-      error: (err, _) => Text(
-        'Gagal memuat data anak: $err',
-        style: GoogleFonts.poppins(fontSize: 12.5, color: AppColors.error),
+      error: (err, _) => ErrorStateWidget(
+        compact: true,
+        title: 'Gagal memuat data anak',
+        message: '$err',
       ),
     );
   }
@@ -332,20 +317,24 @@ class _KartuAnak extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Ringkasan progres imunisasi (13 jadwal dibuat otomatis saat bayi
     // didaftarkan) — sekaligus bukti data tersimpan untuk bayi ini.
-    final jadwal = ref.watch(immunizationProvider(baby.babyId)).asData?.value;
+    final jadwalAsync = ref.watch(immunizationProvider(baby.babyId));
+    final jadwal = jadwalAsync.asData?.value;
     final selesai = jadwal
         ?.where((s) => s.status == VaccineStatus.selesai)
         .length;
 
+    // Temuan #35: jangan biarkan layar tampak "memuat" selamanya saat gagal.
+    final String ringkasanJadwal;
+    if (jadwalAsync.hasError) {
+      ringkasanJadwal = 'Gagal memuat jadwal imunisasi';
+    } else if (jadwal == null) {
+      ringkasanJadwal = 'Memuat jadwal imunisasi…';
+    } else {
+      ringkasanJadwal = 'Imunisasi selesai: ${selesai ?? 0}/${jadwal.length}';
+    }
+
     final aktif =
         ref.watch(activeBabyProvider).asData?.value?.babyId == baby.babyId;
-
-    final file = baby.fotoProfilPath == null
-        ? null
-        : File(baby.fotoProfilPath!);
-    final ImageProvider? fotoProfil = (file != null && file.existsSync())
-        ? FileImage(file)
-        : null;
 
     final gender = baby.jenisKelamin == BabyGender.laki
         ? 'Laki-laki'
@@ -360,22 +349,10 @@ class _KartuAnak extends ConsumerWidget {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              CircleAvatar(
+              BabyAvatar(
                 radius: 24,
-                backgroundColor: AppColors.teal.withValues(alpha: 0.15),
-                backgroundImage: fotoProfil,
-                child: fotoProfil != null
-                    ? null
-                    : Text(
-                        baby.namaAnak.trim().isEmpty
-                            ? '?'
-                            : baby.namaAnak.trim()[0].toUpperCase(),
-                        style: GoogleFonts.baloo2(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.tealDark,
-                        ),
-                      ),
+                name: baby.namaAnak,
+                photoPath: baby.fotoProfilPath,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -396,24 +373,11 @@ class _KartuAnak extends ConsumerWidget {
                         ),
                         if (aktif) ...[
                           const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.green.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: AppColors.green),
-                            ),
-                            child: Text(
-                              'Aktif',
-                              style: GoogleFonts.poppins(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.green,
-                              ),
-                            ),
+                          const StatusBadge(
+                            label: 'Aktif',
+                            color: AppColors.green,
+                            icon: Icons.check_circle,
+                            compact: true,
                           ),
                         ],
                       ],
@@ -428,12 +392,12 @@ class _KartuAnak extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      jadwal == null
-                          ? 'Memuat jadwal imunisasi…'
-                          : 'Imunisasi selesai: ${selesai ?? 0}/${jadwal.length}',
+                      ringkasanJadwal,
                       style: GoogleFonts.poppins(
                         fontSize: 11,
-                        color: AppColors.textHint,
+                        color: jadwalAsync.hasError
+                            ? AppColors.error
+                            : AppColors.textHint,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -490,6 +454,10 @@ class _KartuPengaturan extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notifAsync = ref.watch(notificationEnabledProvider);
     final aktif = notifAsync.asData?.value ?? true;
+    // Temuan #35: kegagalan memuat preferensi tidak lagi disembunyikan.
+    final gagal = notifAsync.hasError;
+    final versi =
+        ref.watch(appVersionProvider).asData?.value ?? AppConstants.appVersion;
 
     return Card(
       child: Column(
@@ -512,10 +480,12 @@ class _KartuPengaturan extends ConsumerWidget {
               ),
             ),
             subtitle: Text(
-              'Pengingat otomatis H-7 & H-1 sebelum jadwal imunisasi',
+              gagal
+                  ? 'Gagal memuat preferensi notifikasi'
+                  : 'Pengingat otomatis H-7 & H-1 sebelum jadwal imunisasi',
               style: GoogleFonts.poppins(
                 fontSize: 11.5,
-                color: AppColors.textSecondary,
+                color: gagal ? AppColors.error : AppColors.textSecondary,
               ),
             ),
           ),
@@ -531,13 +501,13 @@ class _KartuPengaturan extends ConsumerWidget {
               ),
             ),
             subtitle: Text(
-              'ImuniKita versi ${AppConstants.appVersion}',
+              'ImuniKita versi $versi',
               style: GoogleFonts.poppins(
                 fontSize: 11.5,
                 color: AppColors.textSecondary,
               ),
             ),
-            onTap: () => _tampilkanTentang(context),
+            onTap: () => _tampilkanTentang(context, versi),
           ),
         ],
       ),
@@ -558,27 +528,6 @@ class _TombolKeluar extends ConsumerWidget {
       ),
       icon: const Icon(Icons.logout, size: 18),
       label: const Text('Keluar'),
-    );
-  }
-}
-
-class _JudulSeksi extends StatelessWidget {
-  const _JudulSeksi(this.judul);
-
-  final String judul;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Text(
-        judul,
-        style: GoogleFonts.baloo2(
-          fontSize: 17,
-          fontWeight: FontWeight.bold,
-          color: AppColors.darkText,
-        ),
-      ),
     );
   }
 }
@@ -638,18 +587,8 @@ Future<int> _daftarkanUlangPengingat(WidgetRef ref) async {
   final babies = await ref.read(babyNotifierProvider.future);
   if (babies.isEmpty) return 0;
 
-  final repository = ref.read(immunizationRepositoryProvider);
-  final useCase = ref.read(scheduleReminderUseCaseProvider);
-
-  var jumlah = 0;
-  for (final baby in babies) {
-    final schedules = await repository.getSchedulesByBaby(baby.babyId);
-    if (schedules.isEmpty) continue;
-
-    await useCase.execute(namaAnak: baby.namaAnak, schedules: schedules);
-    jumlah += schedules.where((s) => s.status == VaccineStatus.belum).length;
-  }
-  return jumlah;
+  // Bug #34: loop lintas-bayi dipindahkan ke `RescheduleAllRemindersUseCase`.
+  return ref.read(rescheduleAllRemindersUseCaseProvider).execute(babies);
 }
 
 /// Keluar dari akun — selalu lewat konfirmasi karena sesi akan dihapus.
@@ -678,7 +617,7 @@ Future<void> _keluar(BuildContext context, WidgetRef ref) async {
 }
 
 /// Dialog info singkat aplikasi + versi.
-Future<void> _tampilkanTentang(BuildContext context) {
+Future<void> _tampilkanTentang(BuildContext context, String versi) {
   return showDialog<void>(
     context: context,
     builder: (dialogContext) => AlertDialog(
@@ -700,7 +639,7 @@ Future<void> _tampilkanTentang(BuildContext context) {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Versi ${AppConstants.appVersion}',
+            'Versi $versi',
             style: GoogleFonts.poppins(
               fontSize: 12.5,
               fontWeight: FontWeight.w600,
@@ -731,7 +670,7 @@ Future<void> _tampilkanTentang(BuildContext context) {
 }
 
 /// Buka form sunting profil (bottom sheet).
-Future<void> _bukaFormEditProfil(BuildContext context, UserModel akun) {
+Future<void> _bukaFormEditProfil(BuildContext context, UserEntity akun) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -746,7 +685,7 @@ Future<void> _bukaFormEditProfil(BuildContext context, UserModel akun) {
 class _FormEditProfil extends ConsumerStatefulWidget {
   const _FormEditProfil({required this.akun});
 
-  final UserModel akun;
+  final UserEntity akun;
 
   @override
   ConsumerState<_FormEditProfil> createState() => _FormEditProfilState();
@@ -792,7 +731,7 @@ class _FormEditProfilState extends ConsumerState<_FormEditProfil> {
       await ref
           .read(currentUserProvider.notifier)
           .updateProfile(
-            UserModel(
+            UserEntity(
               localId: widget.akun.localId,
               namaLengkap: _nama.text.trim(),
               email: _email.text.trim(),
@@ -859,7 +798,7 @@ class _FormEditProfilState extends ConsumerState<_FormEditProfil> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                LabeledTextField(
+                CustomTextField(
                   label: 'Nama Lengkap',
                   controller: _nama,
                   hint: 'Nama orang tua',
@@ -867,7 +806,7 @@ class _FormEditProfilState extends ConsumerState<_FormEditProfil> {
                       AuthValidators.required(value, 'Nama lengkap'),
                 ),
                 const SizedBox(height: 16),
-                LabeledTextField(
+                CustomTextField(
                   label: 'Email',
                   controller: _email,
                   hint: 'nama@email.com',
@@ -875,7 +814,7 @@ class _FormEditProfilState extends ConsumerState<_FormEditProfil> {
                   validator: AuthValidators.email,
                 ),
                 const SizedBox(height: 16),
-                LabeledTextField(
+                CustomTextField(
                   label: 'Nomor HP',
                   controller: _telepon,
                   hint: '08xxxxxxxxxx',
@@ -884,7 +823,7 @@ class _FormEditProfilState extends ConsumerState<_FormEditProfil> {
                       AuthValidators.required(value, 'Nomor HP'),
                 ),
                 const SizedBox(height: 16),
-                LabeledTextField(
+                CustomTextField(
                   label: 'Kota',
                   controller: _kota,
                   hint: 'Contoh: Bandung',

@@ -5,12 +5,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:imunikita/core/constants/app_constants.dart';
 import 'package:imunikita/core/constants/vaccine_schedule.dart';
 import 'package:imunikita/core/services/local_storage_service.dart';
+import 'package:imunikita/core/services/notification_service.dart';
 import 'package:imunikita/core/utils/age_calculator.dart';
 import 'package:imunikita/core/utils/notification_helper.dart';
+import 'package:imunikita/features/baby_profile/domain/entities/baby_entity.dart';
 import 'package:imunikita/features/immunization/domain/entities/vaccine_schedule_entity.dart';
 import 'package:imunikita/features/immunization/domain/repositories/i_immunization_repository.dart';
 import 'package:imunikita/features/immunization/domain/usecases/generate_schedule_usecase.dart';
+import 'package:imunikita/features/immunization/domain/usecases/reschedule_all_reminders_usecase.dart';
 import 'package:imunikita/features/immunization/domain/usecases/schedule_reminder_usecase.dart';
+import 'package:imunikita/features/immunization/domain/usecases/sync_baby_schedule_usecase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
@@ -19,6 +23,7 @@ import 'package:timezone/timezone.dart' as tz;
 class _FakeImmunizationRepository implements IImmunizationRepository {
   final List<VaccineScheduleEntity> tersimpan = [];
   int jumlahSimpan = 0;
+  int jumlahUpdate = 0;
 
   @override
   Future<List<VaccineScheduleEntity>> getSchedulesByBaby(String babyId) async =>
@@ -45,6 +50,7 @@ class _FakeImmunizationRepository implements IImmunizationRepository {
   Future<VaccineScheduleEntity> updateSchedule(
     VaccineScheduleEntity schedule,
   ) async {
+    jumlahUpdate++;
     tersimpan.removeWhere((s) => s.scheduleId == schedule.scheduleId);
     tersimpan.add(schedule);
     return schedule;
@@ -288,6 +294,7 @@ void main() {
 
     setUp(() async {
       debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      NotificationService.resetScheduleModeForTest();
       panggilan = [];
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(kanal, (call) async {
@@ -426,6 +433,354 @@ void main() {
         's-1',
         's-2',
       });
+    });
+  });
+
+  // ── ScheduleReminderUseCase + flag anti-duplikasi (Bug #11) ─────────────
+
+  group('ScheduleReminderUseCase - flag reminderH7Sent/reminderH1Sent', () {
+    const kanal = MethodChannel('dexterous.com/flutter/local_notifications');
+
+    late List<MethodCall> panggilan;
+    late _FakeImmunizationRepository repository;
+    late ScheduleReminderUseCase useCase;
+
+    VaccineScheduleEntity jadwal({
+      required DateTime tanggalTarget,
+      String status = VaccineStatus.belum,
+      String scheduleId = 's-1',
+      bool reminderH7Sent = false,
+      bool reminderH1Sent = false,
+    }) {
+      return VaccineScheduleEntity(
+        scheduleId: scheduleId,
+        babyId: 'baby-1',
+        namaVaksin: 'BCG',
+        deskripsi: 'Deskripsi',
+        usiaBulanTarget: 1,
+        tanggalTarget: tanggalTarget,
+        status: status,
+        reminderH7Sent: reminderH7Sent,
+        reminderH1Sent: reminderH1Sent,
+      );
+    }
+
+    setUp(() async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      NotificationService.resetScheduleModeForTest();
+      panggilan = [];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(kanal, (call) async {
+            panggilan.add(call);
+            return null;
+          });
+      await LocalStorageService.setNotificationEnabled(true);
+      repository = _FakeImmunizationRepository();
+      useCase = ScheduleReminderUseCase(repository: repository);
+    });
+
+    tearDown(() {
+      debugDefaultTargetPlatformOverride = null;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(kanal, null);
+    });
+
+    test('menandai reminderH7Sent & reminderH1Sent true setelah berhasil dijadwalkan', () async {
+      final target = DateTime.now().add(const Duration(days: 10));
+      final jadwalAwal = jadwal(tanggalTarget: target);
+      await repository.saveSchedules([jadwalAwal]);
+
+      await useCase.execute(namaAnak: 'Aira', schedules: [jadwalAwal]);
+
+      final hasil = await repository.getScheduleById('s-1');
+      expect(hasil!.reminderH7Sent, isTrue);
+      expect(hasil.reminderH1Sent, isTrue);
+    });
+
+    test(
+      'tidak menjadwalkan ulang pengingat yang flag-nya sudah true',
+      () async {
+        final target = DateTime.now().add(const Duration(days: 10));
+        final jadwalSudahH7 = jadwal(
+          tanggalTarget: target,
+          reminderH7Sent: true,
+        );
+        await repository.saveSchedules([jadwalSudahH7]);
+
+        await useCase.execute(namaAnak: 'Aira', schedules: [jadwalSudahH7]);
+
+        // Hanya H-1 yang dijadwalkan; H-7 dilewati karena sudah true.
+        expect(panggilan, hasLength(1));
+        expect(
+          (panggilan.single.arguments as Map)['id'],
+          NotificationHelper.notificationId('s-1', 1),
+        );
+
+        final hasil = await repository.getScheduleById('s-1');
+        expect(hasil!.reminderH7Sent, isTrue);
+        expect(hasil.reminderH1Sent, isTrue);
+      },
+    );
+
+    test(
+      'tidak memanggil repository sama sekali bila kedua flag sudah true',
+      () async {
+        final target = DateTime.now().add(const Duration(days: 10));
+        final jadwalLengkap = jadwal(
+          tanggalTarget: target,
+          reminderH7Sent: true,
+          reminderH1Sent: true,
+        );
+        await repository.saveSchedules([jadwalLengkap]);
+        final jumlahUpdateSebelum = repository.jumlahUpdate;
+
+        await useCase.execute(namaAnak: 'Aira', schedules: [jadwalLengkap]);
+
+        expect(panggilan, isEmpty);
+        expect(repository.jumlahUpdate, jumlahUpdateSebelum);
+      },
+    );
+  });
+
+  // ── Fallback alarm presisi (Bug #29) ────────────────────────────────────
+
+  group('NotificationService — fallback exact → inexact alarm', () {
+    const kanal = MethodChannel('dexterous.com/flutter/local_notifications');
+
+    late List<MethodCall> panggilan;
+
+    VaccineScheduleEntity jadwal({required DateTime tanggalTarget}) {
+      return VaccineScheduleEntity(
+        scheduleId: 's-1',
+        babyId: 'baby-1',
+        namaVaksin: 'BCG',
+        deskripsi: 'Deskripsi',
+        usiaBulanTarget: 1,
+        tanggalTarget: tanggalTarget,
+        status: VaccineStatus.belum,
+      );
+    }
+
+    setUp(() async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      NotificationService.resetScheduleModeForTest();
+      panggilan = [];
+      await LocalStorageService.setNotificationEnabled(true);
+    });
+
+    tearDown(() {
+      debugDefaultTargetPlatformOverride = null;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(kanal, null);
+      NotificationService.resetScheduleModeForTest();
+    });
+
+    List<String> modeTerkirim() => panggilan
+        .where((c) => c.method == 'zonedSchedule')
+        .map(
+          (c) =>
+              ((c.arguments as Map)['platformSpecifics'] as Map)['scheduleMode']
+                  .toString(),
+        )
+        .toList();
+
+    test('memakai inexactAllowWhileIdle bila OS menolak exact alarm', () async {
+      var pertama = true;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(kanal, (call) async {
+            if (call.method == 'zonedSchedule') panggilan.add(call);
+            if (pertama) {
+              pertama = false;
+              throw PlatformException(code: 'exact_alarms_not_permitted');
+            }
+            return null;
+          });
+
+      // Target 2 hari lagi → hanya pengingat H-1 yang belum lewat.
+      const useCase = ScheduleReminderUseCase();
+      await useCase.execute(
+        namaAnak: 'Aira',
+        schedules: [
+          jadwal(tanggalTarget: DateTime.now().add(const Duration(days: 2))),
+        ],
+      );
+
+      final modes = modeTerkirim();
+      expect(modes, hasLength(2));
+      expect(modes.first, contains('exactAllowWhileIdle'));
+      expect(modes.last, contains('inexactAllowWhileIdle'));
+    });
+
+    test('tidak terpengaruh fallback untuk kegagalan error lain', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(kanal, (call) async {
+            if (call.method == 'zonedSchedule') panggilan.add(call);
+            if (panggilan.length == 1) {
+              throw PlatformException(code: 'some_other_error');
+            }
+            return null;
+          });
+
+      const useCase = ScheduleReminderUseCase();
+      await useCase.execute(
+        namaAnak: 'Aira',
+        schedules: [
+          jadwal(tanggalTarget: DateTime.now().add(const Duration(days: 2))),
+        ],
+      );
+
+      // Error lain tidak memicu retry: hanya satu percobaan (exact) yang dicatat.
+      expect(modeTerkirim(), hasLength(1));
+      expect(modeTerkirim().single, contains('exactAllowWhileIdle'));
+    });
+  });
+
+  // ── Use case gabungan alur jadwal (Bug #34) ─────────────────────────────
+
+  group('SyncBabyScheduleUseCase (#34)', () {
+    const kanal = MethodChannel('dexterous.com/flutter/local_notifications');
+
+    late _FakeImmunizationRepository repository;
+    late List<MethodCall> panggilan;
+
+    setUp(() async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      NotificationService.resetScheduleModeForTest();
+      panggilan = [];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(kanal, (call) async {
+            panggilan.add(call);
+            return null;
+          });
+      await LocalStorageService.setNotificationEnabled(true);
+      repository = _FakeImmunizationRepository();
+    });
+
+    tearDown(() {
+      debugDefaultTargetPlatformOverride = null;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(kanal, null);
+    });
+
+    SyncBabyScheduleUseCase useCase() => SyncBabyScheduleUseCase(
+      generateSchedule: GenerateScheduleUseCase(repository),
+      scheduleReminder: ScheduleReminderUseCase(repository: repository),
+    );
+
+    test('membangun 13 jadwal sekaligus mendaftarkan pengingat', () async {
+      final hasil = await useCase().execute(
+        babyId: 'baby-1',
+        namaAnak: 'Aira',
+        tanggalLahir: DateTime.now(),
+      );
+
+      expect(hasil, hasLength(13));
+      expect(await repository.getSchedulesByBaby('baby-1'), hasLength(13));
+      expect(panggilan.where((c) => c.method == 'zonedSchedule'), isNotEmpty);
+    });
+
+    test('jadwal tetap dibuat walau preferensi notifikasi dimatikan', () async {
+      await LocalStorageService.setNotificationEnabled(false);
+
+      final hasil = await useCase().execute(
+        babyId: 'baby-1',
+        namaAnak: 'Aira',
+        tanggalLahir: DateTime.now(),
+      );
+
+      expect(hasil, hasLength(13));
+      expect(panggilan.where((c) => c.method == 'zonedSchedule'), isEmpty);
+    });
+  });
+
+  group('RescheduleAllRemindersUseCase (#34)', () {
+    const kanal = MethodChannel('dexterous.com/flutter/local_notifications');
+
+    late _FakeImmunizationRepository repository;
+    late List<MethodCall> panggilan;
+
+    setUp(() async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      NotificationService.resetScheduleModeForTest();
+      panggilan = [];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(kanal, (call) async {
+            panggilan.add(call);
+            return null;
+          });
+      await LocalStorageService.setNotificationEnabled(true);
+      repository = _FakeImmunizationRepository();
+    });
+
+    tearDown(() {
+      debugDefaultTargetPlatformOverride = null;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(kanal, null);
+    });
+
+    BabyEntity bayi(String id, String nama) => BabyEntity(
+      babyId: id,
+      userId: 'user-1',
+      namaAnak: nama,
+      tanggalLahir: DateTime(2026, 1, 10),
+      jenisKelamin: BabyGender.laki,
+      createdAt: DateTime(2026, 1, 10),
+    );
+
+    VaccineScheduleEntity jadwal(String id, String babyId) =>
+        VaccineScheduleEntity(
+          scheduleId: id,
+          babyId: babyId,
+          namaVaksin: 'BCG',
+          deskripsi: 'Deskripsi',
+          usiaBulanTarget: 1,
+          tanggalTarget: DateTime.now().add(const Duration(days: 30)),
+        );
+
+    test('menghitung jadwal BELUM dan mendaftarkan pengingatnya', () async {
+      await repository.saveSchedules([
+        jadwal('s-1', 'baby-1'),
+        jadwal('s-2', 'baby-2'),
+      ]);
+
+      final useCase = RescheduleAllRemindersUseCase(
+        repository: repository,
+        reminder: ScheduleReminderUseCase(repository: repository),
+      );
+
+      final jumlah = await useCase.execute([
+        bayi('baby-1', 'Aira'),
+        bayi('baby-2', 'Bima'),
+      ]);
+
+      expect(jumlah, 2);
+      expect(panggilan.where((c) => c.method == 'zonedSchedule'), isNotEmpty);
+    });
+
+    test('bayi tanpa jadwal dilewati tanpa error', () async {
+      await repository.saveSchedules([jadwal('s-1', 'baby-1')]);
+
+      final useCase = RescheduleAllRemindersUseCase(
+        repository: repository,
+        reminder: ScheduleReminderUseCase(repository: repository),
+      );
+
+      final jumlah = await useCase.execute([
+        bayi('baby-1', 'Aira'),
+        bayi('baby-tanpa-jadwal', 'Bima'),
+      ]);
+
+      expect(jumlah, 1);
+    });
+
+    test('daftar bayi kosong → 0 tanpa memanggil apa pun', () async {
+      final useCase = RescheduleAllRemindersUseCase(
+        repository: repository,
+        reminder: ScheduleReminderUseCase(repository: repository),
+      );
+
+      expect(await useCase.execute([]), 0);
+      expect(panggilan, isEmpty);
     });
   });
 }

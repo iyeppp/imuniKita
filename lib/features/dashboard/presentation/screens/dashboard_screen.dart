@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,6 +7,14 @@ import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/age_calculator.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../widgets/app_bottom_nav_bar.dart';
+import '../../../../widgets/baby_avatar.dart';
+import '../../../../widgets/empty_state_widget.dart';
+import '../../../../widgets/error_state_widget.dart';
+import '../../../../widgets/loading_overlay.dart';
+import '../../../../widgets/section_header.dart';
+import '../../../../widgets/status_badge.dart';
+import '../../../../widgets/vaccine_card.dart';
 import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../../../baby_profile/presentation/providers/baby_provider.dart';
 import '../../../immunization/domain/entities/vaccine_schedule_entity.dart';
@@ -36,33 +42,14 @@ class DashboardScreen extends ConsumerWidget {
         child: babyAsync.when(
           data: (currentBaby) {
             if (currentBaby == null) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.child_care,
-                        size: 80,
-                        color: AppColors.grey,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Belum ada profil anak',
-                        style: GoogleFonts.baloo2(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      ElevatedButton(
-                        onPressed: () => context.go(AppRoutes.addBaby),
-                        child: const Text('Tambah Profil Anak'),
-                      ),
-                    ],
-                  ),
-                ),
+              return EmptyStateWidget(
+                icon: Icons.child_care,
+                title: 'Belum ada profil anak',
+                message:
+                    'Tambahkan profil anak untuk mulai memantau jadwal '
+                    'imunisasi dan tumbuh kembangnya.',
+                actionLabel: 'Tambah Profil Anak',
+                onAction: () => context.go(AppRoutes.addBaby),
               );
             }
 
@@ -70,17 +57,6 @@ class DashboardScreen extends ConsumerWidget {
               immunizationProvider(currentBaby.babyId),
             );
             final growthAsync = ref.watch(growthProvider(currentBaby.babyId));
-
-            final babyFile = currentBaby.fotoProfilPath == null
-                ? null
-                : File(currentBaby.fotoProfilPath!);
-            final ImageProvider? babyPhoto =
-                (babyFile != null && babyFile.existsSync())
-                    ? FileImage(babyFile)
-                    : null;
-            final babyInitial = currentBaby.namaAnak.trim().isEmpty
-                ? '?'
-                : currentBaby.namaAnak.trim()[0].toUpperCase();
 
             return RefreshIndicator(
               onRefresh: () async {
@@ -98,26 +74,16 @@ class DashboardScreen extends ConsumerWidget {
                       color: AppColors.coral.withValues(alpha: 0.15),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(12),
-                        onTap: () => _showBabySelector(context, ref, currentBaby.babyId),
+                        onTap: () =>
+                            _showBabySelector(context, ref, currentBaby.babyId),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Row(
                             children: [
-                              CircleAvatar(
+                              BabyAvatar(
                                 radius: 28,
-                                backgroundColor:
-                                    AppColors.teal.withValues(alpha: 0.15),
-                                backgroundImage: babyPhoto,
-                                child: babyPhoto != null
-                                    ? null
-                                    : Text(
-                                        babyInitial,
-                                        style: GoogleFonts.baloo2(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.w800,
-                                          color: AppColors.tealDark,
-                                        ),
-                                      ),
+                                name: currentBaby.namaAnak,
+                                photoPath: currentBaby.fotoProfilPath,
                               ),
                               const SizedBox(width: 14),
                               Expanded(
@@ -156,13 +122,24 @@ class DashboardScreen extends ConsumerWidget {
                                 elevation: 0.5,
                                 child: InkWell(
                                   borderRadius: BorderRadius.circular(20),
-                                  onTap: () => _showBabySelector(context, ref, currentBaby.babyId),
+                                  onTap: () => _showBabySelector(
+                                    context,
+                                    ref,
+                                    currentBaby.babyId,
+                                  ),
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 6,
+                                    ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.swap_horiz, size: 16, color: AppColors.coral),
+                                        const Icon(
+                                          Icons.swap_horiz,
+                                          size: 16,
+                                          color: AppColors.coral,
+                                        ),
                                         const SizedBox(width: 4),
                                         Text(
                                           'Ganti',
@@ -185,38 +162,11 @@ class DashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 20),
 
                     // Next Vaccine Countdown Component with Direct Button to Calendar
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Jadwal Imunisasi Terdekat',
-                          style: GoogleFonts.baloo2(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.darkText,
-                          ),
-                        ),
-                        TextButton.icon(
-                          onPressed: () => context.push(AppRoutes.calendar),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          icon: const Icon(
-                            Icons.calendar_month,
-                            size: 16,
-                            color: AppColors.teal,
-                          ),
-                          label: Text(
-                            'Buka Kalender',
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.teal,
-                            ),
-                          ),
-                        ),
-                      ],
+                    SectionHeader(
+                      title: 'Jadwal Imunisasi Terdekat',
+                      actionLabel: 'Buka Kalender',
+                      actionIcon: Icons.calendar_month,
+                      onAction: () => context.push(AppRoutes.calendar),
                     ),
                     const SizedBox(height: 8),
                     schedulesAsync.when(
@@ -240,7 +190,8 @@ class DashboardScreen extends ConsumerWidget {
                                       backgroundColor: AppColors.teal,
                                       foregroundColor: Colors.white,
                                     ),
-                                    onPressed: () => context.push(AppRoutes.calendar),
+                                    onPressed: () =>
+                                        context.push(AppRoutes.calendar),
                                     child: const Text('Buka Kalender'),
                                   ),
                                 ],
@@ -254,114 +205,72 @@ class DashboardScreen extends ConsumerWidget {
                             .inDays;
                         final isWarning = daysLeft < 7;
 
-                        return Card(
-                          color: isWarning
+                        return VaccineCard(
+                          schedule: nextVaccine,
+                          showMeta: false,
+                          backgroundColor: isWarning
                               ? AppColors.yellow.withValues(alpha: 0.2)
                               : Colors.white,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: () => context.push(
-                              '${AppRoutes.calendar}?date=${nextVaccine.tanggalTarget.toIso8601String()}',
-                              extra: nextVaccine.tanggalTarget,
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
+                          onTap: () => context.push(
+                            '${AppRoutes.calendar}?date=${nextVaccine.tanggalTarget.toIso8601String()}',
+                            extra: nextVaccine.tanggalTarget,
+                          ),
+                          leading: Icon(
+                            Icons.vaccines,
+                            color: isWarning ? AppColors.red : AppColors.teal,
+                            size: 32,
+                          ),
+                          trailing: StatusBadge(
+                            label: daysLeft <= 0
+                                ? 'Hari Ini'
+                                : '$daysLeft Hari Lagi',
+                            color: isWarning ? AppColors.red : AppColors.teal,
+                            style: StatusBadgeStyle.filled,
+                            textColor: Colors.white,
+                          ),
+                          footer: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Target: ${DateFormatter.formatLong(nextVaccine.tanggalTarget)}',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              Row(
                                 children: [
-                                  ListTile(
-                                    contentPadding: EdgeInsets.zero,
-                                    leading: Icon(
-                                      Icons.vaccines,
-                                      color: isWarning ? AppColors.red : AppColors.teal,
-                                      size: 32,
-                                    ),
-                                    title: Text(
-                                      nextVaccine.namaVaksin,
-                                      style: GoogleFonts.poppins(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      nextVaccine.deskripsi,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    trailing: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: isWarning
-                                            ? AppColors.red
-                                            : AppColors.teal,
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        daysLeft <= 0
-                                            ? 'Hari Ini'
-                                            : '$daysLeft Hari Lagi',
-                                        style: GoogleFonts.poppins(
-                                          color: Colors.white,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                  Text(
+                                    'Lihat di Kalender',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.teal,
                                     ),
                                   ),
-                                  const Divider(height: 12),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Target: ${DateFormatter.formatLong(nextVaccine.tanggalTarget)}',
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 12,
-                                          color: AppColors.textSecondary,
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text(
-                                            'Lihat di Kalender',
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColors.teal,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          const Icon(
-                                            Icons.arrow_forward,
-                                            size: 14,
-                                            color: AppColors.teal,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                  const SizedBox(width: 4),
+                                  const Icon(
+                                    Icons.arrow_forward,
+                                    size: 14,
+                                    color: AppColors.teal,
                                   ),
                                 ],
                               ),
-                            ),
+                            ],
                           ),
                         );
                       },
-                      loading: () => const LinearProgressIndicator(),
-                      error: (err, _) =>
-                          Text('Gagal memuat jadwal terdekat: $err'),
+                      loading: () => const AppLoadingIndicator(size: 28),
+                      error: (err, _) => ErrorStateWidget(
+                        compact: true,
+                        title: 'Gagal memuat jadwal terdekat',
+                        message: '$err',
+                      ),
                     ),
                     const SizedBox(height: 24),
 
-                    // Quick Actions Grid (2x2)
-                    Text(
-                      'Menu Utama',
-                      style: GoogleFonts.baloo2(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.darkText,
-                      ),
-                    ),
+                    // Quick Actions Grid (2x3)
+                    const SectionHeader(title: 'Menu Utama'),
                     const SizedBox(height: 8),
                     GridView.count(
                       shrinkWrap: true,
@@ -422,32 +331,19 @@ class DashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 24),
 
                     // Growth Summary Card Component
-                    Text(
-                      'Catatan Pertumbuhan Terakhir',
-                      style: GoogleFonts.baloo2(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.darkText,
-                      ),
-                    ),
+                    const SectionHeader(title: 'Catatan Pertumbuhan Terakhir'),
                     const SizedBox(height: 8),
                     growthAsync.when(
                       data: (records) {
                         if (records.isEmpty) {
-                          return Card(
-                            child: ListTile(
-                              title: const Text(
-                                'Belum ada data pengukuran pertumbuhan.',
-                              ),
-                              trailing: IconButton(
-                                icon: const Icon(
-                                  Icons.add,
-                                  color: AppColors.coral,
-                                ),
-                                onPressed: () =>
-                                    context.go(AppRoutes.addGrowth),
-                              ),
-                            ),
+                          return EmptyStateWidget(
+                            icon: Icons.show_chart,
+                            title: 'Belum ada data pertumbuhan',
+                            message:
+                                'Catat berat, tinggi, dan lingkar kepala untuk '
+                                'melihat grafik tumbuh kembang.',
+                            actionLabel: 'Tambah Pengukuran',
+                            onAction: () => context.push(AppRoutes.addGrowth),
                           );
                         }
                         final latest = records.last;
@@ -479,44 +375,26 @@ class DashboardScreen extends ConsumerWidget {
                           ),
                         );
                       },
-                      loading: () => const LinearProgressIndicator(),
-                      error: (err, _) =>
-                          Text('Gagal memuat rekam pertumbuhan: $err'),
+                      loading: () => const AppLoadingIndicator(size: 28),
+                      error: (err, _) => ErrorStateWidget(
+                        compact: true,
+                        title: 'Gagal memuat rekam pertumbuhan',
+                        message: '$err',
+                      ),
                     ),
                   ],
                 ),
               ),
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) => Center(child: Text('Terjadi Kesalahan: $err')),
+          loading: () => const AppLoadingIndicator(),
+          error: (err, _) => ErrorStateWidget(
+            message: '$err',
+            onRetry: () => ref.invalidate(activeBabyProvider),
+          ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        onTap: (index) {
-          if (index == 1) context.go(AppRoutes.calendar);
-          if (index == 2) context.go(AppRoutes.faskes);
-          if (index == 3) context.go(AppRoutes.chatbot);
-          if (index == 4) context.go(AppRoutes.settings);
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: 'Kalender',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.local_hospital_outlined),
-            label: 'Faskes',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: 'ImuniBot',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
-      ),
+      bottomNavigationBar: const AppBottomNavBar(currentIndex: 0),
     );
   }
 
@@ -625,9 +503,9 @@ class DashboardScreen extends ConsumerWidget {
                     babiesAsync.when(
                       data: (babies) {
                         if (babies.isEmpty) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Text('Belum ada data anak.'),
+                          return const EmptyStateWidget(
+                            icon: Icons.child_care,
+                            title: 'Belum ada data anak',
                           );
                         }
                         return ListView.separated(
@@ -638,49 +516,26 @@ class DashboardScreen extends ConsumerWidget {
                           itemBuilder: (_, index) {
                             final baby = babies[index];
                             final isSelected = baby.babyId == currentBabyId;
-                            final file = baby.fotoProfilPath == null
-                                ? null
-                                : File(baby.fotoProfilPath!);
-                            final ImageProvider? foto =
-                                (file != null && file.existsSync())
-                                    ? FileImage(file)
-                                    : null;
-                            final inisial = baby.namaAnak.trim().isEmpty
-                                ? '?'
-                                : baby.namaAnak.trim()[0].toUpperCase();
 
                             return ListTile(
                               contentPadding: const EdgeInsets.symmetric(
                                 vertical: 2,
                                 horizontal: 6,
                               ),
-                              leading: CircleAvatar(
+                              leading: BabyAvatar(
                                 radius: 22,
-                                backgroundColor:
-                                    AppColors.teal.withValues(alpha: 0.15),
-                                backgroundImage: foto,
-                                child: foto != null
-                                    ? null
-                                    : Text(
-                                        inisial,
-                                        style: GoogleFonts.baloo2(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w800,
-                                          color: AppColors.tealDark,
-                                        ),
-                                      ),
+                                name: baby.namaAnak,
+                                photoPath: baby.fotoProfilPath,
                               ),
                               title: Text(
                                 baby.namaAnak,
                                 style: GoogleFonts.poppins(
-                                  fontWeight:
-                                      isSelected
-                                          ? FontWeight.bold
-                                          : FontWeight.w500,
-                                  color:
-                                      isSelected
-                                          ? AppColors.teal
-                                          : AppColors.darkText,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.w500,
+                                  color: isSelected
+                                      ? AppColors.teal
+                                      : AppColors.darkText,
                                 ),
                               ),
                               subtitle: Text(
@@ -690,13 +545,12 @@ class DashboardScreen extends ConsumerWidget {
                                   color: AppColors.textSecondary,
                                 ),
                               ),
-                              trailing:
-                                  isSelected
-                                      ? const Icon(
-                                          Icons.check_circle,
-                                          color: AppColors.teal,
-                                        )
-                                      : null,
+                              trailing: isSelected
+                                  ? const Icon(
+                                      Icons.check_circle,
+                                      color: AppColors.teal,
+                                    )
+                                  : null,
                               onTap: () {
                                 ref
                                     .read(activeBabyProvider.notifier)
@@ -707,14 +561,15 @@ class DashboardScreen extends ConsumerWidget {
                           },
                         );
                       },
-                      loading:
-                          () => const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(16),
-                              child: CircularProgressIndicator(),
-                            ),
-                          ),
-                      error: (e, _) => Text('Gagal: $e'),
+                      loading: () => const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: AppLoadingIndicator(size: 28),
+                      ),
+                      error: (e, _) => ErrorStateWidget(
+                        compact: true,
+                        title: 'Gagal memuat daftar anak',
+                        message: '$e',
+                      ),
                     ),
                     const SizedBox(height: 12),
                     OutlinedButton.icon(

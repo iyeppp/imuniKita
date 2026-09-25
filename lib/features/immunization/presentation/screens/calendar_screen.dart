@@ -7,9 +7,16 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../widgets/app_bottom_nav_bar.dart';
+import '../../../../widgets/empty_state_widget.dart';
+import '../../../../widgets/error_state_widget.dart';
+import '../../../../widgets/loading_overlay.dart';
+import '../../../../widgets/status_badge.dart';
+import '../../../../widgets/vaccine_card.dart';
 import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../providers/immunization_provider.dart';
 import '../../domain/entities/vaccine_schedule_entity.dart';
+import '../widgets/vaccine_status_style.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   final DateTime? initialDate;
@@ -78,35 +85,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       body: babyAsync.when(
         data: (currentBaby) {
           if (currentBaby == null) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.child_care,
-                      size: 64,
-                      color: AppColors.grey,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Silakan tambahkan profil anak terlebih dahulu.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(fontSize: 16),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.teal,
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () => context.push(AppRoutes.addBaby),
-                      child: const Text('Tambah Profil Anak'),
-                    ),
-                  ],
-                ),
-              ),
+            return EmptyStateWidget(
+              icon: Icons.child_care,
+              title: 'Belum ada profil anak',
+              message: 'Silakan tambahkan profil anak terlebih dahulu.',
+              actionLabel: 'Tambah Profil Anak',
+              onAction: () => context.push(AppRoutes.addBaby),
             );
           }
 
@@ -251,13 +235,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                               mainAxisSize: MainAxisSize.min,
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: events.take(4).map((event) {
-                                Color dotColor = AppColors.teal;
-                                if (event.status == VaccineStatus.selesai) {
-                                  dotColor = AppColors.green;
-                                } else if (event.status ==
-                                    VaccineStatus.terlewat) {
-                                  dotColor = AppColors.red;
-                                }
+                                final dotColor = VaccineStatusStyle.color(
+                                  event.status,
+                                );
                                 return Container(
                                   margin: const EdgeInsets.symmetric(
                                     horizontal: 1.5,
@@ -350,34 +330,15 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   // Daftar jadwal yang sesuai
                   Expanded(
                     child: filteredSchedules.isEmpty
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 16,
-                            ),
-                            child: Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.event_available,
-                                    size: 40,
-                                    color: AppColors.grey,
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    _selectedDay != null
-                                        ? 'Tidak ada jadwal pada tanggal\n${DateFormatter.formatLong(_selectedDay!)}'
-                                        : 'Tidak ada jadwal dengan filter "$_selectedFilter"',
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.poppins(
-                                      color: AppColors.textSecondary,
-                                      fontSize: 12.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                        ? EmptyStateWidget(
+                            icon: Icons.event_available,
+                            title: _selectedDay != null
+                                ? 'Tidak ada jadwal'
+                                : 'Tidak ada jadwal "$_selectedFilter"',
+                            message: _selectedDay != null
+                                ? 'Tidak ada jadwal pada tanggal\n'
+                                      '${DateFormatter.formatLong(_selectedDay!)}'
+                                : 'Coba pilih filter status atau tanggal lain.',
                           )
                         : ListView.builder(
                             padding: const EdgeInsets.symmetric(
@@ -387,162 +348,41 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                             itemCount: filteredSchedules.length,
                             itemBuilder: (context, index) {
                               final item = filteredSchedules[index];
-                              return Card(
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  side: const BorderSide(
-                                    color: AppColors.border,
-                                  ),
-                                ),
+                              final warnaStatus = VaccineStatusStyle.color(
+                                item.status,
+                              );
+
+                              return VaccineCard(
+                                schedule: item,
+                                compact: true,
+                                showDescription: false,
                                 margin: const EdgeInsets.symmetric(vertical: 4),
-                                child: ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 4,
-                                  ),
-                                  title: Text(
-                                    item.namaVaksin,
-                                    style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const SizedBox(height: 4),
-                                      Wrap(
-                                        crossAxisAlignment:
-                                            WrapCrossAlignment.center,
-                                        spacing: 4,
-                                        runSpacing: 2,
-                                        children: [
-                                          const Icon(
-                                            Icons.calendar_today,
-                                            size: 12,
-                                            color: AppColors.textSecondary,
-                                          ),
-                                          Text(
-                                            DateFormatter.formatLong(
-                                              item.tanggalTarget,
-                                            ),
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 12,
-                                              color: AppColors.textSecondary,
-                                            ),
-                                          ),
-                                          Text(
-                                            '•  ${item.usiaBulanTarget} Bulan',
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 12,
-                                              color: AppColors.textSecondary,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      if (item.status ==
-                                              VaccineStatus.selesai &&
-                                          item.tanggalRealisasi != null) ...[
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          'Diberikan: ${DateFormatter.formatLong(item.tanggalRealisasi!)}',
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 11,
-                                            color: AppColors.green,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                  trailing: Chip(
-                                    label: Text(
-                                      item.status,
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color:
-                                            item.status == VaccineStatus.selesai
-                                            ? AppColors.green
-                                            : (item.status ==
-                                                      VaccineStatus.terlewat
-                                                  ? AppColors.red
-                                                  : AppColors.darkText),
-                                    ),
-                                  ),
-                                  backgroundColor:
-                                      item.status == VaccineStatus.selesai
-                                      ? AppColors.green.withValues(
-                                          alpha: 0.15,
-                                        )
-                                        : (item.status == VaccineStatus.terlewat
-                                              ? AppColors.red.withValues(
-                                                  alpha: 0.15,
-                                                )
-                                              : AppColors.yellow.withValues(
-                                                  alpha: 0.25,
-                                                )),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 0,
-                                  ),
-                                  visualDensity: VisualDensity.compact,
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  side: BorderSide(
-                                    color:
-                                        item.status == VaccineStatus.selesai
-                                        ? AppColors.green.withValues(alpha: 0.3)
-                                        : (item.status == VaccineStatus.terlewat
-                                              ? AppColors.red.withValues(alpha: 0.3)
-                                              : AppColors.yellow),
-                                  ),
+                                backgroundColor: warnaStatus.withValues(
+                                  alpha: 0.12,
+                                ),
+                                trailing: StatusBadge(
+                                  label: item.status,
+                                  color: warnaStatus,
+                                  compact: true,
                                 ),
                                 onTap: () => context.push(
                                   '/calendar/detail/${item.scheduleId}',
                                 ),
-                              ),
-                            );
-                          },
-                        ),
+                              );
+                            },
+                          ),
                   ),
                 ],
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, _) => Center(child: Text('Gagal: $err')),
+            loading: () => const AppLoadingIndicator(),
+            error: (err, _) => ErrorStateWidget(message: '$err'),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Gagal: $err')),
+        loading: () => const AppLoadingIndicator(),
+        error: (err, _) => ErrorStateWidget(message: '$err'),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1,
-        onTap: (index) {
-          if (index == 0) context.go(AppRoutes.dashboard);
-          if (index == 2) context.go(AppRoutes.faskes);
-          if (index == 3) context.go(AppRoutes.chatbot);
-          if (index == 4) context.go(AppRoutes.settings);
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: 'Kalender',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.local_hospital_outlined),
-            label: 'Faskes',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: 'ImuniBot',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
-      ),
+      bottomNavigationBar: const AppBottomNavBar(currentIndex: 1),
     );
   }
 }

@@ -5,6 +5,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../widgets/empty_state_widget.dart';
+import '../../../../widgets/error_state_widget.dart';
+import '../../../../widgets/loading_overlay.dart';
+import '../../../../widgets/status_badge.dart';
 import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../providers/journal_provider.dart';
 
@@ -21,8 +25,9 @@ class JournalListScreen extends ConsumerWidget {
         leading: IconButton(
           tooltip: 'Kembali',
           icon: const Icon(Icons.arrow_back),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(AppRoutes.dashboard),
+          onPressed: () => context.canPop()
+              ? context.pop()
+              : context.go(AppRoutes.dashboard),
         ),
         title: Text(
           'Jurnal Kesehatan',
@@ -49,24 +54,28 @@ class JournalListScreen extends ConsumerWidget {
       body: babyAsync.when(
         data: (currentBaby) {
           if (currentBaby == null) {
-            return const Center(child: Text('Belum ada profil anak.'));
+            return EmptyStateWidget(
+              icon: Icons.child_care,
+              title: 'Belum ada profil anak',
+              message:
+                  'Tambahkan profil anak untuk mencatat jurnal kesehatannya.',
+              actionLabel: 'Tambah Profil Anak',
+              onAction: () => context.push(AppRoutes.addBaby),
+            );
           }
           final journalsAsync = ref.watch(journalProvider(currentBaby.babyId));
 
           return journalsAsync.when(
             data: (journals) {
               if (journals.isEmpty) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Text(
-                      'Belum ada catatan jurnal harian anak. Klik tombol + di atas untuk menambahkan.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
+                return EmptyStateWidget(
+                  icon: Icons.book_outlined,
+                  title: 'Belum ada catatan jurnal',
+                  message:
+                      'Catat kondisi harian anak agar riwayat kesehatannya '
+                      'terpantau.',
+                  actionLabel: 'Tambah Jurnal',
+                  onAction: () => context.push(AppRoutes.addJournal),
                 );
               }
 
@@ -117,39 +126,13 @@ class JournalListScreen extends ConsumerWidget {
                                   ),
                                 ),
                                 if (item.suhuTubuh != null)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: item.suhuTubuh! >= 37.5
-                                          ? AppColors.red.withValues(
-                                              alpha: 0.15,
-                                            )
-                                          : AppColors.teal.withValues(
-                                              alpha: 0.15,
-                                            ),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: item.suhuTubuh! >= 37.5
-                                            ? AppColors.red.withValues(
-                                                alpha: 0.3,
-                                              )
-                                            : AppColors.teal.withValues(
-                                                alpha: 0.3,
-                                              ),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      '${item.suhuTubuh}°C',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
-                                      ),
-                                    ),
+                                  StatusBadge(
+                                    label: '${item.suhuTubuh}°C',
+                                    color: item.suhuTubuh! >= 37.5
+                                        ? AppColors.red
+                                        : AppColors.teal,
+                                    compact: true,
+                                    textColor: AppColors.darkText,
                                   ),
                               ],
                             ),
@@ -168,29 +151,12 @@ class JournalListScreen extends ConsumerWidget {
                                 runSpacing: 4,
                                 children: item.gejala
                                     .map(
-                                      (g) => Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.surface,
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          border: Border.all(
-                                            color: AppColors.border,
-                                            width: 1,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          g,
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black,
-                                          ),
-                                        ),
+                                      (g) => StatusBadge(
+                                        label: g,
+                                        color: AppColors.teal,
+                                        compact: true,
+                                        style: StatusBadgeStyle.soft,
+                                        textColor: AppColors.darkText,
                                       ),
                                     )
                                     .toList(),
@@ -204,12 +170,12 @@ class JournalListScreen extends ConsumerWidget {
                 },
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, _) => Center(child: Text('Gagal: $err')),
+            loading: () => const AppLoadingIndicator(),
+            error: (err, _) => ErrorStateWidget(message: '$err'),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Gagal: $err')),
+        loading: () => const AppLoadingIndicator(),
+        error: (err, _) => ErrorStateWidget(message: '$err'),
       ),
     );
   }

@@ -6,8 +6,14 @@ import 'package:go_router/go_router.dart';
 import '../../../baby_profile/presentation/providers/active_baby_provider.dart';
 import '../providers/immunization_provider.dart';
 import '../../domain/entities/vaccine_schedule_entity.dart';
+import '../widgets/vaccine_status_style.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/router/app_router.dart';
+import '../../../../widgets/empty_state_widget.dart';
+import '../../../../widgets/error_state_widget.dart';
+import '../../../../widgets/loading_overlay.dart';
+import '../../../../widgets/status_badge.dart';
+import '../../../../widgets/vaccine_card.dart';
 
 class VaccineTimelineScreen extends ConsumerWidget {
   const VaccineTimelineScreen({super.key});
@@ -33,7 +39,14 @@ class VaccineTimelineScreen extends ConsumerWidget {
       body: babyAsync.when(
         data: (currentBaby) {
           if (currentBaby == null) {
-            return const Center(child: Text('Belum ada profil anak.'));
+            return EmptyStateWidget(
+              icon: Icons.child_care,
+              title: 'Belum ada profil anak',
+              message:
+                  'Tambahkan profil anak untuk melihat timeline imunisasi.',
+              actionLabel: 'Tambah Profil Anak',
+              onAction: () => context.push(AppRoutes.addBaby),
+            );
           }
           final schedulesAsync = ref.watch(
             immunizationProvider(currentBaby.babyId),
@@ -54,18 +67,15 @@ class VaccineTimelineScreen extends ConsumerWidget {
                         children: [
                           CircleAvatar(
                             radius: 12,
-                            backgroundColor:
-                                item.status == VaccineStatus.selesai
-                                ? AppColors.green
-                                : (item.status == VaccineStatus.terlewat
-                                    ? AppColors.red
-                                    : AppColors.teal),
+                            backgroundColor: VaccineStatusStyle.color(
+                              item.status,
+                            ),
                             child: Icon(
                               item.status == VaccineStatus.selesai
                                   ? Icons.check
                                   : (item.status == VaccineStatus.terlewat
-                                      ? Icons.close
-                                      : Icons.radio_button_unchecked),
+                                        ? Icons.close
+                                        : Icons.radio_button_unchecked),
                               size: 14,
                               color: Colors.white,
                             ),
@@ -82,79 +92,23 @@ class VaccineTimelineScreen extends ConsumerWidget {
 
                       // Card item data content panel
                       Expanded(
-                        child: Card(
+                        child: VaccineCard(
+                          schedule: item,
                           margin: const EdgeInsets.only(bottom: 16),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        item.namaVaksin,
-                                        style: GoogleFonts.poppins(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.teal.withValues(
-                                          alpha: 0.15,
-                                        ),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: AppColors.teal.withValues(
-                                            alpha: 0.3,
-                                          ),
-                                          width: 1,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        '${item.usiaBulanTarget} Bln',
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  item.deskripsi,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                InkWell(
-                                  onTap: () => context.push(
-                                    '/calendar/detail/${item.scheduleId}',
-                                  ),
-                                  child: Text(
-                                    'Lihat Detail ›',
-                                    style: GoogleFonts.poppins(
-                                      color: AppColors.teal,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                          trailing: StatusBadge(
+                            label: '${item.usiaBulanTarget} Bln',
+                            color: AppColors.teal,
+                          ),
+                          footer: Text(
+                            'Lihat Detail ›',
+                            style: GoogleFonts.poppins(
+                              color: AppColors.teal,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
                             ),
+                          ),
+                          onTap: () => context.push(
+                            '/calendar/detail/${item.scheduleId}',
                           ),
                         ),
                       ),
@@ -163,12 +117,12 @@ class VaccineTimelineScreen extends ConsumerWidget {
                 },
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, _) => Center(child: Text('Gagal: $err')),
+            loading: () => const AppLoadingIndicator(),
+            error: (err, _) => ErrorStateWidget(message: '$err'),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Gagal: $err')),
+        loading: () => const AppLoadingIndicator(),
+        error: (err, _) => ErrorStateWidget(message: '$err'),
       ),
     );
   }

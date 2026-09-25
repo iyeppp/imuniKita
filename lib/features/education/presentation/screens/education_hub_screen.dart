@@ -6,6 +6,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../widgets/empty_state_widget.dart';
+import '../../../../widgets/status_badge.dart';
 import '../../data/datasources/education_mock_datasource.dart';
 import '../../data/models/article_model.dart';
 import '../../data/models/quiz_model.dart';
@@ -125,9 +127,10 @@ class _ArtikelTab extends ConsumerWidget {
     final artikel = ref.watch(educationArtikelProvider);
 
     if (artikel.isEmpty) {
-      return const _EmptyState(
-        pesan: 'Belum ada artikel untuk kategori ini.',
-        ikon: Icons.article_outlined,
+      return const EmptyStateWidget(
+        icon: Icons.article_outlined,
+        title: 'Belum ada artikel',
+        message: 'Belum ada artikel untuk kategori ini.',
       );
     }
 
@@ -230,9 +233,10 @@ class _VideoTab extends ConsumerWidget {
     final video = ref.watch(educationVideoProvider);
 
     if (video.isEmpty) {
-      return const _EmptyState(
-        pesan: 'Belum ada video untuk kategori ini.',
-        ikon: Icons.play_circle_outline,
+      return const EmptyStateWidget(
+        icon: Icons.play_circle_outline,
+        title: 'Belum ada video',
+        message: 'Belum ada video untuk kategori ini.',
       );
     }
 
@@ -379,9 +383,10 @@ class _KuisTab extends ConsumerWidget {
         const <String, QuizScoreModel>{};
 
     if (kuis.isEmpty) {
-      return const _EmptyState(
-        pesan: 'Belum ada kuis untuk kategori ini.',
-        ikon: Icons.quiz_outlined,
+      return const EmptyStateWidget(
+        icon: Icons.quiz_outlined,
+        title: 'Belum ada kuis',
+        message: 'Belum ada kuis untuk kategori ini.',
       );
     }
 
@@ -428,7 +433,19 @@ class _KuisCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  _StatusBadge(sudahDikerjakan: sudahDikerjakan, skor: skor),
+                  sudahDikerjakan
+                      ? StatusBadge(
+                          label: '${skor!.persentase}%',
+                          color: AppColors.green,
+                          icon: Icons.check_circle,
+                          compact: true,
+                        )
+                      : const StatusBadge(
+                          label: 'Mulai',
+                          color: AppColors.coral,
+                          style: StatusBadgeStyle.filled,
+                          compact: true,
+                        ),
                 ],
               ),
               const SizedBox(height: 6),
@@ -458,6 +475,17 @@ class _KuisCard extends StatelessWidget {
                       color: AppColors.textHint,
                     ),
                   ),
+                  // Temuan #15: tampilkan riwayat percobaan bila sudah > 1×.
+                  if ((skor?.totalPercobaan ?? 1) > 1) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      '· Dikerjakan ${skor!.totalPercobaan}×',
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        color: AppColors.textHint,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ],
@@ -468,88 +496,6 @@ class _KuisCard extends StatelessWidget {
   }
 }
 
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.sudahDikerjakan, this.skor});
-
-  final bool sudahDikerjakan;
-  final QuizScoreModel? skor;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!sudahDikerjakan) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: AppColors.coral,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          'Mulai',
-          style: GoogleFonts.poppins(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.green.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.green),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.check_circle, size: 13, color: AppColors.green),
-          const SizedBox(width: 4),
-          Text(
-            '${skor!.persentase}%',
-            style: GoogleFonts.poppins(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: AppColors.green,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 // ───────────────────────────────────────────────────────────────────────────
 // Komponen kecil bersama
 // ───────────────────────────────────────────────────────────────────────────
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.pesan, required this.ikon});
-
-  final String pesan;
-  final IconData ikon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(ikon, size: 64, color: AppColors.grey),
-            const SizedBox(height: 12),
-            Text(
-              pesan,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

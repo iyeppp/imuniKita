@@ -44,6 +44,11 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Signing rilis (Temuan #39) — JANGAN di-commit
+android/key.properties
+*.jks
+*.keystore
+
 # Widget Preview related
 .widget_preview/
 

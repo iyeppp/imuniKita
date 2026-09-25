@@ -307,6 +307,20 @@ class ChatbotMockDatasource {
 
   final Random _random = Random();
 
+  /// Cocokkan [keyword] ke [teks] (huruf kecil) dengan **batas kata**.
+  ///
+  /// Temuan #52: pencocokan `contains` biasa membuat keyword pendek menangkap
+  /// kata lain — mis. `asi` ikut cocok pada "mpasi"/"imunisasi" sehingga
+  /// pertanyaan MPASI dijawab dengan info ASI. Keyword multi-kata (mis.
+  /// "air susu ibu") tetap dicocokkan sebagai frasa.
+  static bool _cocok(String teks, String keyword) {
+    if (keyword.contains(' ')) return teks.contains(keyword);
+
+    // Pagar spasi di ujung teks menangani keyword di awal/akhir kalimat.
+    final pola = RegExp('[^a-z]${RegExp.escape(keyword)}[^a-z]');
+    return pola.hasMatch(' $teks ');
+  }
+
   /// Kembalikan respons berbasis keyword untuk [userMessage].
   /// Mensimulasikan delay jaringan 300–700 ms.
   Future<String> getResponse(String userMessage) async {
@@ -317,7 +331,7 @@ class ChatbotMockDatasource {
 
     for (final (keywords, response) in _rules) {
       for (final kw in keywords) {
-        if (lower.contains(kw)) {
+        if (_cocok(lower, kw)) {
           return response;
         }
       }

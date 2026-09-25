@@ -42,6 +42,8 @@ class BabyEntity {
     DateTime? tanggalLahir,
     String? jenisKelamin,
     String? fotoProfilPath,
+    // Temuan #37: flag eksplisit agar foto profil bisa dihapus (di-set null).
+    bool clearFotoProfilPath = false,
   }) {
     return BabyEntity(
       babyId: babyId,
@@ -49,7 +51,9 @@ class BabyEntity {
       namaAnak: namaAnak ?? this.namaAnak,
       tanggalLahir: tanggalLahir ?? this.tanggalLahir,
       jenisKelamin: jenisKelamin ?? this.jenisKelamin,
-      fotoProfilPath: fotoProfilPath ?? this.fotoProfilPath,
+      fotoProfilPath: clearFotoProfilPath
+          ? null
+          : (fotoProfilPath ?? this.fotoProfilPath),
       createdAt: createdAt,
     );
   }

@@ -23,6 +23,12 @@ class AgeBreakdown {
 /// meski dipanggil pada jam berbeda dalam hari yang sama.
 abstract class AgeCalculator {
   /// Pemecahan usia lengkap `birthDate` sampai `now` (default: hari ini).
+  ///
+  /// Dihitung dengan mencari jumlah **bulan penuh** terbesar yang masih
+  /// ≤ hari ini (lewat [addMonths] yang sudah mengamankan akhir bulan), lalu
+  /// sisa harinya dihitung dari titik itu. Pendekatan ini menghindari bug
+  /// "pinjam hari" yang bisa menghasilkan `days` negatif untuk tanggal lahir
+  /// 29–31 (mis. lahir 31 Jan, hari ini 1 Mar → 1 bulan 1 hari).
   static AgeBreakdown breakdown(DateTime birthDate, {DateTime? now}) {
     final today = _dateOnly(now ?? DateTime.now());
     final birth = _dateOnly(birthDate);
@@ -37,26 +43,19 @@ abstract class AgeCalculator {
       );
     }
 
-    var years = today.year - birth.year;
-    var months = today.month - birth.month;
-    var days = today.day - birth.day;
-
-    if (days < 0) {
-      months -= 1;
-      final previousMonth = DateTime(today.year, today.month - 1);
-      days += daysInMonth(previousMonth.year, previousMonth.month);
-    }
-
-    if (months < 0) {
-      years -= 1;
-      months += 12;
+    var bulanPenuh =
+        ((today.year - birth.year) * 12) + (today.month - birth.month);
+    var titik = addMonths(birth, bulanPenuh);
+    if (titik.isAfter(today)) {
+      bulanPenuh -= 1;
+      titik = addMonths(birth, bulanPenuh);
     }
 
     return AgeBreakdown(
-      years: years,
-      months: months,
-      days: days,
-      totalMonths: (years * 12) + months,
+      years: bulanPenuh ~/ 12,
+      months: bulanPenuh % 12,
+      days: today.difference(titik).inDays,
+      totalMonths: bulanPenuh,
       totalDays: today.difference(birth).inDays,
     );
   }

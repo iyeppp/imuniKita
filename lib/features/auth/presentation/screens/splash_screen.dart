@@ -1,13 +1,13 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
-import '../../../../core/constants/app_constants.dart';
+import '../../../../injection/dependency_injection.dart';
 import '../widgets/confetti_dots_painter.dart';
 
 /// Splash Screen ImuniKita (Design System v1.0).
@@ -70,15 +70,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
 
     // Karakter Ibu + Bayi: Slide Up + Fade (150ms - 750ms)
-    _characterSlideAnim = Tween<Offset>(
-      begin: const Offset(0.0, 0.18),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _mainAnimController,
-        curve: const Interval(0.12, 0.65, curve: Curves.easeOutCubic),
-      ),
-    );
+    _characterSlideAnim =
+        Tween<Offset>(begin: const Offset(0.0, 0.18), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _mainAnimController,
+            curve: const Interval(0.12, 0.65, curve: Curves.easeOutCubic),
+          ),
+        );
     _characterFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _mainAnimController,
@@ -87,15 +85,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
 
     // Blok Teal Bawah: SlideUp dari bawah (300ms - 900ms)
-    _tealBlockSlideAnim = Tween<Offset>(
-      begin: const Offset(0.0, 0.35),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _mainAnimController,
-        curve: const Interval(0.25, 0.75, curve: Curves.easeOutCubic),
-      ),
-    );
+    _tealBlockSlideAnim =
+        Tween<Offset>(begin: const Offset(0.0, 0.35), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _mainAnimController,
+            curve: const Interval(0.25, 0.75, curve: Curves.easeOutCubic),
+          ),
+        );
 
     // Teks Bawah: FadeIn (450ms - 950ms)
     _textFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -121,15 +117,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       if (!mounted) return;
 
       try {
-        final prefs = await SharedPreferences.getInstance();
-        final isLoggedIn = prefs.getBool(AppConstants.prefIsLoggedIn) ?? false;
-        final seenOnboarding = prefs.getBool(AppConstants.prefSeenOnboarding) ?? false;
+        // Temuan #22: status sesi dibaca lewat use case, bukan SharedPreferences
+        // langsung dari layar.
+        final status = await ref.read(checkAuthStateUseCaseProvider).execute();
 
         if (!mounted) return;
 
-        if (isLoggedIn) {
+        if (status.loggedIn) {
           context.go(AppRoutes.dashboard);
-        } else if (seenOnboarding) {
+        } else if (status.seenOnboarding) {
           context.go(AppRoutes.login);
         } else {
           context.go(AppRoutes.onboarding);
@@ -173,9 +169,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               left: 0,
               right: 0,
               height: topZoneHeight,
-              child: Container(
-                color: AppColors.coral,
-              ),
+              child: Container(color: AppColors.coral),
             ),
 
             // ── LAYER 2: Confetti Dots Dinamis (XL, M, S) ───────────────────
@@ -228,7 +222,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               ),
             ),
 
-
             // ── LAYER 5: Blok Bawah Teal Solid (38% Layar) ──────────────────
             Positioned(
               bottom: 0,
@@ -277,7 +270,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                         ),
                       ],
                     ),
-
                   ),
                 ),
               ),

@@ -1,4 +1,4 @@
-package com.example.imunikita
+package com.imunikita.app
 
 import io.flutter.embedding.android.FlutterActivity
 
