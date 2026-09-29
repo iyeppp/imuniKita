@@ -30,7 +30,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   late DateTime _focusedDay;
   DateTime? _selectedDay;
-  String? _selectedFilter = 'Semua';
+  String _selectedFilter = 'Semua';
 
   DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
@@ -41,23 +41,21 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       final target = _dateOnly(widget.initialDate!);
       _focusedDay = target;
       _selectedDay = target;
-      _selectedFilter = null;
     } else {
       _focusedDay = _dateOnly(DateTime.now());
       _selectedDay = null;
-      _selectedFilter = 'Semua';
     }
   }
 
   @override
   void didUpdateWidget(covariant CalendarScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialDate != null) {
+    if (widget.initialDate != null && widget.initialDate != oldWidget.initialDate) {
       final target = _dateOnly(widget.initialDate!);
       setState(() {
         _focusedDay = target;
         _selectedDay = target;
-        _selectedFilter = null;
+        _selectedFilter = 'Semua';
       });
     }
   }
@@ -115,23 +113,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
           return schedulesAsync.when(
             data: (schedules) {
-              // Filtering logics
+              // Filtering: prioritas kategori status terlebih dahulu, baru tanggal
               final filteredSchedules = schedules.where((s) {
-                // filter per hari terpilih (jika ada tanggal yang di-tap)
-                if (_selectedDay != null &&
-                    !isSameDay(s.tanggalTarget, _selectedDay!)) {
-                  return false;
-                }
-                // filter status
-                if (_selectedFilter == 'Terjadwal') {
-                  return s.status == VaccineStatus.belum;
-                }
-                if (_selectedFilter == 'Selesai') {
-                  return s.status == VaccineStatus.selesai;
-                }
-                if (_selectedFilter == 'Terlewat') {
-                  return s.status == VaccineStatus.terlewat;
-                }
+                if (_selectedFilter == 'Terjadwal') return s.status == VaccineStatus.belum;
+                if (_selectedFilter == 'Selesai') return s.status == VaccineStatus.selesai;
+                if (_selectedFilter == 'Terlewat') return s.status == VaccineStatus.terlewat;
+                if (_selectedDay != null) return isSameDay(s.tanggalTarget, _selectedDay!);
                 return true;
               }).toList();
 
@@ -178,7 +165,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                       onDaySelected: (selectedDay, focusedDay) {
                         setState(() {
                           _selectedDay = selectedDay;
-                          _selectedFilter = null; // Unselect centang "Semua" saat tanggal dipilih
+                          _selectedFilter = 'Semua';
                           _focusedDay = focusedDay;
                         });
                       },
@@ -265,28 +252,20 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                       children: ['Semua', 'Terjadwal', 'Selesai', 'Terlewat']
                           .map((filter) {
                             final isSelected = filter == 'Semua'
-                                ? (_selectedDay == null &&
-                                      (_selectedFilter == null ||
-                                          _selectedFilter == 'Semua'))
+                                ? (_selectedFilter == 'Semua' && _selectedDay == null)
                                 : (_selectedFilter == filter);
                             return Padding(
                               padding: const EdgeInsets.only(right: 8.0),
                               child: FilterChip(
                                 label: Text(filter),
                                 selected: isSelected,
-                                onSelected: (selected) {
+                                onSelected: (_) {
                                   setState(() {
-                                    if (filter == 'Semua') {
-                                      // Pencet 'Semua' -> tampilkan seluruh jadwal
-                                      _selectedDay = null;
-                                      _selectedFilter = 'Semua';
-                                    } else {
-                                      if (isSelected) {
-                                        _selectedFilter = null;
-                                      } else {
-                                        _selectedFilter = filter;
-                                      }
-                                    }
+                                    _selectedDay = null;
+                                    _selectedFilter =
+                                        (filter == 'Semua' || isSelected)
+                                            ? 'Semua'
+                                            : filter;
                                   });
                                 },
                                 selectedColor: AppColors.teal,
@@ -312,12 +291,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        _selectedDay != null
-                            ? 'Jadwal: ${DateFormatter.formatLong(_selectedDay!)}'
-                            : (_selectedFilter != null &&
-                                      _selectedFilter != 'Semua'
-                                  ? 'Jadwal $_selectedFilter (${filteredSchedules.length})'
-                                  : 'Semua Jadwal (${filteredSchedules.length})'),
+                        _selectedFilter != 'Semua'
+                            ? 'Jadwal $_selectedFilter (${filteredSchedules.length})'
+                            : (_selectedDay != null
+                                ? 'Jadwal: ${DateFormatter.formatLong(_selectedDay!)}'
+                                : 'Semua Jadwal (${filteredSchedules.length})'),
                         style: GoogleFonts.poppins(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
@@ -332,13 +310,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     child: filteredSchedules.isEmpty
                         ? EmptyStateWidget(
                             icon: Icons.event_available,
-                            title: _selectedDay != null
-                                ? 'Tidak ada jadwal'
-                                : 'Tidak ada jadwal "$_selectedFilter"',
-                            message: _selectedDay != null
-                                ? 'Tidak ada jadwal pada tanggal\n'
-                                      '${DateFormatter.formatLong(_selectedDay!)}'
-                                : 'Coba pilih filter status atau tanggal lain.',
+                            title: _selectedFilter != 'Semua'
+                                ? 'Tidak ada jadwal "$_selectedFilter"'
+                                : 'Tidak ada jadwal',
+                            message: _selectedFilter != 'Semua'
+                                ? 'Coba pilih filter status atau tanggal lain.'
+                                : (_selectedDay != null
+                                    ? 'Tidak ada jadwal pada tanggal\n${DateFormatter.formatLong(_selectedDay!)}'
+                                    : 'Belum ada data jadwal imunisasi.'),
                           )
                         : ListView.builder(
                             padding: const EdgeInsets.symmetric(

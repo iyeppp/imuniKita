@@ -92,19 +92,27 @@ class JournalListScreen extends ConsumerWidget {
                     background: Container(
                       alignment: Alignment.centerRight,
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      color: AppColors.red,
+                      decoration: BoxDecoration(
+                        color: AppColors.red,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       child: const Icon(Icons.delete, color: Colors.white),
                     ),
-                    onDismissed: (direction) async {
-                      await ref
-                          .read(journalProvider(currentBaby.babyId).notifier)
-                          .deleteJournal(item.journalId);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Catatan jurnal berhasil dihapus.'),
-                          ),
-                        );
+                    confirmDismiss: (direction) async {
+                      try {
+                        await ref
+                            .read(journalProvider(currentBaby.babyId).notifier)
+                            .deleteJournal(item.journalId);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Catatan jurnal berhasil dihapus.'),
+                            ),
+                          );
+                        }
+                        return false; // Jangan hapus widget secara manual, biarkan provider rebuild
+                      } catch (_) {
+                        return false;
                       }
                     },
                     child: Card(
