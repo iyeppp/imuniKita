@@ -6,9 +6,8 @@ import '../../domain/entities/vaccine_schedule_entity.dart';
 /// Pemetaan status jadwal vaksin → warna (satu sumber kebenaran).
 ///
 /// Fix Bug #33: sebelumnya mapping ini ditulis ulang di Kalender, Timeline, dan
-/// Detail dengan hasil yang **tidak konsisten** — `BELUM` berwarna kuning di
-/// daftar Kalender tetapi teal di Timeline/Detail. Kini semuanya memakai helper
-/// ini (`BELUM` → teal, selaras dengan marker di Kalender & `statusScheduled`).
+/// Detail dengan hasil yang **tidak konsisten**. Kini semuanya memakai helper
+/// ini (`BELUM` → kuning, `SELESAI` → hijau, `TERLEWAT` → merah).
 abstract class VaccineStatusStyle {
   static Color color(String status) {
     switch (status) {
@@ -17,7 +16,7 @@ abstract class VaccineStatusStyle {
       case VaccineStatus.terlewat:
         return AppColors.red;
       default:
-        return AppColors.statusScheduled;
+        return AppColors.yellow;
     }
   }
 }

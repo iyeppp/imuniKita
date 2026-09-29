@@ -109,17 +109,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           height: 200,
                           decoration: BoxDecoration(
                             color: (slide['color'] as Color).withValues(
-                              alpha: 0.2,
+                              alpha: 0.15,
                             ),
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: AppColors.darkText,
+                              color: slide['color'] as Color,
                               width: 3,
                             ),
-                            boxShadow: const [
+                            boxShadow: [
                               BoxShadow(
-                                color: AppColors.darkText,
-                                offset: Offset(4, 4),
+                                color: (slide['color'] as Color).withValues(
+                                  alpha: 0.35,
+                                ),
+                                offset: const Offset(4, 4),
                                 blurRadius: 0,
                               ),
                             ],
@@ -127,7 +129,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           child: Icon(
                             slide['icon'] as IconData,
                             size: 100,
-                            color: AppColors.darkText,
+                            color: slide['color'] as Color,
                           ),
                         ),
                         const SizedBox(height: 48),

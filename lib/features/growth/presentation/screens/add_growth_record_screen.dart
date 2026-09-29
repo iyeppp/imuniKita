@@ -38,11 +38,15 @@ class _AddGrowthRecordScreenState extends ConsumerState<AddGrowthRecordScreen> {
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> _selectDate(BuildContext context, DateTime tanggalLahir) async {
+    // Pastikan initialDate tidak sebelum tanggal lahir
+    final effectiveInitial = _tanggalPengukuran.isBefore(tanggalLahir)
+        ? tanggalLahir
+        : _tanggalPengukuran;
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _tanggalPengukuran,
-      firstDate: DateTime(2020),
+      initialDate: effectiveInitial,
+      firstDate: tanggalLahir,
       lastDate: DateTime.now(),
     );
     if (picked != null && picked != _tanggalPengukuran) {
@@ -55,6 +59,84 @@ class _AddGrowthRecordScreenState extends ConsumerState<AddGrowthRecordScreen> {
 
   Future<void> _saveRecord(String babyId) async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Cek apakah sudah ada data di tanggal yang sama
+    final existingRecords = ref.read(growthProvider(babyId)).valueOrNull ?? [];
+    final sameDateRecord = existingRecords.cast<GrowthRecordEntity?>().firstWhere(
+      (r) =>
+          r != null &&
+          r.tanggalPengukuran.year == _tanggalPengukuran.year &&
+          r.tanggalPengukuran.month == _tanggalPengukuran.month &&
+          r.tanggalPengukuran.day == _tanggalPengukuran.day,
+      orElse: () => null,
+    );
+
+    if (sameDateRecord != null) {
+      // Tanya user apakah ingin menimpa data yang sudah ada
+      final shouldUpdate = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Data Sudah Ada'),
+          content: Text(
+            'Sudah ada pengukuran pada tanggal '
+            '${_tanggalPengukuran.day}/${_tanggalPengukuran.month}/${_tanggalPengukuran.year}.\n\n'
+            'Apakah Anda ingin memperbarui data yang sudah ada?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.coral,
+              ),
+              child: const Text('Perbarui'),
+            ),
+          ],
+        ),
+      );
+      if (shouldUpdate != true) return;
+
+      // Gunakan recordId yang sudah ada agar data ditimpa (bukan tambah baru)
+      setState(() => _menyimpan = true);
+
+      final updatedRecord = GrowthRecordEntity(
+        recordId: sameDateRecord.recordId,
+        babyId: babyId,
+        tanggalPengukuran: _tanggalPengukuran,
+        beratBadan: double.parse(_bbController.text),
+        tinggiBadan: double.parse(_tbController.text),
+        lingkarKepala: _lkController.text.isNotEmpty
+            ? double.parse(_lkController.text)
+            : null,
+      );
+
+      try {
+        await ref.read(growthProvider(babyId).notifier).addRecord(updatedRecord);
+
+        if (!mounted) return;
+        setState(() => _menyimpan = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Data pertumbuhan berhasil diperbarui! 📈'),
+            backgroundColor: AppColors.green,
+          ),
+        );
+        context.pop();
+      } catch (e) {
+        if (!mounted) return;
+        setState(() => _menyimpan = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal memperbarui data pertumbuhan: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      return;
+    }
 
     setState(() => _menyimpan = true);
 
@@ -152,7 +234,7 @@ class _AddGrowthRecordScreenState extends ConsumerState<AddGrowthRecordScreen> {
                             Icons.calendar_today,
                             color: AppColors.coral,
                           ),
-                          onTap: () => _selectDate(context),
+                          onTap: () => _selectDate(context, currentBaby.tanggalLahir),
                         ),
                         const Divider(),
                         const SizedBox(height: 16),
