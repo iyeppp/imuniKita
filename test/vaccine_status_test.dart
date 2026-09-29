@@ -22,21 +22,17 @@ void main() {
       expect(VaccineStatusStyle.color(VaccineStatus.terlewat), AppColors.red);
     });
 
-    test('BELUM konsisten dengan marker kalender (teal), bukan kuning', () {
+    test('BELUM berwarna kuning (AppColors.yellow)', () {
       expect(
         VaccineStatusStyle.color(VaccineStatus.belum),
-        AppColors.statusScheduled,
-      );
-      expect(
-        VaccineStatusStyle.color(VaccineStatus.belum),
-        isNot(AppColors.yellow),
+        AppColors.yellow,
       );
     });
 
-    test('status tak dikenal jatuh ke warna terjadwal', () {
+    test('status tak dikenal jatuh ke warna default (kuning)', () {
       expect(
         VaccineStatusStyle.color('STATUS_LAIN'),
-        AppColors.statusScheduled,
+        AppColors.yellow,
       );
     });
   });
