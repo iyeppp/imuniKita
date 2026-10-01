@@ -39,8 +39,8 @@ class JournalListScreen extends ConsumerWidget {
             child: IconButton(
               tooltip: 'Tambah Jurnal',
               style: IconButton.styleFrom(
-                backgroundColor: AppColors.yellow,
-                foregroundColor: AppColors.darkText,
+                backgroundColor: AppColors.coral,
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

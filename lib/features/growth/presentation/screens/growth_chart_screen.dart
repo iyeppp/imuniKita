@@ -155,6 +155,11 @@ class _GrowthChartScreenState extends ConsumerState<GrowthChartScreen>
     }
 
     final who = WhoGrowthReference.forMode(mode, isLakiLaki: isLakiLaki);
+    final whoOver24 = WhoGrowthReference.forMode(
+      mode,
+      isLakiLaki: isLakiLaki,
+      over24: true,
+    );
 
     double? nilaiUntuk(GrowthRecordEntity r) => switch (mode) {
       'BB' => r.beratBadan,
@@ -183,35 +188,51 @@ class _GrowthChartScreenState extends ConsumerState<GrowthChartScreen>
     final maxBulan = spots.map((s) => s.x).reduce((a, b) => a > b ? a : b);
 
     // Kurva referensi WHO (median, −2SD, +2SD) sepanjang rentang data anak.
-    List<FlSpot> kurva(double? Function(double) ambil) {
+    List<FlSpot> kurva(
+      WhoSeries? series,
+      double? Function(double) ambil,
+    ) {
       final titik = <FlSpot>[];
-      if (who == null) return titik;
-      final batas = maxBulan < who.maxMonth
+      if (series == null) return titik;
+      final start = series.startMonth.toDouble();
+      if (maxBulan < start) return titik;
+      final batas = maxBulan < series.maxMonth
           ? maxBulan
-          : who.maxMonth.toDouble();
-      for (var bulan = 0.0; bulan <= batas; bulan += 1) {
+          : series.maxMonth.toDouble();
+      for (var bulan = start; bulan <= batas; bulan += 1) {
         final nilai = ambil(bulan);
         if (nilai != null) titik.add(FlSpot(bulan, nilai));
       }
       return titik;
     }
 
-    final medianSpots = kurva((b) => who?.medianAt(b));
-    final minus2Spots = kurva((b) => who?.minus2SdAt(b));
-    final plus2Spots = kurva((b) => who?.plus2SdAt(b));
+    final medianSpots = kurva(who, (b) => who?.medianAt(b));
+    final minus2Spots = kurva(who, (b) => who?.minus2SdAt(b));
+    final plus2Spots = kurva(who, (b) => who?.plus2SdAt(b));
+
+    final medianOver24Spots =
+        kurva(whoOver24, (b) => whoOver24?.medianAt(b));
+    final minus2Over24Spots =
+        kurva(whoOver24, (b) => whoOver24?.minus2SdAt(b));
+    final plus2Over24Spots =
+        kurva(whoOver24, (b) => whoOver24?.plus2SdAt(b));
 
     final semuaNilai = [
       ...spots.map((s) => s.y),
       ...medianSpots.map((s) => s.y),
       ...minus2Spots.map((s) => s.y),
       ...plus2Spots.map((s) => s.y),
+      ...medianOver24Spots.map((s) => s.y),
+      ...minus2Over24Spots.map((s) => s.y),
+      ...plus2Over24Spots.map((s) => s.y),
     ];
     final nilaiMin = semuaNilai.reduce((a, b) => a < b ? a : b);
     final nilaiMax = semuaNilai.reduce((a, b) => a > b ? a : b);
     final rentang = (nilaiMax - nilaiMin).abs();
     final margin = rentang < 5 ? 1.0 : rentang * 0.15;
 
-    const warnaWho = Color(0xFF16A34A); // green-700
+    const warnaWho = Color(0xFF16A34A); // green-700 (0–24 bulan)
+    const warnaWhoOver24 = Color(0xFF2563EB); // blue-600 (> 24 bulan)
     final modeLabel = who?.label ?? mode;
     final unit = who?.unit ?? '';
 
@@ -299,7 +320,7 @@ class _GrowthChartScreenState extends ConsumerState<GrowthChartScreen>
                     barWidth: 4,
                     dotData: const FlDotData(show: true),
                   ),
-                  // Median WHO
+                  // Median WHO (0–24 bulan)
                   if (medianSpots.isNotEmpty)
                     LineChartBarData(
                       spots: medianSpots,
@@ -308,7 +329,7 @@ class _GrowthChartScreenState extends ConsumerState<GrowthChartScreen>
                       barWidth: 2.5,
                       dotData: const FlDotData(show: false),
                     ),
-                  // −2SD WHO
+                  // −2SD WHO (0–24 bulan)
                   if (minus2Spots.isNotEmpty)
                     LineChartBarData(
                       spots: minus2Spots,
@@ -318,12 +339,41 @@ class _GrowthChartScreenState extends ConsumerState<GrowthChartScreen>
                       dashArray: [6, 4],
                       dotData: const FlDotData(show: false),
                     ),
-                  // +2SD WHO
+                  // +2SD WHO (0–24 bulan)
                   if (plus2Spots.isNotEmpty)
                     LineChartBarData(
                       spots: plus2Spots,
                       isCurved: true,
                       color: warnaWho.withValues(alpha: 0.55),
+                      barWidth: 1.5,
+                      dashArray: [6, 4],
+                      dotData: const FlDotData(show: false),
+                    ),
+                  // Median WHO (> 24 bulan)
+                  if (medianOver24Spots.isNotEmpty)
+                    LineChartBarData(
+                      spots: medianOver24Spots,
+                      isCurved: true,
+                      color: warnaWhoOver24,
+                      barWidth: 2.5,
+                      dotData: const FlDotData(show: false),
+                    ),
+                  // −2SD WHO (> 24 bulan)
+                  if (minus2Over24Spots.isNotEmpty)
+                    LineChartBarData(
+                      spots: minus2Over24Spots,
+                      isCurved: true,
+                      color: warnaWhoOver24.withValues(alpha: 0.55),
+                      barWidth: 1.5,
+                      dashArray: [6, 4],
+                      dotData: const FlDotData(show: false),
+                    ),
+                  // +2SD WHO (> 24 bulan)
+                  if (plus2Over24Spots.isNotEmpty)
+                    LineChartBarData(
+                      spots: plus2Over24Spots,
+                      isCurved: true,
+                      color: warnaWhoOver24.withValues(alpha: 0.55),
                       barWidth: 1.5,
                       dashArray: [6, 4],
                       dotData: const FlDotData(show: false),
@@ -334,8 +384,8 @@ class _GrowthChartScreenState extends ConsumerState<GrowthChartScreen>
           ),
           const SizedBox(height: 12),
           Text(
-            '*Garis hijau = median, −2SD, dan +2SD WHO Child Growth Standards '
-            '(${isLakiLaki ? 'laki-laki' : 'perempuan'}, 0–24 bulan) — indikatif, '
+            '*Garis hijau = standar WHO (0–24 bulan), garis biru = standar WHO (> 24 bulan) '
+            '(${isLakiLaki ? 'laki-laki' : 'perempuan'}) — indikatif, '
             'bukan diagnosis.',
             style: GoogleFonts.poppins(
               fontSize: 10.5,

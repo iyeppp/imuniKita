@@ -19,33 +19,44 @@ class WhoSeries {
     required this.median,
     required this.minus2Sd,
     required this.plus2Sd,
+    this.startMonth = 0,
   });
 
   /// Label metrik, mis. "Berat Badan".
   final String label;
   final String unit;
 
-  /// Nilai per bulan (indeks = usia bulan 0..24).
+  /// Bulan awal seri ini (default 0 untuk 0–24 bulan, 24 untuk >24 bulan).
+  final int startMonth;
+
+  /// Nilai per bulan (indeks 0 = usia [startMonth] bulan).
   final List<double> median;
   final List<double> minus2Sd;
   final List<double> plus2Sd;
 
   /// Usia tertinggi yang didukung tabel (bulan).
-  int get maxMonth => median.length - 1;
+  int get maxMonth => startMonth + median.length - 1;
 
   /// Interpolasi linear nilai [seri] pada [bulan]. `null` bila di luar rentang.
-  static double? _interpolate(List<double> seri, double bulan) {
-    if (bulan < 0 || bulan > seri.length - 1) return null;
-    final bawah = bulan.floor();
-    final atas = bulan.ceil();
+  static double? _interpolate(
+    List<double> seri,
+    double bulan,
+    int startMonth,
+  ) {
+    final rel = bulan - startMonth;
+    if (rel < 0 || rel > seri.length - 1) return null;
+    final bawah = rel.floor();
+    final atas = rel.ceil();
     if (bawah == atas) return seri[bawah];
-    final rasio = bulan - bawah;
+    final rasio = rel - bawah;
     return seri[bawah] + (seri[atas] - seri[bawah]) * rasio;
   }
 
-  double? medianAt(double bulan) => _interpolate(median, bulan);
-  double? minus2SdAt(double bulan) => _interpolate(minus2Sd, bulan);
-  double? plus2SdAt(double bulan) => _interpolate(plus2Sd, bulan);
+  double? medianAt(double bulan) => _interpolate(median, bulan, startMonth);
+  double? minus2SdAt(double bulan) =>
+      _interpolate(minus2Sd, bulan, startMonth);
+  double? plus2SdAt(double bulan) =>
+      _interpolate(plus2Sd, bulan, startMonth);
 }
 
 /// Akses tabel referensi WHO per metrik & jenis kelamin.
@@ -173,11 +184,177 @@ abstract class WhoGrowthReference {
     ],
   );
 
+  // ── Standar WHO Anak > 24 Bulan (24–60 bulan / 2–5 tahun) ───────────────
+
+  // Berat badan > 24 bulan (kg)
+  static const WhoSeries bbLakiOver24 = WhoSeries(
+    label: 'Berat Badan',
+    unit: 'kg',
+    startMonth: 24,
+    median: [
+      12.2, 12.4, 12.5, 12.7, 12.9, 13.1, 13.3, 13.5, 13.7, 13.8, //
+      14.0, 14.2, 14.3, 14.5, 14.7, 14.8, 15.0, 15.2, 15.3, 15.5, //
+      15.7, 15.8, 16.0, 16.2, 16.3, 16.5, 16.7, 16.8, 17.0, 17.2, //
+      17.3, 17.5, 17.7, 17.9, 18.0, 18.2, 18.3,
+    ],
+    minus2Sd: [
+      9.7, 9.8, 10.0, 10.1, 10.2, 10.4, 10.5, 10.7, 10.8, 10.9, //
+      11.0, 11.2, 11.3, 11.4, 11.5, 11.6, 11.8, 11.9, 12.0, 12.1, //
+      12.2, 12.4, 12.5, 12.6, 12.7, 12.8, 12.9, 13.1, 13.2, 13.3, //
+      13.4, 13.5, 13.7, 13.8, 13.9, 14.0, 14.1,
+    ],
+    plus2Sd: [
+      15.3, 15.5, 15.8, 16.0, 16.3, 16.5, 16.8, 17.0, 17.3, 17.5, //
+      17.8, 18.0, 18.3, 18.5, 18.8, 19.0, 19.3, 19.5, 19.8, 20.1, //
+      20.3, 20.6, 20.9, 21.1, 21.4, 21.7, 22.0, 22.2, 22.5, 22.8, //
+      23.1, 23.4, 23.7, 24.0, 24.3, 24.6, 24.9,
+    ],
+  );
+
+  static const WhoSeries bbPerempuanOver24 = WhoSeries(
+    label: 'Berat Badan',
+    unit: 'kg',
+    startMonth: 24,
+    median: [
+      11.5, 11.7, 11.9, 12.1, 12.3, 12.5, 12.7, 12.9, 13.1, 13.3, //
+      13.5, 13.7, 13.9, 14.0, 14.2, 14.4, 14.6, 14.8, 15.0, 15.2, //
+      15.3, 15.5, 15.7, 15.9, 16.1, 16.3, 16.4, 16.6, 16.8, 17.0, //
+      17.2, 17.4, 17.6, 17.8, 18.0, 18.2, 18.4,
+    ],
+    minus2Sd: [
+      9.0, 9.2, 9.3, 9.4, 9.6, 9.7, 9.8, 10.0, 10.1, 10.2, //
+      10.4, 10.5, 10.7, 10.8, 10.9, 11.1, 11.2, 11.3, 11.5, 11.6, //
+      11.7, 11.8, 12.0, 12.1, 12.2, 12.4, 12.5, 12.6, 12.7, 12.9, //
+      13.0, 13.1, 13.3, 13.4, 13.5, 13.7, 13.8,
+    ],
+    plus2Sd: [
+      14.8, 15.1, 15.4, 15.7, 16.0, 16.3, 16.6, 16.9, 17.2, 17.5, //
+      17.8, 18.1, 18.4, 18.7, 19.0, 19.3, 19.6, 19.9, 20.2, 20.6, //
+      20.9, 21.2, 21.5, 21.9, 22.2, 22.6, 22.9, 23.3, 23.6, 24.0, //
+      24.4, 24.8, 25.1, 25.5, 25.9, 26.3, 26.7,
+    ],
+  );
+
+  // Tinggi/panjang badan > 24 bulan (cm)
+  static const WhoSeries tbLakiOver24 = WhoSeries(
+    label: 'Tinggi Badan',
+    unit: 'cm',
+    startMonth: 24,
+    median: [
+      87.8, 88.8, 89.6, 90.5, 91.3, 92.1, 92.9, 93.6, 94.4, 95.1, //
+      95.8, 96.5, 97.2, 97.9, 98.6, 99.2, 99.9, 100.5, 101.2, 101.8, //
+      102.4, 103.0, 103.6, 104.2, 104.8, 105.4, 106.0, 106.5, 107.1, 107.7, //
+      108.2, 108.8, 109.3, 109.9, 110.4, 110.9, 111.5,
+    ],
+    minus2Sd: [
+      81.7, 82.5, 83.3, 84.1, 84.9, 85.6, 86.3, 87.0, 87.7, 88.4, //
+      89.0, 89.7, 90.3, 90.9, 91.5, 92.1, 92.7, 93.3, 93.9, 94.5, //
+      95.0, 95.6, 96.1, 96.7, 97.2, 97.7, 98.2, 98.7, 99.2, 99.7, //
+      100.2, 100.7, 101.2, 101.7, 102.1, 102.6, 103.1,
+    ],
+    plus2Sd: [
+      93.9, 95.0, 95.9, 96.9, 97.8, 98.7, 99.5, 100.3, 101.1, 101.9, //
+      102.7, 103.4, 104.2, 104.9, 105.7, 106.4, 107.1, 107.8, 108.5, 109.2, //
+      109.9, 110.5, 111.2, 111.8, 112.5, 113.1, 113.7, 114.4, 115.0, 115.6, //
+      116.2, 116.8, 117.4, 118.0, 118.6, 119.2, 119.8,
+    ],
+  );
+
+  static const WhoSeries tbPerempuanOver24 = WhoSeries(
+    label: 'Tinggi Badan',
+    unit: 'cm',
+    startMonth: 24,
+    median: [
+      86.4, 87.5, 88.4, 89.3, 90.1, 91.0, 91.8, 92.5, 93.3, 94.0, //
+      94.7, 95.4, 96.1, 96.8, 97.4, 98.1, 98.7, 99.4, 100.0, 100.6, //
+      101.2, 101.8, 102.4, 103.0, 103.6, 104.2, 104.7, 105.3, 105.8, 106.4, //
+      106.9, 107.4, 108.0, 108.5, 109.0, 109.5, 110.0,
+    ],
+    minus2Sd: [
+      80.0, 81.0, 81.8, 82.6, 83.4, 84.2, 84.9, 85.6, 86.3, 87.0, //
+      87.6, 88.3, 88.9, 89.5, 90.1, 90.7, 91.3, 91.9, 92.4, 93.0, //
+      93.5, 94.1, 94.6, 95.1, 95.6, 96.1, 96.6, 97.1, 97.6, 98.1, //
+      98.5, 99.0, 99.5, 99.9, 100.4, 100.8, 101.3,
+    ],
+    plus2Sd: [
+      92.9, 94.0, 95.0, 96.0, 96.9, 97.8, 98.6, 99.4, 100.2, 101.0, //
+      101.8, 102.5, 103.3, 104.0, 104.8, 105.5, 106.2, 106.9, 107.6, 108.2, //
+      108.9, 109.6, 110.2, 110.8, 111.5, 112.1, 112.7, 113.3, 114.0, 114.6, //
+      115.2, 115.8, 116.4, 117.0, 117.6, 118.2, 118.8,
+    ],
+  );
+
+  // Lingkar kepala > 24 bulan (cm)
+  static const WhoSeries lkLakiOver24 = WhoSeries(
+    label: 'Lingkar Kepala',
+    unit: 'cm',
+    startMonth: 24,
+    median: [
+      48.3, 48.4, 48.5, 48.6, 48.7, 48.8, 48.9, 49.0, 49.1, 49.2, //
+      49.3, 49.4, 49.5, 49.5, 49.6, 49.7, 49.8, 49.8, 49.9, 50.0, //
+      50.0, 50.1, 50.1, 50.2, 50.2, 50.3, 50.3, 50.4, 50.4, 50.5, //
+      50.5, 50.6, 50.6, 50.7, 50.7, 50.7, 50.8,
+    ],
+    minus2Sd: [
+      45.8, 45.9, 46.0, 46.1, 46.2, 46.3, 46.4, 46.5, 46.6, 46.7, //
+      46.7, 46.8, 46.9, 47.0, 47.0, 47.1, 47.2, 47.2, 47.3, 47.3, //
+      47.4, 47.4, 47.5, 47.5, 47.6, 47.6, 47.7, 47.7, 47.7, 47.8, //
+      47.8, 47.8, 47.9, 47.9, 47.9, 48.0, 48.0,
+    ],
+    plus2Sd: [
+      50.9, 51.0, 51.1, 51.2, 51.3, 51.4, 51.5, 51.6, 51.7, 51.8, //
+      51.8, 51.9, 52.0, 52.1, 52.1, 52.2, 52.3, 52.3, 52.4, 52.5, //
+      52.5, 52.6, 52.6, 52.7, 52.7, 52.8, 52.8, 52.9, 52.9, 53.0, //
+      53.0, 53.0, 53.1, 53.1, 53.1, 53.2, 53.2,
+    ],
+  );
+
+  static const WhoSeries lkPerempuanOver24 = WhoSeries(
+    label: 'Lingkar Kepala',
+    unit: 'cm',
+    startMonth: 24,
+    median: [
+      47.2, 47.3, 47.4, 47.5, 47.6, 47.7, 47.8, 47.9, 48.0, 48.1, //
+      48.2, 48.3, 48.4, 48.4, 48.5, 48.6, 48.6, 48.7, 48.8, 48.8, //
+      48.9, 48.9, 49.0, 49.0, 49.1, 49.1, 49.2, 49.2, 49.3, 49.3, //
+      49.4, 49.4, 49.5, 49.5, 49.5, 49.6, 49.6,
+    ],
+    minus2Sd: [
+      44.3, 44.4, 44.5, 44.6, 44.7, 44.8, 44.9, 45.0, 45.1, 45.1, //
+      45.2, 45.3, 45.4, 45.4, 45.5, 45.5, 45.6, 45.6, 45.7, 45.7, //
+      45.8, 45.8, 45.9, 45.9, 45.9, 46.0, 46.0, 46.1, 46.1, 46.1, //
+      46.2, 46.2, 46.2, 46.3, 46.3, 46.3, 46.4,
+    ],
+    plus2Sd: [
+      49.6, 49.7, 49.8, 50.0, 50.1, 50.2, 50.3, 50.4, 50.5, 50.6, //
+      50.7, 50.8, 50.9, 50.9, 51.0, 51.1, 51.1, 51.2, 51.3, 51.3, //
+      51.4, 51.4, 51.5, 51.5, 51.6, 51.6, 51.7, 51.7, 51.8, 51.8, //
+      51.8, 51.9, 51.9, 52.0, 52.0, 52.0, 52.1,
+    ],
+  );
+
   /// Mode grafik di `GrowthChartScreen` → seri WHO yang sesuai.
   ///
   /// [isLakiLaki] menentukan tabel yang dipakai (standar WHO dipisah per jenis
-  /// kelamin).
-  static WhoSeries? forMode(String mode, {required bool isLakiLaki}) {
+  /// kelamin). Bila [over24] bernilai true, mengembalikan standar WHO untuk usia
+  /// > 24 bulan (24–60 bulan).
+  static WhoSeries? forMode(
+    String mode, {
+    required bool isLakiLaki,
+    bool over24 = false,
+  }) {
+    if (over24) {
+      switch (mode) {
+        case 'BB':
+          return isLakiLaki ? bbLakiOver24 : bbPerempuanOver24;
+        case 'TB':
+          return isLakiLaki ? tbLakiOver24 : tbPerempuanOver24;
+        case 'LK':
+          return isLakiLaki ? lkLakiOver24 : lkPerempuanOver24;
+        default:
+          return null;
+      }
+    }
     switch (mode) {
       case 'BB':
         return isLakiLaki ? bbLaki : bbPerempuan;
