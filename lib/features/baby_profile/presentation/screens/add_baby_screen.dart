@@ -176,7 +176,7 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.backgroundOf(context),
       appBar: AppBar(
         title: Text(
           'Tambah Profil Bayi',
@@ -197,7 +197,7 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     fontSize: 14,
-                    color: AppColors.textSecondary,
+                    color: AppColors.textSecondaryOf(context),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -286,7 +286,7 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.darkText,
+                    color: AppColors.darkTextOf(context),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -295,9 +295,9 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
                   child: InputDecorator(
                     decoration: InputDecoration(
                       hintText: 'Pilih tanggal lahir',
-                      suffixIcon: const Icon(
+                      suffixIcon: Icon(
                         Icons.calendar_month_rounded,
-                        color: AppColors.darkText,
+                        color: AppColors.darkTextOf(context),
                       ),
                       errorText: _showDateError
                           ? 'Tanggal lahir wajib dipilih'
@@ -309,8 +309,8 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
                           : 'Pilih tanggal lahir',
                       style: GoogleFonts.poppins(
                         color: _tanggalLahir != null
-                            ? AppColors.darkText
-                            : AppColors.textHint,
+                            ? AppColors.darkTextOf(context)
+                            : AppColors.textHintOf(context),
                       ),
                     ),
                   ),
@@ -323,7 +323,7 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryLighter,
+                      color: AppColors.primaryLighterOf(context),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -339,7 +339,7 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
                           style: GoogleFonts.poppins(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.darkText,
+                            color: AppColors.darkTextOf(context),
                           ),
                         ),
                       ],
@@ -354,7 +354,7 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.darkText,
+                    color: AppColors.darkTextOf(context),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -397,10 +397,10 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: _isLoading
                         ? null
-                        : const [
+                        : [
                             BoxShadow(
-                              color: AppColors.darkText,
-                              offset: Offset(3, 3),
+                              color: AppColors.shadowOf(context),
+                              offset: const Offset(3, 3),
                               blurRadius: 0,
                             ),
                           ],
@@ -409,8 +409,8 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
                     onPressed: _isLoading ? null : _handleSave,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      side: const BorderSide(
-                        color: AppColors.darkText,
+                      side: BorderSide(
+                        color: AppColors.darkTextOf(context),
                         width: 2,
                       ),
                       shape: RoundedRectangleBorder(
@@ -421,11 +421,11 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
                       ),
                     ),
                     child: _isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                             height: 24,
                             width: 24,
                             child: CircularProgressIndicator(
-                              color: AppColors.darkText,
+                              color: AppColors.darkTextOf(context),
                               strokeWidth: 2.5,
                             ),
                           )
@@ -433,7 +433,7 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
                             'Simpan Profil',
                             style: GoogleFonts.poppins(
                               fontWeight: FontWeight.bold,
-                              color: AppColors.darkText,
+                              color: AppColors.darkTextOf(context),
                             ),
                           ),
                   ),
@@ -471,14 +471,14 @@ class _GenderOption extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : AppColors.surface,
+          color: selected ? AppColors.primary : AppColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.darkText, width: 2),
+          border: Border.all(color: AppColors.darkTextOf(context), width: 2),
           boxShadow: selected
-              ? const [
+              ? [
                   BoxShadow(
-                    color: AppColors.darkText,
-                    offset: Offset(3, 3),
+                    color: AppColors.shadowOf(context),
+                    offset: const Offset(3, 3),
                     blurRadius: 0,
                   ),
                 ]
@@ -486,13 +486,13 @@ class _GenderOption extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon, color: AppColors.darkText),
+            Icon(icon, color: AppColors.darkTextOf(context)),
             const SizedBox(height: 4),
             Text(
               label,
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.w600,
-                color: AppColors.darkText,
+                color: AppColors.darkTextOf(context),
               ),
             ),
           ],

@@ -15,9 +15,40 @@ class JournalListScreen extends ConsumerWidget {
     final babiesAsync = ref.watch(babyNotifierProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.backgroundOf(context),
       appBar: AppBar(
+<<<<<<< Updated upstream
         title: Text('Jurnal Kesehatan', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+=======
+        leading: IconButton(
+          tooltip: 'Kembali',
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.canPop()
+              ? context.pop()
+              : context.go(AppRoutes.dashboard),
+        ),
+        title: Text(
+          'Jurnal Kesehatan',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: IconButton(
+              tooltip: 'Tambah Jurnal',
+              style: IconButton.styleFrom(
+                backgroundColor: AppColors.coral,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              icon: const Icon(Icons.add, size: 22),
+              onPressed: () => context.push(AppRoutes.addJournal),
+            ),
+          ),
+        ],
+>>>>>>> Stashed changes
       ),
       body: babiesAsync.when(
         data: (babies) {
@@ -72,6 +103,7 @@ class JournalListScreen extends ConsumerWidget {
                               children: [
                                 Text(
                                   '${item.tanggalCatatan.day}/${item.tanggalCatatan.month}/${item.tanggalCatatan.year}',
+<<<<<<< Updated upstream
                                   style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textSecondary),
                                 ),
                                 if (item.suhuTubuh != null)
@@ -83,17 +115,60 @@ class JournalListScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 8),
                             Text(item.isiCatatan, style: GoogleFonts.poppins(fontSize: 14, color: AppColors.darkText)),
+=======
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: AppColors.textSecondaryOf(context),
+                                  ),
+                                ),
+                                if (item.suhuTubuh != null)
+                                  StatusBadge(
+                                    label: '${item.suhuTubuh}°C',
+                                    color: item.suhuTubuh! >= 37.5
+                                        ? AppColors.red
+                                        : AppColors.teal,
+                                    compact: true,
+                                    textColor: AppColors.darkTextOf(context),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              item.isiCatatan,
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                color: AppColors.darkTextOf(context),
+                              ),
+                            ),
+>>>>>>> Stashed changes
                             if (item.gejala.isNotEmpty) ...[
                               const SizedBox(height: 10),
                               Wrap(
                                 spacing: 6,
                                 runSpacing: 4,
+<<<<<<< Updated upstream
                                 children: item.gejala.map((g) => Chip(
                                   label: Text(g, style: const TextStyle(fontSize: 11)),
                                   padding: EdgeInsets.zero,
                                 )).toList(),
                               )
                             ]
+=======
+                                children: item.gejala
+                                    .map(
+                                      (g) => StatusBadge(
+                                        label: g,
+                                        color: AppColors.teal,
+                                        compact: true,
+                                        style: StatusBadgeStyle.soft,
+                                        textColor: AppColors.darkTextOf(context),
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            ],
+>>>>>>> Stashed changes
                           ],
                         ),
                       ),

@@ -44,7 +44,7 @@ class LabeledTextField extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: AppColors.darkText,
+            color: AppColors.textPrimaryOf(context),
           ),
         ),
         const SizedBox(height: 6),

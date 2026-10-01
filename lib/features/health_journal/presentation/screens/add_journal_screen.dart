@@ -74,12 +74,39 @@ class _AddJournalScreenState extends ConsumerState<AddJournalScreen> {
     final babiesAsync = ref.watch(babyNotifierProvider);
 
     return Scaffold(
+<<<<<<< Updated upstream
       backgroundColor: AppColors.background,
       appBar: AppBar(title: Text('Tambah Jurnal Sehat', style: GoogleFonts.poppins(fontWeight: FontWeight.bold))),
       body: babiesAsync.when(
         data: (babies) {
           if (babies.isEmpty) return const Center(child: Text('Belum ada profil anak.'));
           final currentBaby = babies.first;
+=======
+      backgroundColor: AppColors.backgroundOf(context),
+      appBar: AppBar(
+        leading: IconButton(
+          tooltip: 'Kembali',
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go(AppRoutes.journal),
+        ),
+        title: Text(
+          'Tambah Jurnal Sehat',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: babyAsync.when(
+        data: (currentBaby) {
+          if (currentBaby == null) {
+            return EmptyStateWidget(
+              icon: Icons.child_care,
+              title: 'Belum ada profil anak',
+              message: 'Tambahkan profil anak sebelum mencatat jurnal.',
+              actionLabel: 'Tambah Profil Anak',
+              onAction: () => context.push(AppRoutes.addBaby),
+            );
+          }
+>>>>>>> Stashed changes
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
@@ -114,6 +141,7 @@ class _AddJournalScreenState extends ConsumerState<AddJournalScreen> {
                       ),
                       const SizedBox(height: 20),
 
+<<<<<<< Updated upstream
                       Text('Pilih Gejala yang Timbul:', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.darkText)),
                       const SizedBox(height: 8),
                       Wrap(
@@ -137,6 +165,38 @@ class _AddJournalScreenState extends ConsumerState<AddJournalScreen> {
                         }).toList(),
                       ),
                       const SizedBox(height: 20),
+=======
+                        Text(
+                          'Pilih Gejala yang Timbul:',
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: AppColors.darkTextOf(context),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 4,
+                          children: _daftarGejala.map((gejala) {
+                            final isSelected = _selectedGejala.contains(gejala);
+                            return FilterChip(
+                              label: Text(gejala),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                setState(() {
+                                  if (selected) {
+                                    _selectedGejala.add(gejala);
+                                  } else {
+                                    _selectedGejala.remove(gejala);
+                                  }
+                                });
+                              },
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 20),
+>>>>>>> Stashed changes
 
                       TextFormField(
                         controller: _catatanController,
@@ -146,12 +206,27 @@ class _AddJournalScreenState extends ConsumerState<AddJournalScreen> {
                       ),
                       const SizedBox(height: 32),
 
+<<<<<<< Updated upstream
                       ElevatedButton(
                         onPressed: () => _saveJournal(currentBaby.babyId),
                         style: ElevatedButton.styleFrom(backgroundColor: AppColors.yellow, foregroundColor: AppColors.darkText),
                         child: const Text('Simpan Catatan Jurnal'),
                       )
                     ],
+=======
+                        ElevatedButton(
+                          onPressed: _menyimpan
+                              ? null
+                              : () => _saveJournal(currentBaby.babyId),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.yellow,
+                            foregroundColor: AppColors.darkTextOf(context),
+                          ),
+                          child: const Text('Simpan Catatan Jurnal'),
+                        ),
+                      ],
+                    ),
+>>>>>>> Stashed changes
                   ),
                 ),
               ),

@@ -14,7 +14,13 @@ class ImuniKitaApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'ImuniKita',
       theme: AppTheme.lightTheme,
+<<<<<<< Updated upstream
       routerConfig: router,
+=======
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
+      routerConfig: _router,
+>>>>>>> Stashed changes
       debugShowCheckedModeBanner: false,
     );
   }

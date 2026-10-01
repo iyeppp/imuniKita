@@ -100,7 +100,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+<<<<<<< Updated upstream
       backgroundColor: AppColors.background,
+=======
+      backgroundColor: AppColors.backgroundOf(context),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          tooltip: 'Kembali',
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go(AppRoutes.login),
+        ),
+      ),
+>>>>>>> Stashed changes
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -117,7 +131,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     style: GoogleFonts.baloo2(
                       fontSize: 28,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.darkText,
+                      color: AppColors.textPrimaryOf(context),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -126,7 +140,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
                       fontSize: 14,
-                      color: AppColors.textSecondary,
+                      color: AppColors.textSecondaryOf(context),
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -181,7 +195,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         _obscurePassword
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
-                        color: AppColors.darkText,
+                        color: AppColors.darkTextOf(context),
                       ),
                       onPressed: () =>
                           setState(() => _obscurePassword = !_obscurePassword),
@@ -201,7 +215,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         _obscureConfirmPassword
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
-                        color: AppColors.darkText,
+                        color: AppColors.darkTextOf(context),
                       ),
                       onPressed: () => setState(() =>
                           _obscureConfirmPassword = !_obscureConfirmPassword),
@@ -230,7 +244,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         'Sudah punya akun? ',
                         style: GoogleFonts.poppins(
                           fontSize: 14,
-                          color: AppColors.textSecondary,
+                          color: AppColors.textSecondaryOf(context),
                         ),
                       ),
                       GestureDetector(

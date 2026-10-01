@@ -60,7 +60,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final media = MediaQuery.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.backgroundOf(context),
       body: SafeArea(
         child: Column(
           children: [
@@ -76,7 +76,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         child: Text(
                           'Lewati',
                           style: GoogleFonts.poppins(
-                            color: AppColors.darkText,
+                            color: AppColors.textPrimaryOf(context),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -135,7 +135,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           style: GoogleFonts.baloo2(
                             fontSize: 28,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.darkText,
+                            color: AppColors.textPrimaryOf(context),
                             height: 1.2,
                           ),
                         ),
@@ -148,7 +148,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           style: GoogleFonts.poppins(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
-                            color: AppColors.textSecondary,
+                            color: AppColors.textSecondaryOf(context),
                             height: 1.5,
                           ),
                         ),

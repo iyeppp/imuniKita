@@ -14,7 +14,7 @@ class VaccineTimelineScreen extends ConsumerWidget {
     final babiesAsync = ref.watch(babyNotifierProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.backgroundOf(context),
       appBar: AppBar(
         title: Text('Timeline Imunisasi', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
       ),

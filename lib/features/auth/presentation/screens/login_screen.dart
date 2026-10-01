@@ -106,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.backgroundOf(context),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -124,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: GoogleFonts.baloo2(
                       fontSize: 26,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.darkText,
+                      color: AppColors.textPrimaryOf(context),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -133,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
                       fontSize: 14,
-                      color: AppColors.textSecondary,
+                      color: AppColors.textSecondaryOf(context),
                     ),
                   ),
                   const SizedBox(height: 36),
@@ -144,9 +144,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _emailController,
                     hint: 'nama@email.com',
                     keyboardType: TextInputType.emailAddress,
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.email_outlined,
-                      color: AppColors.darkText,
+                      color: AppColors.textSecondaryOf(context),
                     ),
                     validator: AuthValidators.email,
                   ),
@@ -158,16 +158,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _passwordController,
                     hint: '••••••••',
                     obscureText: _obscurePassword,
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.lock_outline,
-                      color: AppColors.darkText,
+                      color: AppColors.textSecondaryOf(context),
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
-                        color: AppColors.darkText,
+                        color: AppColors.textSecondaryOf(context),
                       ),
                       onPressed: () {
                         setState(() {
@@ -196,7 +196,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         'Belum punya akun? ',
                         style: GoogleFonts.poppins(
                           fontSize: 14,
-                          color: AppColors.textSecondary,
+                          color: AppColors.textSecondaryOf(context),
                         ),
                       ),
                       GestureDetector(

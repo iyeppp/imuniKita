@@ -73,6 +73,7 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
   Widget build(BuildContext context) {
     // Search record matches by scheduleId directly
     return Scaffold(
+<<<<<<< Updated upstream
       backgroundColor: AppColors.background,
       appBar: AppBar(title: Text('Detail Imunisasi', style: GoogleFonts.poppins(fontWeight: FontWeight.bold))),
       body: FutureBuilder<Box<VaccineScheduleModel>>(
@@ -81,6 +82,33 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
           final box = snapshot.data!;
           final item = box.get(widget.scheduleId);
+=======
+      backgroundColor: AppColors.backgroundOf(context),
+      appBar: AppBar(
+        leading: IconButton(
+          tooltip: 'Kembali',
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go(AppRoutes.calendar),
+        ),
+        title: Text(
+          'Detail Imunisasi',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: LoadingOverlay(
+        isLoading: _menyimpan,
+        message: 'Menyimpan perubahan…',
+        child: jadwalAsync.when(
+          data: (item) {
+            if (item == null) {
+              return const EmptyStateWidget(
+                icon: Icons.event_busy,
+                title: 'Jadwal tidak ditemukan',
+                message: 'Jadwal imunisasi yang kamu cari tidak tersedia.',
+              );
+            }
+>>>>>>> Stashed changes
 
           if (item == null) return const Center(child: Text('Jadwal tidak ditemukan.'));
 
@@ -130,6 +158,7 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
                               keyboardType: TextInputType.number,
                               decoration: const InputDecoration(labelText: 'Suhu Tubuh (°C) - Opsional', hintText: 'Contoh: 37.5'),
                             ),
+<<<<<<< Updated upstream
                             const SizedBox(height: 16),
                             Text('Gejala yang Timbul:', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 13)),
                             const SizedBox(height: 6),
@@ -151,6 +180,35 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
                                   },
                                 );
                               }).toList(),
+=======
+                          ),
+                          const SizedBox(height: 4),
+                          // Tanggal target -- Fix checklist #3.3
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.calendar_today_outlined,
+                                size: 14,
+                                color: AppColors.teal,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Tanggal Target: ${item.tanggalTarget.day}/${item.tanggalTarget.month}/${item.tanggalTarget.year}',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  color: AppColors.teal,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            item.deskripsi,
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              color: AppColors.textSecondaryOf(context),
+>>>>>>> Stashed changes
                             ),
                             const SizedBox(height: 16),
                             TextFormField(
@@ -183,12 +241,154 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
                         ],
                       ),
                     ),
+<<<<<<< Updated upstream
                   )
                 ]
               ],
             ),
           );
         },
+=======
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Form KIPI — hanya untuk jadwal yang belum selesai.
+                  if (item.status != VaccineStatus.selesai) ...[
+                    const SectionHeader(
+                      title:
+                          'Tandai Sudah Diberikan & Catat Efek Samping (KIPI)',
+                    ),
+                    const SizedBox(height: 8),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Form(
+                          key: _kipiFormKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              CustomTextField(
+                                label: 'Suhu Tubuh (°C) - Opsional',
+                                controller: _suhuController,
+                                hint: 'Contoh: 37.5',
+                                keyboardType: TextInputType.number,
+                                enabled: !_menyimpan,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Gejala yang Timbul:',
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Wrap(
+                                spacing: 8,
+                                children: _daftarGejala.map((gejala) {
+                                  final isSelected = _selectedGejala.contains(
+                                    gejala,
+                                  );
+                                  return ChoiceChip(
+                                    label: Text(gejala),
+                                    selected: isSelected,
+                                    onSelected: (selected) {
+                                      setState(() {
+                                        if (selected) {
+                                          _selectedGejala.add(gejala);
+                                        } else {
+                                          _selectedGejala.remove(gejala);
+                                        }
+                                      });
+                                    },
+                                  );
+                                }).toList(),
+                              ),
+                              const SizedBox(height: 16),
+                              CustomTextField(
+                                label: 'Catatan Reaksi / Kondisi Anak',
+                                controller: _catatanController,
+                                hint: 'Tulis reaksi pasca imunisasi di sini...',
+                                maxLines: 3,
+                                enabled: !_menyimpan,
+                                validator: (value) =>
+                                    value == null || value.trim().isEmpty
+                                    ? 'Catatan kondisi wajib diisi'
+                                    : null,
+                              ),
+                              const SizedBox(height: 20),
+                              ElevatedButton(
+                                onPressed: () => _submitKipi(item),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.teal,
+                                ),
+                                child: const Text(
+                                  'Simpan & Selesaikan Imunisasi',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ] else ...[
+                    Card(
+                      color: AppColors.green.withValues(alpha: 0.1),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Icon(
+                                  Icons.check_circle,
+                                  color: AppColors.green,
+                                  size: 28,
+                                ),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Imunisasi ini telah berhasil diselesaikan. ✓',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (item.tanggalRealisasi != null) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                'Tanggal diberikan: ${item.tanggalRealisasi!.day}/${item.tanggalRealisasi!.month}/${item.tanggalRealisasi!.year}',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  color: AppColors.textSecondaryOf(context),
+                                ),
+                              ),
+                            ],
+                            if (item.catatanReaksi != null &&
+                                item.catatanReaksi!.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                'Catatan: ${item.catatanReaksi}',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  color: AppColors.textSecondaryOf(context),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+          loading: () => const AppLoadingIndicator(),
+          error: (err, _) =>
+              ErrorStateWidget(message: 'Gagal memuat jadwal: $err'),
+        ),
+>>>>>>> Stashed changes
       ),
     );
   }
