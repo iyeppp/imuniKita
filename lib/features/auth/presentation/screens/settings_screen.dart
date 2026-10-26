@@ -108,8 +108,9 @@ class SettingsScreen extends ConsumerWidget {
         ),
       ),
       bottomNavigationBar: const AppBottomNavBar(currentIndex: 4),
-    );
-  }
+    ),
+  );
+}
 }
 
 // ───────────────────────────────────────────────────────────────────────────

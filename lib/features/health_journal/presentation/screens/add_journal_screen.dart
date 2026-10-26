@@ -250,6 +250,7 @@ class _AddJournalScreenState extends ConsumerState<AddJournalScreen> {
         loading: () => const AppLoadingIndicator(),
         error: (err, _) => ErrorStateWidget(message: '$err'),
       ),
-    );
-  }
+    ),
+  );
+}
 }

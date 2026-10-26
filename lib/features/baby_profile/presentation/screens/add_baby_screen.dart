@@ -439,8 +439,9 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 /// Toggle kartu pilihan jenis kelamin (L/P) bergaya neo-brutalist konsisten

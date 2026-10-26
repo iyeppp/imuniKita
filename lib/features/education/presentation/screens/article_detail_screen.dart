@@ -170,10 +170,10 @@ class ArticleDetailScreen extends ConsumerWidget {
                       ),
                       ...terkait.map((item) => _TerkaitCard(artikel: item)),
                     ],
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       );

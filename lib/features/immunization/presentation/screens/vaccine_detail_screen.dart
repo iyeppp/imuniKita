@@ -383,6 +383,7 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
               ErrorStateWidget(message: 'Gagal memuat jadwal: $err'),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

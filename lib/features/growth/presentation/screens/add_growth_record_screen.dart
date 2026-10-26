@@ -326,6 +326,7 @@ class _AddGrowthRecordScreenState extends ConsumerState<AddGrowthRecordScreen> {
         loading: () => const AppLoadingIndicator(),
         error: (err, _) => ErrorStateWidget(message: '$err'),
       ),
-    );
-  }
+    ),
+  );
+}
 }

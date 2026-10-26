@@ -195,6 +195,7 @@ class JournalListScreen extends ConsumerWidget {
         loading: () => const AppLoadingIndicator(),
         error: (err, _) => ErrorStateWidget(message: '$err'),
       ),
-    );
-  }
+    ),
+  );
+}
 }

@@ -372,6 +372,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         error: (err, _) => ErrorStateWidget(message: '$err'),
       ),
       bottomNavigationBar: const AppBottomNavBar(currentIndex: 1),
-    );
-  }
+    ),
+  );
+}
 }
