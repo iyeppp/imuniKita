@@ -19,38 +19,48 @@ class JournalListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final babyAsync = ref.watch(activeBabyProvider);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        leading: IconButton(
-          tooltip: 'Kembali',
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.canPop()
-              ? context.pop()
-              : context.go(AppRoutes.dashboard),
-        ),
-        title: Text(
-          'Jurnal Kesehatan',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: IconButton(
-              tooltip: 'Tambah Jurnal',
-              style: IconButton.styleFrom(
-                backgroundColor: AppColors.coral,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              icon: const Icon(Icons.add, size: 22),
-              onPressed: () => context.push(AppRoutes.addJournal),
-            ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.dashboard);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: AppBar(
+          leading: IconButton(
+            tooltip: 'Kembali',
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.canPop()
+                ? context.pop()
+                : context.go(AppRoutes.dashboard),
           ),
-        ],
-      ),
+          title: Text(
+            'Jurnal Kesehatan',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: IconButton(
+                tooltip: 'Tambah Jurnal',
+                style: IconButton.styleFrom(
+                  backgroundColor: AppColors.coral,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.add, size: 22),
+                onPressed: () => context.push(AppRoutes.addJournal),
+              ),
+            ),
+          ],
+        ),
       body: babyAsync.when(
         data: (currentBaby) {
           if (currentBaby == null) {
@@ -149,7 +159,7 @@ class JournalListScreen extends ConsumerWidget {
                               item.isiCatatan,
                               style: GoogleFonts.poppins(
                                 fontSize: 14,
-                                color: AppColors.darkText,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                             if (item.gejala.isNotEmpty) ...[

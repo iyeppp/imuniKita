@@ -37,7 +37,7 @@ class DashboardScreen extends ConsumerWidget {
     final babyAsync = ref.watch(activeBabyProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: babyAsync.when(
           data: (currentBaby) {
@@ -94,7 +94,7 @@ class DashboardScreen extends ConsumerWidget {
                                       _getGreeting(),
                                       style: GoogleFonts.poppins(
                                         fontSize: 12,
-                                        color: AppColors.textSecondary,
+                                        color: context.secondaryTextColor,
                                       ),
                                     ),
                                     Text(
@@ -102,14 +102,14 @@ class DashboardScreen extends ConsumerWidget {
                                       style: GoogleFonts.baloo2(
                                         fontSize: 20,
                                         fontWeight: FontWeight.w800,
-                                        color: AppColors.darkText,
+                                        color: context.primaryTextColor,
                                       ),
                                     ),
                                     Text(
                                       '${currentBaby.jenisKelamin == "L" ? "Laki-laki" : "Perempuan"} • ${AgeCalculator.label(currentBaby.tanggalLahir)}',
                                       style: GoogleFonts.poppins(
                                         fontSize: 12,
-                                        color: AppColors.textSecondary,
+                                        color: context.secondaryTextColor,
                                       ),
                                     ),
                                   ],
@@ -117,7 +117,7 @@ class DashboardScreen extends ConsumerWidget {
                               ),
                               // Shortcut Ganti Bayi
                               Material(
-                                color: Colors.white,
+                                color: context.cardBackgroundColor,
                                 borderRadius: BorderRadius.circular(20),
                                 elevation: 0.5,
                                 child: InkWell(
@@ -219,7 +219,7 @@ class DashboardScreen extends ConsumerWidget {
                           showMeta: false,
                           backgroundColor: isWarning
                               ? AppColors.yellow.withValues(alpha: 0.2)
-                              : Colors.white,
+                              : context.cardBackgroundColor,
                           onTap: () => context.push(
                             '${AppRoutes.calendar}?date=${nextVaccine.tanggalTarget.toIso8601String()}',
                             extra: nextVaccine.tanggalTarget,
@@ -244,7 +244,7 @@ class DashboardScreen extends ConsumerWidget {
                                 'Target: ${DateFormatter.formatLong(nextVaccine.tanggalTarget)}',
                                 style: GoogleFonts.poppins(
                                   fontSize: 12,
-                                  color: AppColors.textSecondary,
+                                  color: context.secondaryTextColor,
                                 ),
                               ),
                               Row(
@@ -363,16 +363,19 @@ class DashboardScreen extends ConsumerWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 _buildGrowthMetric(
+                                  context,
                                   'Berat Badan',
                                   '${latest.beratBadan} kg',
                                   Icons.scale,
                                 ),
                                 _buildGrowthMetric(
+                                  context,
                                   'Tinggi Badan',
                                   '${latest.tinggiBadan} cm',
                                   Icons.straighten,
                                 ),
                                 _buildGrowthMetric(
+                                  context,
                                   'Lingkar Kepala',
                                   latest.lingkarKepala != null
                                       ? '${latest.lingkarKepala} cm'
@@ -413,7 +416,7 @@ class DashboardScreen extends ConsumerWidget {
     IconData icon,
     Color color,
     String route, {
-    bool push = false,
+    bool push = true,
   }) {
     return GestureDetector(
       onTap: () => push ? context.push(route) : context.go(route),
@@ -433,7 +436,7 @@ class DashboardScreen extends ConsumerWidget {
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
-                color: AppColors.darkText,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ],
@@ -442,7 +445,7 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildGrowthMetric(String label, String value, IconData icon) {
+  Widget _buildGrowthMetric(BuildContext context, String label, String value, IconData icon) {
     return Column(
       children: [
         Icon(icon, color: AppColors.coral, size: 28),
@@ -451,7 +454,7 @@ class DashboardScreen extends ConsumerWidget {
           label,
           style: GoogleFonts.poppins(
             fontSize: 11,
-            color: AppColors.textSecondary,
+            color: context.secondaryTextColor,
           ),
         ),
         Text(
@@ -459,7 +462,7 @@ class DashboardScreen extends ConsumerWidget {
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             fontSize: 15,
-            color: AppColors.darkText,
+            color: context.primaryTextColor,
           ),
         ),
       ],
@@ -473,7 +476,7 @@ class DashboardScreen extends ConsumerWidget {
   ) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -499,7 +502,7 @@ class DashboardScreen extends ConsumerWidget {
                           style: GoogleFonts.baloo2(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.darkText,
+                            color: context.primaryTextColor,
                           ),
                         ),
                         IconButton(
@@ -544,14 +547,14 @@ class DashboardScreen extends ConsumerWidget {
                                       : FontWeight.w500,
                                   color: isSelected
                                       ? AppColors.teal
-                                      : AppColors.darkText,
+                                      : context.primaryTextColor,
                                 ),
                               ),
                               subtitle: Text(
                                 '${baby.jenisKelamin == "L" ? "Laki-laki" : "Perempuan"} • ${AgeCalculator.label(baby.tanggalLahir)}',
                                 style: GoogleFonts.poppins(
                                   fontSize: 12,
-                                  color: AppColors.textSecondary,
+                                  color: context.secondaryTextColor,
                                 ),
                               ),
                               trailing: isSelected

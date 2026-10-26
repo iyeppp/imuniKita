@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../widgets/app_bottom_nav_bar.dart';
 import '../../../../widgets/empty_state_widget.dart';
@@ -12,6 +14,7 @@ import '../../../../widgets/status_badge.dart';
 import '../../data/datasources/faskes_mock_datasource.dart';
 import '../../data/models/faskes_model.dart';
 import '../providers/faskes_provider.dart';
+
 
 // ── Konstanta tampilan ────────────────────────────────────────────────────
 
@@ -113,7 +116,7 @@ class _FaskesScreenState extends ConsumerState<FaskesScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.background,
+      backgroundColor: context.cardBackgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -129,34 +132,45 @@ class _FaskesScreenState extends ConsumerState<FaskesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        automaticallyImplyLeading: false,
-        title: Text(
-          'Direktori Faskes',
-          style: GoogleFonts.baloo2(
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-            color: AppColors.darkText,
-          ),
-        ),
-        actions: [
-          IconButton(
-            tooltip: _showMap ? 'Tampilan Daftar' : 'Tampilan Peta',
-            icon: Icon(
-              _showMap ? Icons.list_rounded : Icons.map_rounded,
-              color: AppColors.teal,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.dashboard);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
+          automaticallyImplyLeading: false,
+          title: Text(
+            'Direktori Faskes',
+            style: GoogleFonts.baloo2(
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+              color: context.primaryTextColor,
             ),
-            onPressed: () => setState(() => _showMap = !_showMap),
           ),
-        ],
+          actions: [
+            IconButton(
+              tooltip: _showMap ? 'Tampilan Daftar' : 'Tampilan Peta',
+              icon: Icon(
+                _showMap ? Icons.list_rounded : Icons.map_rounded,
+                color: AppColors.teal,
+              ),
+              onPressed: () => setState(() => _showMap = !_showMap),
+            ),
+          ],
+        ),
+        body: _showMap ? _buildMapView() : _buildListView(),
+        bottomNavigationBar: const AppBottomNavBar(currentIndex: 2),
       ),
-      body: _showMap ? _buildMapView() : _buildListView(),
-      bottomNavigationBar: const AppBottomNavBar(currentIndex: 2),
     );
   }
 
@@ -173,17 +187,20 @@ class _FaskesScreenState extends ConsumerState<FaskesScreen> {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
           child: TextField(
             controller: _searchCtrl,
-            style: GoogleFonts.poppins(fontSize: 14, color: AppColors.darkText),
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: context.primaryTextColor,
+            ),
             decoration: InputDecoration(
               hintText: 'Cari nama faskes atau kota...',
               hintStyle: GoogleFonts.poppins(
                 fontSize: 14,
-                color: AppColors.grey,
+                color: context.hintTextColor,
               ),
-              prefixIcon: const Icon(Icons.search, color: AppColors.grey),
+              prefixIcon: Icon(Icons.search, color: context.hintTextColor),
               suffixIcon: _searchQuery.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear, color: AppColors.grey),
+                      icon: Icon(Icons.clear, color: context.hintTextColor),
                       onPressed: () {
                         _searchCtrl.clear();
                         setState(() => _searchQuery = '');
@@ -191,15 +208,15 @@ class _FaskesScreenState extends ConsumerState<FaskesScreen> {
                     )
                   : null,
               filled: true,
-              fillColor: Colors.white,
+              fillColor: context.inputFillColor,
               contentPadding: const EdgeInsets.symmetric(vertical: 10),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.divider),
+                borderSide: BorderSide(color: context.containerBorderColor),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.divider),
+                borderSide: BorderSide(color: context.containerBorderColor),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -346,9 +363,9 @@ class _FaskesCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.cardBackgroundColor,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.divider),
+          border: Border.all(color: context.containerBorderColor),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.04),
@@ -384,7 +401,7 @@ class _FaskesCard extends StatelessWidget {
                           style: GoogleFonts.baloo2(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.darkText,
+                            color: context.primaryTextColor,
                             height: 1.2,
                           ),
                         ),
@@ -565,7 +582,7 @@ class _FaskesDetailSheet extends StatelessWidget {
                     style: GoogleFonts.baloo2(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.darkText,
+                      color: context.primaryTextColor,
                       height: 1.2,
                     ),
                   ),

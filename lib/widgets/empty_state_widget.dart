@@ -46,7 +46,7 @@ class EmptyStateWidget extends StatelessWidget {
               style: GoogleFonts.baloo2(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: AppColors.darkText,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             if (message != null) ...[
@@ -56,7 +56,7 @@ class EmptyStateWidget extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
                   fontSize: 13,
-                  color: AppColors.textSecondary,
+                  color: context.secondaryTextColor,
                   height: 1.45,
                 ),
               ),

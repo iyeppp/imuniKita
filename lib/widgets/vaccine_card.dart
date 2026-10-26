@@ -53,7 +53,7 @@ class VaccineCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final metaStyle = GoogleFonts.poppins(
       fontSize: 12,
-      color: AppColors.textSecondary,
+      color: context.secondaryTextColor,
     );
 
     final content = Padding(
@@ -75,7 +75,7 @@ class VaccineCard extends StatelessWidget {
                         style: GoogleFonts.poppins(
                           fontWeight: FontWeight.bold,
                           fontSize: compact ? 14 : 15,
-                          color: AppColors.darkText,
+                          color: context.primaryTextColor,
                         ),
                       ),
                     ),
@@ -92,10 +92,10 @@ class VaccineCard extends StatelessWidget {
                     spacing: 6,
                     runSpacing: 2,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.calendar_today,
                         size: 12,
-                        color: AppColors.textSecondary,
+                        color: context.secondaryTextColor,
                       ),
                       Text(
                         DateFormatter.formatLong(schedule.tanggalTarget),
@@ -127,7 +127,7 @@ class VaccineCard extends StatelessWidget {
                     schedule.deskripsi,
                     style: GoogleFonts.poppins(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: context.secondaryTextColor,
                       height: 1.4,
                     ),
                   ),
@@ -142,12 +142,13 @@ class VaccineCard extends StatelessWidget {
 
     return Card(
       margin: margin ?? const EdgeInsets.symmetric(vertical: 4),
-      color: backgroundColor,
+      color: backgroundColor ?? context.cardBackgroundColor,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: AppColors.border),
+        side: BorderSide(color: context.containerBorderColor),
       ),
+
       child: onTap == null
           ? content
           : InkWell(

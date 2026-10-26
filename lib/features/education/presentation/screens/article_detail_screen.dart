@@ -55,9 +55,10 @@ class ArticleDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final artikel = ref.watch(artikelDetailProvider(articleId));
 
+    Widget bodyWidget;
     if (artikel == null) {
-      return Scaffold(
-        backgroundColor: AppColors.background,
+      bodyWidget = Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           leading: IconButton(
             tooltip: 'Kembali',
@@ -77,104 +78,118 @@ class ArticleDetailScreen extends ConsumerWidget {
           message: 'Artikel ini mungkin sudah tidak tersedia.',
         ),
       );
-    }
+    } else {
+      final terkait = ref
+          .watch(educationDatasourceProvider)
+          .getArtikelTerkait(artikel);
 
-    final terkait = ref
-        .watch(educationDatasourceProvider)
-        .getArtikelTerkait(artikel);
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        leading: IconButton(
-          tooltip: 'Kembali',
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.canPop()
-              ? context.pop()
-              : context.go(AppRoutes.education),
-        ),
-        title: Text(
-          'Artikel',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'Bagikan artikel',
-            icon: const Icon(Icons.share_outlined),
-            onPressed: () => _bagikan(context, artikel),
+      bodyWidget = Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: AppBar(
+          leading: IconButton(
+            tooltip: 'Kembali',
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.canPop()
+                ? context.pop()
+                : context.go(AppRoutes.education),
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Hero image
-            EducationThumbnail(
-              kategori: artikel.kategori,
-              imageUrl: artikel.imageUrl,
-              width: double.infinity,
-              height: 200,
-              borderRadius: 0,
-              iconSize: 56,
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  EducationKategoriBadge(kategori: artikel.kategori),
-                  const SizedBox(height: 10),
-                  Text(
-                    artikel.judul,
-                    style: GoogleFonts.baloo2(
-                      fontSize: 23,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.darkText,
-                      height: 1.25,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _MetaRow(artikel: artikel),
-                  const Divider(height: 28),
-
-                  // Body artikel (HTML)
-                  Html(
-                    data: artikel.kontenHtml,
-                    style: {
-                      'body': Style(
-                        margin: Margins.zero,
-                        padding: HtmlPaddings.zero,
-                        fontSize: FontSize(14),
-                        lineHeight: LineHeight(1.7),
-                        color: AppColors.darkText,
-                      ),
-                      'h3': Style(
-                        fontSize: FontSize(16),
-                        fontWeight: FontWeight.w700,
-                        margin: Margins.only(top: 18, bottom: 6),
-                      ),
-                      'p': Style(margin: Margins.only(bottom: 10)),
-                      'ul': Style(margin: Margins.only(bottom: 10)),
-                      'li': Style(margin: Margins.only(bottom: 4)),
-                    },
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Artikel terkait
-                  if (terkait.isNotEmpty) ...[
-                    const SectionHeader(
-                      title: 'Artikel Terkait',
-                      padding: EdgeInsets.only(bottom: 10),
-                    ),
-                    ...terkait.map((item) => _TerkaitCard(artikel: item)),
-                  ],
-                ],
-              ),
+          title: Text(
+            'Artikel',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+          ),
+          actions: [
+            IconButton(
+              tooltip: 'Bagikan artikel',
+              icon: const Icon(Icons.share_outlined),
+              onPressed: () => _bagikan(context, artikel),
             ),
           ],
         ),
-      ),
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Hero image
+              EducationThumbnail(
+                kategori: artikel.kategori,
+                imageUrl: artikel.imageUrl,
+                width: double.infinity,
+                height: 200,
+                borderRadius: 0,
+                iconSize: 56,
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    EducationKategoriBadge(kategori: artikel.kategori),
+                    const SizedBox(height: 10),
+                    Text(
+                      artikel.judul,
+                      style: GoogleFonts.baloo2(
+                        fontSize: 23,
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        height: 1.25,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _MetaRow(artikel: artikel),
+                    const Divider(height: 28),
+
+                    // Body artikel (HTML)
+                    Html(
+                      data: artikel.kontenHtml,
+                      style: {
+                        'body': Style(
+                          margin: Margins.zero,
+                          padding: HtmlPaddings.zero,
+                          fontSize: FontSize(14),
+                          lineHeight: LineHeight(1.7),
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                        'h3': Style(
+                          fontSize: FontSize(16),
+                          fontWeight: FontWeight.w700,
+                          margin: Margins.only(top: 18, bottom: 6),
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                        'p': Style(margin: Margins.only(bottom: 10)),
+                        'ul': Style(margin: Margins.only(bottom: 10)),
+                        'li': Style(margin: Margins.only(bottom: 4)),
+                      },
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Artikel terkait
+                    if (terkait.isNotEmpty) ...[
+                      const SectionHeader(
+                        title: 'Artikel Terkait',
+                        padding: EdgeInsets.only(bottom: 10),
+                      ),
+                      ...terkait.map((item) => _TerkaitCard(artikel: item)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.education);
+        }
+      },
+      child: bodyWidget,
     );
   }
 }
@@ -251,7 +266,7 @@ class _TerkaitCard extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.darkText,
+                        color: Theme.of(context).colorScheme.onSurface,
                         height: 1.3,
                       ),
                     ),

@@ -64,8 +64,18 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   Widget build(BuildContext context) {
     final babyAsync = ref.watch(activeBabyProvider);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.dashboard);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(
@@ -138,9 +148,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: context.cardBackgroundColor,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(color: context.containerBorderColor),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.04),
@@ -196,17 +206,17 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                           color: AppColors.teal,
                         ),
                       ),
-                      calendarStyle: const CalendarStyle(
-                        todayDecoration: BoxDecoration(shape: BoxShape.circle),
+                      calendarStyle: CalendarStyle(
+                        todayDecoration: const BoxDecoration(shape: BoxShape.circle),
                         todayTextStyle: TextStyle(
-                          color: AppColors.darkText,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontWeight: FontWeight.bold,
                         ),
-                        selectedDecoration: BoxDecoration(
+                        selectedDecoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           color: AppColors.teal,
                         ),
-                        selectedTextStyle: TextStyle(
+                        selectedTextStyle: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
@@ -273,7 +283,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                 labelStyle: TextStyle(
                                   color: isSelected
                                       ? Colors.white
-                                      : AppColors.darkText,
+                                      : Theme.of(context).colorScheme.onSurface,
                                   fontWeight: isSelected
                                       ? FontWeight.bold
                                       : FontWeight.normal,
@@ -299,7 +309,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         style: GoogleFonts.poppins(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
-                          color: AppColors.darkText,
+                          color: context.primaryTextColor,
                         ),
                       ),
                     ),

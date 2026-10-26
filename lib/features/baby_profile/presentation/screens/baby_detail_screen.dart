@@ -39,8 +39,18 @@ class BabyDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final babyAsync = ref.watch(babyByIdProvider(babyId));
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.dashboard);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
           tooltip: 'Kembali',
@@ -68,8 +78,9 @@ class BabyDetailScreen extends ConsumerWidget {
         error: (err, _) =>
             ErrorStateWidget(message: 'Gagal memuat profil anak: $err'),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class _FormKelolaBayi extends ConsumerStatefulWidget {
