@@ -31,6 +31,8 @@ class _ImuniKitaAppState extends ConsumerState<ImuniKitaApp> {
     return MaterialApp.router(
       title: 'ImuniKita',
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       routerConfig: _router,
       debugShowCheckedModeBanner: false,
     );

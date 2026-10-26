@@ -42,8 +42,18 @@ class SettingsScreen extends ConsumerWidget {
     final versi =
         ref.watch(appVersionProvider).asData?.value ?? AppConstants.appVersion;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.dashboard);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'Profil & Pengaturan',
@@ -98,8 +108,9 @@ class SettingsScreen extends ConsumerWidget {
         ),
       ),
       bottomNavigationBar: const AppBottomNavBar(currentIndex: 4),
-    );
-  }
+    ),
+  );
+}
 }
 
 // ───────────────────────────────────────────────────────────────────────────
@@ -208,7 +219,7 @@ class _KartuProfil extends ConsumerWidget {
             ),
             IconButton(
               tooltip: 'Sunting profil',
-              icon: const Icon(Icons.edit_outlined, color: AppColors.darkText),
+              icon: Icon(Icons.edit_outlined, color: context.primaryTextColor),
               onPressed: () => _bukaFormEditProfil(context, akun),
             ),
           ],
@@ -367,7 +378,7 @@ class _KartuAnak extends ConsumerWidget {
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.darkText,
+                              color: context.primaryTextColor,
                             ),
                           ),
                         ),
@@ -387,7 +398,7 @@ class _KartuAnak extends ConsumerWidget {
                       '${AgeCalculator.label(baby.tanggalLahir)} · $gender',
                       style: GoogleFonts.poppins(
                         fontSize: 11.5,
-                        color: AppColors.textSecondary,
+                        color: context.secondaryTextColor,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -476,7 +487,7 @@ class _KartuPengaturan extends ConsumerWidget {
               style: GoogleFonts.poppins(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w600,
-                color: AppColors.darkText,
+                color: context.primaryTextColor,
               ),
             ),
             subtitle: Text(
@@ -485,26 +496,26 @@ class _KartuPengaturan extends ConsumerWidget {
                   : 'Pengingat otomatis H-7 & H-1 sebelum jadwal imunisasi',
               style: GoogleFonts.poppins(
                 fontSize: 11.5,
-                color: gagal ? AppColors.error : AppColors.textSecondary,
+                color: gagal ? AppColors.error : context.secondaryTextColor,
               ),
             ),
           ),
           const Divider(height: 1),
           ListTile(
-            leading: const Icon(Icons.info_outline, color: AppColors.darkText),
+            leading: Icon(Icons.info_outline, color: context.primaryTextColor),
             title: Text(
               'Tentang Aplikasi',
               style: GoogleFonts.poppins(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w600,
-                color: AppColors.darkText,
+                color: context.primaryTextColor,
               ),
             ),
             subtitle: Text(
               'ImuniKita versi $versi',
               style: GoogleFonts.poppins(
                 fontSize: 11.5,
-                color: AppColors.textSecondary,
+                color: context.secondaryTextColor,
               ),
             ),
             onTap: () => _tampilkanTentang(context, versi),
@@ -621,17 +632,17 @@ Future<void> _tampilkanTentang(BuildContext context, String versi) {
   return showDialog<void>(
     context: context,
     builder: (dialogContext) => AlertDialog(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
-        side: const BorderSide(color: AppColors.border),
+        side: BorderSide(color: Theme.of(context).dividerColor),
       ),
       title: Text(
         'ImuniKita',
         style: GoogleFonts.baloo2(
           fontSize: 20,
           fontWeight: FontWeight.w800,
-          color: AppColors.darkText,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
       content: Column(
@@ -643,7 +654,7 @@ Future<void> _tampilkanTentang(BuildContext context, String versi) {
             style: GoogleFonts.poppins(
               fontSize: 12.5,
               fontWeight: FontWeight.w600,
-              color: AppColors.darkText,
+              color: Theme.of(dialogContext).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -654,7 +665,7 @@ Future<void> _tampilkanTentang(BuildContext context, String versi) {
             style: GoogleFonts.poppins(
               fontSize: 12.5,
               height: 1.5,
-              color: AppColors.textSecondary,
+              color: Theme.of(dialogContext).colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -674,7 +685,7 @@ Future<void> _bukaFormEditProfil(BuildContext context, UserEntity akun) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.surface,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
     ),
@@ -794,7 +805,7 @@ class _FormEditProfilState extends ConsumerState<_FormEditProfil> {
                   style: GoogleFonts.baloo2(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.darkText,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 16),

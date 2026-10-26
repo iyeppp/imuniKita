@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../app/theme/app_colors.dart';
-
 /// Label + `TextFormField` dalam satu komponen (komponen UI global).
 ///
 /// Menggantikan pola berulang di seluruh form:
@@ -55,7 +53,7 @@ class CustomTextField extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: AppColors.darkText,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 6),

@@ -22,17 +22,17 @@ abstract class ConfirmDialog {
     final hasil = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.surface,
+        backgroundColor: dialogContext.cardBackgroundColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: const BorderSide(color: AppColors.border),
+          side: BorderSide(color: dialogContext.containerBorderColor),
         ),
         title: Text(
           title,
           style: GoogleFonts.poppins(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: AppColors.darkText,
+            color: dialogContext.primaryTextColor,
           ),
         ),
         content: Text(
@@ -40,7 +40,7 @@ abstract class ConfirmDialog {
           style: GoogleFonts.poppins(
             fontSize: 13,
             height: 1.5,
-            color: AppColors.textSecondary,
+            color: dialogContext.secondaryTextColor,
           ),
         ),
         actions: [
@@ -49,7 +49,7 @@ abstract class ConfirmDialog {
             child: Text(
               cancelLabel,
               style: GoogleFonts.poppins(
-                color: AppColors.textSecondary,
+                color: dialogContext.secondaryTextColor,
                 fontWeight: FontWeight.w500,
               ),
             ),

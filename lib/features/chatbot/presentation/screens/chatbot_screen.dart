@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../widgets/app_bottom_nav_bar.dart';
 import '../../../../widgets/confirm_dialog.dart';
 import '../../data/models/chat_message_model.dart';
 import '../providers/chatbot_provider.dart';
+
 
 // ── Layar Utama ───────────────────────────────────────────────────────────────
 
@@ -84,24 +87,35 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
       }
     });
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: _buildAppBar(chatState),
-      body: Column(
-        children: [
-          Expanded(child: _buildChatArea(chatState)),
-          _buildInputBar(chatState.isLoading),
-        ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.dashboard);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: _buildAppBar(context, chatState),
+        body: Column(
+          children: [
+            Expanded(child: _buildChatArea(chatState)),
+            _buildInputBar(chatState.isLoading),
+          ],
+        ),
+        bottomNavigationBar: const AppBottomNavBar(currentIndex: 3),
       ),
-      bottomNavigationBar: const AppBottomNavBar(currentIndex: 3),
     );
   }
 
-  PreferredSizeWidget _buildAppBar(ChatState chatState) {
+  PreferredSizeWidget _buildAppBar(BuildContext context, ChatState chatState) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       elevation: 0.5,
-      shadowColor: AppColors.divider,
+      shadowColor: context.containerBorderColor,
       automaticallyImplyLeading: false,
       title: Row(
         children: [
@@ -119,7 +133,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
                 style: GoogleFonts.baloo2(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.darkText,
+                  color: context.primaryTextColor,
                   height: 1.2,
                 ),
               ),
@@ -127,7 +141,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
                 'Asisten Imunisasi & Parenting',
                 style: GoogleFonts.poppins(
                   fontSize: 10,
-                  color: AppColors.textSecondary,
+                  color: context.secondaryTextColor,
                   height: 1.2,
                 ),
               ),
@@ -138,9 +152,9 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
       actions: [
         if (chatState.messages.isNotEmpty)
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.delete_outline,
-              color: AppColors.textSecondary,
+              color: context.secondaryTextColor,
             ),
             tooltip: 'Hapus percakapan',
             onPressed: _confirmClear,
@@ -183,13 +197,16 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
               style: GoogleFonts.baloo2(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.darkText,
+                color: context.primaryTextColor,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               'Tanya apa saja soal imunisasi\n& tumbuh kembang si kecil.',
-              style: GoogleFonts.poppins(fontSize: 13, color: AppColors.grey),
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                color: context.secondaryTextColor,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
@@ -197,7 +214,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
               'Pertanyaan cepat:',
               style: GoogleFonts.poppins(
                 fontSize: 12,
-                color: AppColors.textSecondary,
+                color: context.secondaryTextColor,
               ),
             ),
             const SizedBox(height: 8),
@@ -214,7 +231,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
                       color: AppColors.teal,
                     ),
                   ),
-                  backgroundColor: AppColors.cream,
+                  backgroundColor: context.cardBackgroundColor,
                   side: const BorderSide(color: AppColors.teal),
                   onPressed: () => _sendMessage(q),
                 );
@@ -230,8 +247,10 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
     return SafeArea(
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: AppColors.divider, width: 1)),
+          color: context.cardBackgroundColor,
+          border: Border(
+            top: BorderSide(color: context.containerBorderColor, width: 1),
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.04),
@@ -252,27 +271,27 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
                 textInputAction: TextInputAction.newline,
                 style: GoogleFonts.poppins(
                   fontSize: 14,
-                  color: AppColors.darkText,
+                  color: context.primaryTextColor,
                 ),
                 decoration: InputDecoration(
                   hintText: 'Ketik pertanyaan...',
                   hintStyle: GoogleFonts.poppins(
                     fontSize: 14,
-                    color: AppColors.grey,
+                    color: context.hintTextColor,
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 10,
                   ),
                   filled: true,
-                  fillColor: AppColors.background,
+                  fillColor: context.inputFillColor,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
                     borderSide: BorderSide.none,
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
-                    borderSide: const BorderSide(color: AppColors.divider),
+                    borderSide: BorderSide(color: context.containerBorderColor),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
@@ -292,11 +311,13 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
                 final canSend = value.text.trim().isNotEmpty && !isLoading;
                 return CircleAvatar(
                   radius: 24,
-                  backgroundColor: canSend ? AppColors.teal : AppColors.divider,
+                  backgroundColor: canSend
+                      ? AppColors.teal
+                      : context.containerBorderColor,
                   child: IconButton(
                     icon: Icon(
                       Icons.send_rounded,
-                      color: canSend ? Colors.white : AppColors.grey,
+                      color: canSend ? Colors.white : context.hintTextColor,
                       size: 20,
                     ),
                     onPressed: canSend
@@ -324,7 +345,7 @@ class _ChatBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: message.isUser ? _buildUserBubble() : _buildBotBubble(),
+      child: message.isUser ? _buildUserBubble() : _buildBotBubble(context),
     );
   }
 
@@ -350,8 +371,6 @@ class _ChatBubble extends StatelessWidget {
               message.text,
               style: GoogleFonts.poppins(
                 fontSize: 14,
-                // Kontras: teks gelap di atas teal jauh lebih terbaca daripada
-                // `warmWhite` (yang hanya ±2:1 — di bawah ambang WCAG).
                 color: AppColors.darkText,
                 height: 1.45,
               ),
@@ -367,7 +386,7 @@ class _ChatBubble extends StatelessWidget {
     );
   }
 
-  Widget _buildBotBubble() {
+  Widget _buildBotBubble(BuildContext context) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Row(
@@ -389,8 +408,10 @@ class _ChatBubble extends StatelessWidget {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.cream,
-                  border: Border.all(color: AppColors.divider),
+                  color: context.isDarkMode
+                      ? const Color(0xFF242429)
+                      : AppColors.cream,
+                  border: Border.all(color: context.containerBorderColor),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(4),
                     topRight: Radius.circular(18),
@@ -402,7 +423,7 @@ class _ChatBubble extends StatelessWidget {
                   message.text,
                   style: GoogleFonts.poppins(
                     fontSize: 14,
-                    color: AppColors.darkText,
+                    color: context.primaryTextColor,
                     height: 1.45,
                   ),
                 ),
@@ -410,7 +431,10 @@ class _ChatBubble extends StatelessWidget {
               const SizedBox(height: 3),
               Text(
                 DateFormat('HH:mm').format(message.timestamp),
-                style: GoogleFonts.poppins(fontSize: 10, color: AppColors.grey),
+                style: GoogleFonts.poppins(
+                  fontSize: 10,
+                  color: context.hintTextColor,
+                ),
               ),
             ],
           ),
@@ -488,8 +512,10 @@ class _TypingIndicatorState extends State<_TypingIndicator>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: AppColors.cream,
-                border: Border.all(color: AppColors.divider),
+                color: context.isDarkMode
+                    ? const Color(0xFF242429)
+                    : AppColors.cream,
+                border: Border.all(color: context.containerBorderColor),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(4),
                   topRight: Radius.circular(18),

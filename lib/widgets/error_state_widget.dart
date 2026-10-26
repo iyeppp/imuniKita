@@ -78,7 +78,7 @@ class ErrorStateWidget extends StatelessWidget {
               style: GoogleFonts.baloo2(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: AppColors.darkText,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 6),

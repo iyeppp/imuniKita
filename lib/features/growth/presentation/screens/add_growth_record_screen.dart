@@ -179,8 +179,18 @@ class _AddGrowthRecordScreenState extends ConsumerState<AddGrowthRecordScreen> {
   Widget build(BuildContext context) {
     final babyAsync = ref.watch(activeBabyProvider);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.growth);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
           tooltip: 'Kembali',
@@ -316,6 +326,7 @@ class _AddGrowthRecordScreenState extends ConsumerState<AddGrowthRecordScreen> {
         loading: () => const AppLoadingIndicator(),
         error: (err, _) => ErrorStateWidget(message: '$err'),
       ),
-    );
-  }
+    ),
+  );
+}
 }

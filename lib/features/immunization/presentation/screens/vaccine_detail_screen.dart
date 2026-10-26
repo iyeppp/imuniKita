@@ -112,8 +112,18 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
       vaccineScheduleByIdProvider(widget.scheduleId),
     );
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.calendar);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
           tooltip: 'Kembali',
@@ -200,7 +210,7 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
                             item.deskripsi,
                             style: GoogleFonts.poppins(
                               fontSize: 13,
-                              color: AppColors.textSecondary,
+                              color: context.secondaryTextColor,
                             ),
                           ),
                           if (item.status != VaccineStatus.selesai) ...[
@@ -344,7 +354,7 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
                                 'Tanggal diberikan: ${item.tanggalRealisasi!.day}/${item.tanggalRealisasi!.month}/${item.tanggalRealisasi!.year}',
                                 style: GoogleFonts.poppins(
                                   fontSize: 13,
-                                  color: AppColors.textSecondary,
+                                  color: context.secondaryTextColor,
                                 ),
                               ),
                             ],
@@ -355,7 +365,7 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
                                 'Catatan: ${item.catatanReaksi}',
                                 style: GoogleFonts.poppins(
                                   fontSize: 13,
-                                  color: AppColors.textSecondary,
+                                  color: context.secondaryTextColor,
                                 ),
                               ),
                             ],
@@ -373,6 +383,7 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
               ErrorStateWidget(message: 'Gagal memuat jadwal: $err'),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

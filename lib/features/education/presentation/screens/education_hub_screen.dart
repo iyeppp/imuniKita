@@ -26,10 +26,20 @@ class EducationHubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        backgroundColor: AppColors.background,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.dashboard);
+        }
+      },
+      child: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           // `/education` adalah route top-level. Bila dibuka tanpa riwayat
           // (mis. deep link), tidak ada halaman untuk di-`pop` — karena itu
@@ -71,8 +81,9 @@ class EducationHubScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 // ───────────────────────────────────────────────────────────────────────────

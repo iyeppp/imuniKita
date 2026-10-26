@@ -32,7 +32,7 @@ class SectionHeader extends StatelessWidget {
       style: GoogleFonts.baloo2(
         fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: AppColors.darkText,
+        color: Theme.of(context).colorScheme.onSurface,
       ),
     );
 

@@ -82,9 +82,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         .watch(educationDatasourceProvider)
         .getKuisById(widget.quizId);
 
+    Widget bodyWidget;
     if (kuis == null) {
-      return Scaffold(
-        backgroundColor: AppColors.background,
+      bodyWidget = Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           leading: IconButton(
             tooltip: 'Kembali',
@@ -104,13 +105,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           message: 'Kuis ini mungkin sudah tidak tersedia.',
         ),
       );
-    }
-
-    // Temuan #47: jaga-jaga bila suatu kuis tidak punya soal — sebelumnya
-    // `kuis.soal[_index]` akan melempar RangeError dan pembagian progres NaN.
-    if (kuis.soal.isEmpty) {
-      return Scaffold(
-        backgroundColor: AppColors.background,
+    } else if (kuis.soal.isEmpty) {
+      bodyWidget = Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           leading: IconButton(
             tooltip: 'Kembali',
@@ -132,26 +129,39 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           message: 'Kuis ini masih kosong. Coba pilih kuis lain, ya.',
         ),
       );
+    } else {
+      bodyWidget = Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: AppBar(
+          leading: IconButton(
+            tooltip: 'Kembali',
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.canPop()
+                ? context.pop()
+                : context.go(AppRoutes.education),
+          ),
+          title: Text(
+            _selesai ? 'Hasil Kuis' : kuis.judul,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+          ),
+        ),
+        body: SafeArea(child: _selesai ? _buildHasil(kuis) : _buildSoal(kuis)),
+      );
     }
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        leading: IconButton(
-          tooltip: 'Kembali',
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.canPop()
-              ? context.pop()
-              : context.go(AppRoutes.education),
-        ),
-        title: Text(
-          _selesai ? 'Hasil Kuis' : kuis.judul,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: SafeArea(child: _selesai ? _buildHasil(kuis) : _buildSoal(kuis)),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.education);
+        }
+      },
+      child: bodyWidget,
     );
   }
 
@@ -175,14 +185,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 style: GoogleFonts.poppins(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.darkText,
+                  color: context.primaryTextColor,
                 ),
               ),
               Text(
                 kuis.kategori,
                 style: GoogleFonts.poppins(
                   fontSize: 11,
-                  color: AppColors.textHint,
+                  color: context.hintTextColor,
                 ),
               ),
             ],
@@ -193,7 +203,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             child: LinearProgressIndicator(
               value: (_index + 1) / kuis.totalSoal,
               minHeight: 8,
-              backgroundColor: AppColors.divider,
+              backgroundColor: context.dividerLineColor,
               color: AppColors.teal,
             ),
           ),
@@ -201,6 +211,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
           // Pertanyaan
           Card(
+            color: context.cardBackgroundColor,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
@@ -208,7 +219,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 style: GoogleFonts.poppins(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.darkText,
+                  color: context.primaryTextColor,
                   height: 1.4,
                 ),
               ),
@@ -247,8 +258,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final jawabanBenar = index == soal.indexJawabanBenar;
     final dipilih = _dipilih == index;
 
-    var border = AppColors.border;
-    var background = AppColors.surface;
+    var border = context.containerBorderColor;
+    var background = context.cardBackgroundColor;
     IconData? ikon;
 
     if (sudahDijawab && jawabanBenar) {
@@ -302,7 +313,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                     soal.pilihan[index],
                     style: GoogleFonts.poppins(
                       fontSize: 13,
-                      color: AppColors.darkText,
+                      color: context.primaryTextColor,
                       height: 1.35,
                     ),
                   ),

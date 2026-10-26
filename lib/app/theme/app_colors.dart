@@ -55,3 +55,41 @@ abstract class AppColors {
   static const Color error = red;
   static const Color success = green;
 }
+
+/// Helper ekstensi context untuk tema adaptif (Dark Mode & Light Mode).
+extension AppThemeContextExtension on BuildContext {
+  /// Apakah device/user saat ini menggunakan Dark Mode
+  bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
+
+  /// Warna background kartu/container
+  Color get cardBackgroundColor =>
+      isDarkMode ? const Color(0xFF242429) : Colors.white;
+
+  /// Warna background utama halaman (Scaffold)
+  Color get scaffoldBgColor => Theme.of(this).scaffoldBackgroundColor;
+
+  /// Warna teks utama yang kontras (putih di dark mode, gelap di light mode)
+  Color get primaryTextColor =>
+      isDarkMode ? const Color(0xFFF4F4F5) : AppColors.darkText;
+
+  /// Warna teks sekunder (abu-abu terang di dark mode, abu-abu di light mode)
+  Color get secondaryTextColor =>
+      isDarkMode ? const Color(0xFFA1A1AA) : AppColors.textSecondary;
+
+  /// Warna teks hint (abu-abu pudar)
+  Color get hintTextColor =>
+      isDarkMode ? const Color(0xFF71717A) : AppColors.textHint;
+
+  /// Warna border container
+  Color get containerBorderColor =>
+      isDarkMode ? const Color(0xFF33333C) : AppColors.border;
+
+  /// Warna garis pemisah (Divider)
+  Color get dividerLineColor =>
+      isDarkMode ? const Color(0xFF2D2D35) : AppColors.divider;
+
+  /// Warna isian input field (TextField)
+  Color get inputFillColor =>
+      isDarkMode ? const Color(0xFF242429) : Colors.white;
+}
+
