@@ -5,11 +5,15 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz_loc;
 
 import 'app/app.dart';
+import 'core/firebase/firebase_bootstrap.dart';
 import 'core/services/notification_service.dart';
 import 'hive_registrar.g.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 0. Inisialisasi Firebase Foundation
+  await FirebaseBootstrap.initialize();
 
   // 1. Inisialisasi Hive CE (local database)
   await Hive.initFlutter();

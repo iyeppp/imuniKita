@@ -49,6 +49,14 @@ android/key.properties
 *.jks
 *.keystore
 
+# Config Backend & Environment Secrets
+.env
+.env.*
+!.env.example
+*_prod.json
+*google-services-prod.json
+*GoogleService-Info-prod.plist
+
 # Widget Preview related
 .widget_preview/
 

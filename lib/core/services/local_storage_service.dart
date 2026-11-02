@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/app_constants.dart';
@@ -74,4 +75,27 @@ class LocalStorageService {
 
   static Future<void> setNotificationEnabled(bool enabled) async =>
       (await instance).setBool(await _notificationPrefKey(), enabled);
+
+  /// Preferensi tema aplikasi (system, light, dark).
+  static Future<ThemeMode> getThemeMode() async {
+    final modeStr = (await instance).getString(AppConstants.prefThemeMode);
+    switch (modeStr) {
+      case 'light':
+        return ThemeMode.light;
+      case 'dark':
+        return ThemeMode.dark;
+      case 'system':
+      default:
+        return ThemeMode.system;
+    }
+  }
+
+  static Future<void> setThemeMode(ThemeMode mode) async {
+    final modeStr = switch (mode) {
+      ThemeMode.light => 'light',
+      ThemeMode.dark => 'dark',
+      ThemeMode.system => 'system',
+    };
+    await (await instance).setString(AppConstants.prefThemeMode, modeStr);
+  }
 }
