@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/app_version_provider.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/theme_provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/age_calculator.dart';
@@ -470,6 +471,9 @@ class _KartuPengaturan extends ConsumerWidget {
     final versi =
         ref.watch(appVersionProvider).asData?.value ?? AppConstants.appVersion;
 
+    final themeModeAsync = ref.watch(themeModeProvider);
+    final currentThemeMode = themeModeAsync.asData?.value ?? ThemeMode.system;
+
     return Card(
       child: Column(
         children: [
@@ -499,6 +503,29 @@ class _KartuPengaturan extends ConsumerWidget {
                 color: gagal ? AppColors.error : context.secondaryTextColor,
               ),
             ),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: Icon(
+              _getThemeIcon(currentThemeMode),
+              color: context.primaryTextColor,
+            ),
+            title: Text(
+              'Tema Aplikasi',
+              style: GoogleFonts.poppins(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: context.primaryTextColor,
+              ),
+            ),
+            subtitle: Text(
+              _getThemeLabel(currentThemeMode),
+              style: GoogleFonts.poppins(
+                fontSize: 11.5,
+                color: context.secondaryTextColor,
+              ),
+            ),
+            onTap: () => _tampilkanPilihanTema(context, ref, currentThemeMode),
           ),
           const Divider(height: 1),
           ListTile(
@@ -678,6 +705,159 @@ Future<void> _tampilkanTentang(BuildContext context, String versi) {
       ],
     ),
   );
+}
+
+IconData _getThemeIcon(ThemeMode mode) {
+  return switch (mode) {
+    ThemeMode.system => Icons.brightness_auto_outlined,
+    ThemeMode.light => Icons.light_mode_outlined,
+    ThemeMode.dark => Icons.dark_mode_outlined,
+  };
+}
+
+String _getThemeLabel(ThemeMode mode) {
+  return switch (mode) {
+    ThemeMode.system => 'Ikuti Sistem',
+    ThemeMode.light => 'Mode Terang',
+    ThemeMode.dark => 'Mode Gelap',
+  };
+}
+
+/// Modal bottom sheet pilihan tema aplikasi (System, Light, Dark).
+Future<void> _tampilkanPilihanTema(
+  BuildContext context,
+  WidgetRef ref,
+  ThemeMode currentMode,
+) {
+  return showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Theme.of(context).colorScheme.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+    ),
+    builder: (dialogContext) {
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.divider,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Pilih Tema Aplikasi',
+                style: GoogleFonts.baloo2(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 12),
+              _OpsiTemaTile(
+                icon: Icons.brightness_auto_outlined,
+                title: 'Ikuti Sistem',
+                subtitle: 'Tema otomatis mengikuti pengaturan perangkat Anda',
+                selected: currentMode == ThemeMode.system,
+                onTap: () {
+                  ref
+                      .read(themeModeProvider.notifier)
+                      .setThemeMode(ThemeMode.system);
+                  Navigator.pop(dialogContext);
+                },
+              ),
+              _OpsiTemaTile(
+                icon: Icons.light_mode_outlined,
+                title: 'Mode Terang',
+                subtitle: 'Tampilan bersih dengan latar cerah',
+                selected: currentMode == ThemeMode.light,
+                onTap: () {
+                  ref
+                      .read(themeModeProvider.notifier)
+                      .setThemeMode(ThemeMode.light);
+                  Navigator.pop(dialogContext);
+                },
+              ),
+              _OpsiTemaTile(
+                icon: Icons.dark_mode_outlined,
+                title: 'Mode Gelap',
+                subtitle: 'Tampilan redup yang nyaman di mata pada malam hari',
+                selected: currentMode == ThemeMode.dark,
+                onTap: () {
+                  ref
+                      .read(themeModeProvider.notifier)
+                      .setThemeMode(ThemeMode.dark);
+                  Navigator.pop(dialogContext);
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+class _OpsiTemaTile extends StatelessWidget {
+  const _OpsiTemaTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      onTap: onTap,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      leading: Icon(
+        icon,
+        color: selected
+            ? AppColors.primary
+            : Theme.of(context).colorScheme.onSurface,
+      ),
+      title: Text(
+        title,
+        style: GoogleFonts.poppins(
+          fontSize: 14,
+          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          color: selected
+              ? AppColors.primary
+              : Theme.of(context).colorScheme.onSurface,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: GoogleFonts.poppins(
+          fontSize: 11.5,
+          color: Theme.of(context)
+              .colorScheme
+              .onSurface
+              .withValues(alpha: 0.6),
+        ),
+      ),
+      trailing: selected
+          ? const Icon(Icons.check_circle_rounded, color: AppColors.primary)
+          : null,
+    );
+  }
 }
 
 /// Buka form sunting profil (bottom sheet).

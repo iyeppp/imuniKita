@@ -6,6 +6,8 @@ import '../core/services/notification_service.dart';
 import 'router/app_router.dart';
 import 'theme/app_theme.dart';
 
+import 'theme/theme_provider.dart';
+
 class ImuniKitaApp extends ConsumerStatefulWidget {
   const ImuniKitaApp({super.key});
 
@@ -28,11 +30,14 @@ class _ImuniKitaAppState extends ConsumerState<ImuniKitaApp> {
 
   @override
   Widget build(BuildContext context) {
+    final themeModeAsync = ref.watch(themeModeProvider);
+    final themeMode = themeModeAsync.asData?.value ?? ThemeMode.system;
+
     return MaterialApp.router(
       title: 'ImuniKita',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       routerConfig: _router,
       debugShowCheckedModeBanner: false,
     );

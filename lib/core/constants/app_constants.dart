@@ -29,6 +29,9 @@ abstract class AppConstants {
   /// Preferensi notifikasi pengingat (diatur di layar Profil & Pengaturan).
   static const String prefNotificationsEnabled = 'notifications_enabled';
 
+  /// Preferensi tema aplikasi ('system', 'light', 'dark').
+  static const String prefThemeMode = 'theme_mode';
+
   // ── Info Aplikasi ─────────────────────────────────────────────────────
   /// Versi aplikasi — disamakan manual dengan `version:` di `pubspec.yaml`
   /// karena `package_info_plus` belum dipakai pada fase UTS.
