@@ -47,3 +47,12 @@ class UnexpectedFailure extends Failure {
     super.message = 'Terjadi kesalahan tak terduga. Coba lagi sebentar lagi.',
   ]);
 }
+
+/// Konfigurasi Firebase belum valid (mis. `firebase_options.dart` masih
+/// placeholder atau project tidak cocok dengan `ENV`).
+class FirebaseConfigFailure extends Failure {
+  const FirebaseConfigFailure([
+    super.message =
+        'Konfigurasi Firebase belum valid. Jalankan `flutterfire configure`.',
+  ]);
+}

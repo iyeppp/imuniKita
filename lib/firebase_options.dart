@@ -23,25 +23,27 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDevKeyForImuniKitaWebProject12345',
-    appId: '1:1234567890:web:imunikita123456',
-    messagingSenderId: '1234567890',
-    projectId: 'imunikita-dev',
-    authDomain: 'imunikita-dev.firebaseapp.com',
+    apiKey: 'AIzaSyCyCSm-qHBxG_bU45CTAFRw4-a5V76eKVc',
+    appId: '1:219754293644:web:3bcc668cc1574760f8cea9',
+    messagingSenderId: '219754293644',
+    projectId: 'imunikita-dev-f',
+    authDomain: 'imunikita-dev-f.firebaseapp.com',
+    storageBucket: 'imunikita-dev-f.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDevKeyForImuniKitaAndroid12345',
-    appId: '1:1234567890:android:imunikita123456',
-    messagingSenderId: '1234567890',
-    projectId: 'imunikita-dev',
+    apiKey: 'AIzaSyCRZ7cbVNp0V2TObjXlkvhZRQCa3vafnsk',
+    appId: '1:219754293644:android:092c762cf358018cf8cea9',
+    messagingSenderId: '219754293644',
+    projectId: 'imunikita-dev-f',
+    storageBucket: 'imunikita-dev-f.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDevKeyForImuniKitaIos1234567',
-    appId: '1:1234567890:ios:imunikita123456',
-    messagingSenderId: '1234567890',
-    projectId: 'imunikita-dev',
+    apiKey: 'AIzaSyBFPggMoZ-IiXLe8VwXg3OYGPdXgSPSZ98',
+    appId: '1:219754293644:ios:b8d6b4087ece42def8cea9',
+    messagingSenderId: '219754293644',
+    projectId: 'imunikita-dev-f',
+    storageBucket: 'imunikita-dev-f.firebasestorage.app',
     iosBundleId: 'com.imunikita.app',
   );
 }

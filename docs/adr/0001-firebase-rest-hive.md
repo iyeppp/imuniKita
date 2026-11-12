@@ -2,13 +2,14 @@
 
 - **Status**: 🟡 Menunggu Persetujuan Tim (*Pending Approval*)
 - **Tanggal**: 30 Oktober 2026
+- **Revisi**: 12 November 2026 — seluruh layanan berbayar (Storage, Functions, Cloud Run/Scheduler, Maps) dihapus; solusi diganti versi gratis.
 - **Pengambil Keputusan**: Tim Pengembang Backend ImuniKita
 
 ---
 
 ##  Context & Problem Statement
 
-Pada fase UTS, aplikasi ImuniKita menggunakan penyimpanan lokal penuh berbasis Hive CE dan SharedPreferences. Untuk fase UAS, aplikasi harus mendukung sinkronisasi data multi-device, autentikasi cloud yang aman, penyimpanan foto anak di cloud, konten dinamis (edukasi & faskes), serta konsultasi AI Chatbot tanpa mengubah antarmuka pengguna (*Presentation Layer*) yang sudah ada (19 screen + 10 shared widgets).
+Pada fase UTS, aplikasi ImuniKita menggunakan penyimpanan lokal penuh berbasis Hive CE dan SharedPreferences. Untuk fase UAS, aplikasi harus mendukung sinkronisasi data multi-device, autentikasi cloud yang aman, penyimpanan foto anak (lokal di perangkat), konten dinamis (edukasi & faskes), serta konsultasi AI Chatbot tanpa mengubah antarmuka pengguna (*Presentation Layer*) yang sudah ada (19 screen + 10 shared widgets). Seluruh solusi wajib berjalan pada **Firebase Spark (gratis)** tanpa verifikasi kartu kredit.
 
 ##  Decision Drivers
 
@@ -35,9 +36,18 @@ Pada fase UTS, aplikasi ImuniKita menggunakan penyimpanan lokal penuh berbasis H
 
 ### 4. Custom REST API (Node.js + Express/Hono & Dio)
 - Digunakan untuk menyajikan konten dinamis (artikel, video, kuis, faskes) dan sebagai proxy aman untuk AI Chatbot agar API Key LLM berada di server (`.env`).
+- Deploy ke **hosting gratis tanpa kartu kredit** (Cloudflare Workers / Vercel / Deno Deploy) atau jalankan lokal saat demo. **Cloud Run/Functions tidak dipakai.**
+- Bila tim tidak ingin mengelola server: konten dapat disimpan sebagai koleksi Firestore read-only, dan chatbot memakai mock keyword yang sudah ada.
 
-### 5. Firebase Cloud Messaging (FCM)
-- Digunakan untuk pengiriman push notification pengingat jadwal imunisasi (H-7 dan H-1) dari server, dengan `flutter_local_notifications` sebagai fallback saat offline.
+### 5. Notifikasi H-7 & H-1 (Tanpa Billing)
+- Jalur utama: `flutter_local_notifications` + `zonedSchedule` (sudah ada). Berjalan lokal, offline, dan tetap muncul saat aplikasi tertutup.
+- Jalur opsional: FCM HTTP v1 dipicu **GitHub Actions cron** dengan service account yang disimpan sebagai repository secret. Ini menghindari Cloud Functions/Cloud Scheduler yang memerlukan billing.
+
+### 6. Batasan Tanpa Billing (Firebase Spark)
+Layanan berikut **tidak digunakan** karena membutuhkan Blaze + verifikasi kartu kredit:
+- Firebase Storage → foto anak disimpan lokal di folder aplikasi.
+- Cloud Functions / Cloud Run / Cloud Scheduler → cascade delete dilakukan dari klien; penjadwal memakai GitHub Actions atau notifikasi lokal.
+- Test Lab, Extensions, Google Maps API → tidak dipakai (peta tetap OpenStreetMap).
 
 ## 📈 Consequences & Trade-offs
 
@@ -45,9 +55,13 @@ Pada fase UTS, aplikasi ImuniKita menggunakan penyimpanan lokal penuh berbasis H
   - Presentation Layer (UI) tidak perlu di-rewrite.
   - Keamanan kredensial dan API key terjamin.
   - Pengguna tidak kehilangan kemampuan offline.
+  - **Nol biaya**: seluruh layanan berada di free tier; tidak ada ketergantungan pada kartu kredit.
 - **Tantangan / Risiko**:
   - Memerlukan outbox queue (`SyncQueue`) untuk menyimpan operasi mutation saat offline dan men-drain otomatis saat online.
   - Memerlukan strategi penanganan konflik *Last-Write-Wins* (LWW) berbasis timestamp `updatedAt`.
+  - Cascade delete harus dilakukan klien (beberapa batch request) — lebih lambat daripada trigger server.
+  - Foto profil tidak menyebar antar-device (batasan yang diterima).
+  - FCM opsional bergantung pada jadwal GitHub Actions (bukan realtime server).
 
 ---
 *Dokumen ini dibuat otomatis pada Tahap B0-3 dan menunggu persetujuan resmi tim.*

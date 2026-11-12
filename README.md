@@ -234,7 +234,6 @@ lib/
 
 test/                   # unit & widget test
 .github/workflows/      # pipeline CI (analyze + test)
-docs/                   # dokumen ringkas proyek (persona, peta layar, model data, dst.)
 ```
 
 Daftar fitur di `lib/features/`:
