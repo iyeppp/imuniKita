@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/firebase/firebase_bootstrap.dart';
 import '../features/auth/data/datasources/auth_local_datasource.dart';
+import '../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../features/auth/data/repositories/auth_repository_impl.dart';
 import '../features/auth/domain/repositories/i_auth_repository.dart';
 import '../features/auth/domain/usecases/auth_state_usecase.dart';
@@ -8,6 +10,7 @@ import '../features/auth/domain/usecases/get_current_user_usecase.dart';
 import '../features/auth/domain/usecases/login_usecase.dart';
 import '../features/auth/domain/usecases/logout_usecase.dart';
 import '../features/auth/domain/usecases/register_usecase.dart';
+import '../features/auth/domain/usecases/send_password_reset_usecase.dart';
 import '../features/auth/domain/usecases/update_profile_usecase.dart';
 import '../features/baby_profile/data/datasources/baby_local_datasource.dart';
 import '../features/baby_profile/data/repositories/baby_repository_impl.dart';
@@ -49,8 +52,20 @@ final authLocalDatasourceProvider = Provider<AuthLocalDatasource>((ref) {
   return const AuthLocalDatasource();
 });
 
+/// Remote datasource Firebase hanya dibuat bila bootstrap berhasil.
+///
+/// `null` berarti aplikasi berjalan local-only (desktop, atau init Firebase
+/// gagal) dan repository otomatis memakai fallback lokal ala UTS.
+final authRemoteDatasourceProvider = Provider<AuthRemoteDatasource?>((ref) {
+  if (!FirebaseBootstrap.isInitialized) return null;
+  return const FirebaseAuthRemoteDatasource();
+});
+
 final authRepositoryProvider = Provider<IAuthRepository>((ref) {
-  return AuthRepositoryImpl(ref.watch(authLocalDatasourceProvider));
+  return AuthRepositoryImpl(
+    ref.watch(authLocalDatasourceProvider),
+    remote: ref.watch(authRemoteDatasourceProvider),
+  );
 });
 
 final getCurrentUserUseCaseProvider = Provider<GetCurrentUserUseCase>((ref) {
@@ -63,6 +78,12 @@ final loginUseCaseProvider = Provider<LoginUseCase>((ref) {
 
 final registerUseCaseProvider = Provider<RegisterUseCase>((ref) {
   return RegisterUseCase(ref.watch(authRepositoryProvider));
+});
+
+final sendPasswordResetUseCaseProvider = Provider<SendPasswordResetUseCase>((
+  ref,
+) {
+  return SendPasswordResetUseCase(ref.watch(authRepositoryProvider));
 });
 
 final updateProfileUseCaseProvider = Provider<UpdateProfileUseCase>((ref) {

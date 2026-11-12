@@ -48,6 +48,59 @@ class UnexpectedFailure extends Failure {
   ]);
 }
 
+/// Kegagalan umum pada proses autentikasi (Firebase Auth atau fallback lokal).
+class AuthFailure extends Failure {
+  const AuthFailure([
+    super.message = 'Gagal memproses autentikasi. Coba lagi.',
+  ]);
+}
+
+/// Email atau password tidak cocok dengan akun yang terdaftar.
+///
+/// Pesannya sengaja digabung (bukan "email tidak ditemukan") agar tidak
+/// membocorkan email mana yang terdaftar — praktik umum pada autentikasi.
+class InvalidCredentialsFailure extends AuthFailure {
+  const InvalidCredentialsFailure([
+    super.message = 'Email atau password salah. Periksa kembali.',
+  ]);
+}
+
+/// Email belum terdaftar (dipakai untuk mengarahkan user ke halaman daftar).
+class UserNotFoundFailure extends AuthFailure {
+  const UserNotFoundFailure([
+    super.message = 'Email belum terdaftar. Silakan daftar terlebih dahulu.',
+  ]);
+}
+
+/// Email sudah dipakai akun lain.
+class EmailAlreadyInUseFailure extends AuthFailure {
+  const EmailAlreadyInUseFailure([
+    super.message = 'Email ini sudah terdaftar. Silakan masuk.',
+  ]);
+}
+
+/// Password tidak memenuhi kebijakan keamanan Firebase.
+class WeakPasswordFailure extends AuthFailure {
+  const WeakPasswordFailure([
+    super.message = 'Password terlalu lemah. Gunakan minimal 6 karakter.',
+  ]);
+}
+
+/// Belum ada akun sama sekali di perangkat (mode lokal tanpa Firebase).
+class NoAccountFailure extends AuthFailure {
+  const NoAccountFailure([
+    super.message = 'Belum ada akun terdaftar. Silakan daftar terlebih dahulu.',
+  ]);
+}
+
+/// Tidak ada koneksi internet atau server tidak dapat dihubungi.
+class NetworkFailure extends Failure {
+  const NetworkFailure([
+    super.message =
+        'Tidak ada koneksi internet. Periksa jaringan lalu coba lagi.',
+  ]);
+}
+
 /// Konfigurasi Firebase belum valid (mis. `firebase_options.dart` masih
 /// placeholder atau project tidak cocok dengan `ENV`).
 class FirebaseConfigFailure extends Failure {

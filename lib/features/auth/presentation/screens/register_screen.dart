@@ -49,6 +49,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   /// Temuan #22: registrasi kini lewat `RegisterUseCase`
   /// (`currentUserProvider.notifier.register`), bukan Hive/SharedPreferences
   /// langsung dari layar.
+  ///
+  /// B2-3: password diteruskan ke Firebase Auth dan tidak disimpan lokal.
+  /// Document ID/profil akhirnya memakai `uid` Firebase (di-assign repository),
+  /// sehingga `localId` dari UUID di bawah hanya dipakai pada mode fallback
+  /// tanpa Firebase.
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -69,6 +74,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               lokasiKota: _cityController.text.trim(),
               createdAt: DateTime.now(),
             ),
+            _passwordController.text,
           );
 
       if (!mounted) return;
@@ -102,173 +108,174 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       },
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          tooltip: 'Kembali',
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(AppRoutes.login),
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            tooltip: 'Kembali',
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go(AppRoutes.login),
+          ),
         ),
-      ),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // App Title Header
-                  Text(
-                    'Buat Akun Baru',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.baloo2(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.darkText,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Lengkapi formulir di bawah ini untuk memulai',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Full Name Field
-                  CustomTextField(
-                    label: 'Nama Lengkap',
-                    controller: _nameController,
-                    hint: 'Nama Lengkap Anda',
-                    keyboardType: TextInputType.name,
-                    validator: (val) =>
-                        AuthValidators.required(val, 'Nama lengkap'),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Email Field
-                  CustomTextField(
-                    label: 'Email',
-                    controller: _emailController,
-                    hint: 'nama@email.com',
-                    keyboardType: TextInputType.emailAddress,
-                    validator: AuthValidators.email,
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Phone Number Field
-                  CustomTextField(
-                    label: 'Nomor HP',
-                    controller: _phoneController,
-                    hint: '081234567890',
-                    keyboardType: TextInputType.phone,
-                    validator: (val) =>
-                        AuthValidators.required(val, 'Nomor HP'),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // City Field
-                  CustomTextField(
-                    label: 'Kota Tempat Tinggal',
-                    controller: _cityController,
-                    hint: 'Contoh: Jakarta',
-                    validator: (val) => AuthValidators.required(val, 'Kota'),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Password Field
-                  CustomTextField(
-                    label: 'Password',
-                    controller: _passwordController,
-                    hint: '••••••••',
-                    obscureText: _obscurePassword,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // App Title Header
+                    Text(
+                      'Buat Akun Baru',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.baloo2(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
                         color: AppColors.darkText,
                       ),
-                      onPressed: () =>
-                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
-                    validator: AuthValidators.password,
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Confirm Password Field
-                  CustomTextField(
-                    label: 'Konfirmasi Password',
-                    controller: _confirmPasswordController,
-                    hint: '••••••••',
-                    obscureText: _obscureConfirmPassword,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureConfirmPassword
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                        color: AppColors.darkText,
-                      ),
-                      onPressed: () => setState(
-                        () =>
-                            _obscureConfirmPassword = !_obscureConfirmPassword,
+                    const SizedBox(height: 8),
+                    Text(
+                      'Lengkapi formulir di bawah ini untuk memulai',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
                       ),
                     ),
-                    validator: (val) => AuthValidators.confirmPassword(
-                      val,
-                      _passwordController.text,
+                    const SizedBox(height: 32),
+
+                    // Full Name Field
+                    CustomTextField(
+                      label: 'Nama Lengkap',
+                      controller: _nameController,
+                      hint: 'Nama Lengkap Anda',
+                      keyboardType: TextInputType.name,
+                      validator: (val) =>
+                          AuthValidators.required(val, 'Nama lengkap'),
                     ),
-                  ),
-                  const SizedBox(height: 28),
+                    const SizedBox(height: 16),
 
-                  // Register Button
-                  NeoButton(
-                    label: 'Daftar',
-                    isLoading: _isLoading,
-                    onPressed: _handleRegister,
-                    backgroundColor: AppColors.primary,
-                  ),
-                  const SizedBox(height: 20),
+                    // Email Field
+                    CustomTextField(
+                      label: 'Email',
+                      controller: _emailController,
+                      hint: 'nama@email.com',
+                      keyboardType: TextInputType.emailAddress,
+                      validator: AuthValidators.email,
+                    ),
+                    const SizedBox(height: 16),
 
-                  // Link to Login Screen
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Sudah punya akun? ',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: AppColors.textSecondary,
+                    // Phone Number Field
+                    CustomTextField(
+                      label: 'Nomor HP',
+                      controller: _phoneController,
+                      hint: '081234567890',
+                      keyboardType: TextInputType.phone,
+                      validator: (val) =>
+                          AuthValidators.required(val, 'Nomor HP'),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // City Field
+                    CustomTextField(
+                      label: 'Kota Tempat Tinggal',
+                      controller: _cityController,
+                      hint: 'Contoh: Jakarta',
+                      validator: (val) => AuthValidators.required(val, 'Kota'),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Password Field
+                    CustomTextField(
+                      label: 'Password',
+                      controller: _passwordController,
+                      hint: '••••••••',
+                      obscureText: _obscurePassword,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: AppColors.darkText,
+                        ),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () => context.go(AppRoutes.login),
-                        child: Text(
-                          'Masuk',
+                      validator: AuthValidators.password,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Confirm Password Field
+                    CustomTextField(
+                      label: 'Konfirmasi Password',
+                      controller: _confirmPasswordController,
+                      hint: '••••••••',
+                      obscureText: _obscureConfirmPassword,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureConfirmPassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: AppColors.darkText,
+                        ),
+                        onPressed: () => setState(
+                          () => _obscureConfirmPassword =
+                              !_obscureConfirmPassword,
+                        ),
+                      ),
+                      validator: (val) => AuthValidators.confirmPassword(
+                        val,
+                        _passwordController.text,
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+
+                    // Register Button
+                    NeoButton(
+                      label: 'Daftar',
+                      isLoading: _isLoading,
+                      onPressed: _handleRegister,
+                      backgroundColor: AppColors.primary,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Link to Login Screen
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Sudah punya akun? ',
                           style: GoogleFonts.poppins(
                             fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                            decoration: TextDecoration.underline,
+                            color: AppColors.textSecondary,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        GestureDetector(
+                          onTap: () => context.go(AppRoutes.login),
+                          child: Text(
+                            'Masuk',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
-    ),
     );
   }
 }

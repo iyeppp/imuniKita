@@ -1,3 +1,4 @@
+import '../../../../core/errors/failures.dart';
 import '../entities/user_entity.dart';
 import '../repositories/i_auth_repository.dart';
 
@@ -6,11 +7,14 @@ enum LoginStatus {
   /// Akun ditemukan dan sesi dibuat.
   sukses,
 
-  /// Belum ada akun sama sekali di perangkat ini.
+  /// Belum ada akun sama sekali di perangkat ini (mode lokal tanpa Firebase).
   belumAdaAkun,
 
-  /// Ada akun lain, tetapi email yang dimasukkan tidak terdaftar.
+  /// Email yang dimasukkan tidak terdaftar.
   emailTidakDitemukan,
+
+  /// Email terdaftar, tetapi password tidak cocok.
+  sandiSalah,
 }
 
 class LoginResult {
@@ -22,29 +26,27 @@ class LoginResult {
   bool get berhasil => status == LoginStatus.sukses;
 }
 
-/// Masuk memakai **email**.
+/// Masuk memakai **email + password**.
 ///
-/// Catatan fase UTS: autentikasi masih lokal dan mencocokkan email saja
-/// (password belum diverifikasi karena belum ada hashing/penyimpanan aman).
-/// Fase UAS: ganti isi use case ini dengan Firebase Auth — screen tidak berubah.
+/// Fase UAS: kredensial diverifikasi Firebase Auth; password tidak pernah
+/// menyentuh penyimpanan lokal. Status khusus dipertahankan agar layar dapat
+/// memberi arahan yang tepat (daftar dulu / periksa password) tanpa harus
+/// membongkar tipe `Failure` di presentation layer.
 class LoginUseCase {
   const LoginUseCase(this._repository);
 
   final IAuthRepository _repository;
 
-  Future<LoginResult> execute(String email) async {
-    if (!await _repository.hasAnyAccount()) {
+  Future<LoginResult> execute(String email, String password) async {
+    try {
+      final user = await _repository.login(email, password);
+      return LoginResult(LoginStatus.sukses, user);
+    } on NoAccountFailure {
       return const LoginResult(LoginStatus.belumAdaAkun);
-    }
-
-    final user = await _repository.findByEmail(email);
-    if (user == null) {
+    } on UserNotFoundFailure {
       return const LoginResult(LoginStatus.emailTidakDitemukan);
+    } on InvalidCredentialsFailure {
+      return const LoginResult(LoginStatus.sandiSalah);
     }
-
-    // Simpan sesi untuk akun yang cocok.
-    await _repository.startSession(user);
-
-    return LoginResult(LoginStatus.sukses, user);
   }
 }
