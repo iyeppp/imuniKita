@@ -105,3 +105,66 @@ Pemetaan ada di `lib/features/auth/data/repositories/auth_repository_impl.dart`
   `flutter run --dart-define=USE_EMULATOR=true` lalu uji daftar, masuk, salah
   password, lupa password, dan logout. Emulator Auth berjalan di port `9099`,
   Firestore di `8080`.
+
+## 6. Konfigurasi Firebase & Rotasi API Key
+
+### File yang tidak boleh di-commit
+
+File berikut berisi Firebase API key dan sekarang **di-ignore git**:
+
+- `android/app/google-services.json`
+- `ios/Runner/GoogleService-Info.plist`
+- `lib/firebase_options.dart`
+- `web/firebase-messaging-sw.js`
+
+Generate ulang secara lokal setelah clone:
+
+```sh
+dart pub global run flutterfire_cli:flutterfire configure \
+  -p imunikita-dev-f --platforms=android,ios,web
+```
+
+CI tidak membutuhkan key asli. Workflow menyalin template non-secret
+`tool/firebase_options.ci.dart` ke `lib/firebase_options.dart` sebelum
+`flutter analyze`/`flutter test`.
+
+### Kalau key sudah terlanjur publik
+
+1. **Opsi paling sederhana: “Regenerate key”** pada key yang sudah terhubung
+   ke Firebase. Regenerate mengubah nilai key pada resource yang sama sehingga
+   asosiasi app tetap terjaga. Setelah itu jalankan ulang
+   `flutterfire configure`.
+2. **Kalau telanjur membuat key baru yang terpisah**, key tersebut belum tentu
+   terikat ke Firebase app. Cek UID key yang sedang dipakai:
+
+   ```sh
+   firebase apps:list --project=imunikita-dev-f --json
+   ```
+
+   Field `apiKeyId` adalah **UID** key (bukan key string). Bind key baru lewat
+   Firebase Management API:
+
+   ```
+   PATCH https://firebase.googleapis.com/v1beta1/projects/imunikita-dev-f/
+         {androidApps|iosApps|webApps}/{appId}?updateMask=apiKeyId
+   Body: { "apiKeyId": "<UID key baru>" }
+   ```
+
+   Ulangi untuk Android, iOS, dan Web, lalu jalankan
+   `flutterfire configure` agar file lokal berisi key baru.
+3. Batasi key:
+   - Android: package `com.imunikita.app` + SHA-1 debug & release.
+   - iOS: bundle ID `com.imunikita.app`.
+   - Web: HTTP referrer `localhost` + domain produksi.
+   - API restrictions: Identity Toolkit, Cloud Firestore, FCM, Firebase
+     Installations.
+4. Cek Firebase Console → Usage/quota dan pastikan Firestore rules bukan test
+   mode (Tahap 3).
+5. Alert secret scanning baru bisa ditutup sebagai *revoked* setelah key lama
+   benar-benar tidak aktif. Alert pada placeholder boleh ditutup sebagai
+   *false positive*.
+6. Pastikan `git status` tidak menampilkan file config sebagai *tracked*;
+   file hanya boleh ada lokal (ignored).
+
+> **Jangan pernah** meng-commit service account JSON (FCM/GitHub Actions),
+> keystore, atau `.env`. Simpan sebagai repository secret (risiko B-20).
