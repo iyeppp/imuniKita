@@ -30,6 +30,11 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # File config Firebase asli di-ignore git (berisi API key). CI memakai
+      # template non-secret agar analyze/test tetap bisa dikompilasi.
+      - name: Provide Firebase options for CI
+        run: cp tool/firebase_options.ci.dart lib/firebase_options.dart
+
       - name: Analyze
         run: flutter analyze --no-fatal-infos
 
