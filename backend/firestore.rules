@@ -1,0 +1,67 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function validUser(d) {
+      return d.namaLengkap is string && d.namaLengkap.size() <= 100
+          && d.email is string && d.email.size() <= 254
+          && d.nomorTelepon is string && d.nomorTelepon.size() <= 20
+          && d.createdAt is timestamp && d.updatedAt is timestamp
+          && d.schemaVersion == 1;
+    }
+
+    function validBaby(d) {
+      return d.namaAnak is string && d.namaAnak.size() > 0 && d.namaAnak.size() <= 60
+          && d.tanggalLahir is timestamp
+          && d.jenisKelamin in ['Laki-laki', 'Perempuan']
+          && d.schemaVersion == 1;
+    }
+
+    function validChild(d) {
+      return d.schemaVersion == 1;
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && request.resource.data.keys().hasOnly([
+          'namaLengkap', 'email', 'nomorTelepon', 'lokasiKota',
+          'activeBabyId', 'createdAt', 'updatedAt', 'schemaVersion'
+        ])
+        && validUser(request.resource.data);
+      allow delete: if false; // akun dihapus lewat backend / konsol
+
+      match /babies/{babyId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validBaby(request.resource.data);
+
+        match /{sub=**} {
+          allow read, delete: if isOwner(uid);
+          allow create, update: if isOwner(uid) && validChild(request.resource.data);
+        }
+      }
+
+      match /quizScores/{quizId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validChild(request.resource.data);
+      }
+
+      match /devices/{token} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /syncMeta/{docId} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+  }
+}
