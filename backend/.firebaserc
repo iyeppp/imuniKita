@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "imunikita-dev-f",
+    "dev": "imunikita-dev-f",
+    "prod": "imunikita-prod-f"
+  }
+}
