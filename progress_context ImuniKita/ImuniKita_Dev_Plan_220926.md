@@ -702,12 +702,15 @@ dependencies:
   firebase_core: ^3.x
   firebase_auth: ^5.x
   cloud_firestore: ^5.x
-  firebase_storage: ^12.x    # untuk foto profil
+  # firebase_storage TIDAK dipakai — aktivasi billing butuh verifikasi kartu
+  # kredit. Foto profil anak disimpan lokal di perangkat (Tahap 7 Backend Progress).
   dio: ^5.x                   # HTTP client untuk custom backend
   retrofit: ^4.x              # Code gen untuk REST API
   connectivity_plus: ^6.x     # Monitor koneksi jaringan
-  firebase_messaging: ^15.x   # Push notification dari server
+  firebase_messaging: ^15.x   # Opsional: push via GitHub Actions cron (bukan Functions)
 ```
+
+> **Batasan tanpa billing (revisi 12 Nov 2026)**: rencana UAS **tidak memakai** Cloud Functions, Cloud Run, Cloud Scheduler, Firebase Storage, Test Lab, Extensions, maupun Google Maps API — semuanya memerlukan Blaze/verifikasi kartu kredit. Pengganti gratis: recursive delete dari klien, notifikasi lokal (`flutter_local_notifications`), FCM opsional via GitHub Actions, foto profil lokal, dan OpenStreetMap untuk peta.
 
 ---
 
@@ -935,7 +938,7 @@ dependency_overrides:
 |------|--------|
 | Performance profiling | Flutter DevTools |
 | Security audit (token storage, data sanitasi) | - |
-| Google Maps integration (FR-03 real) | maps_flutter |
+| Google Maps integration (FR-03 real) | **Tidak dipakai** (butuh billing) — tetap OpenStreetMap `flutter_map` |
 | Final UI/UX polish & testing | - |
 | Build release APK + dokumentasi | - |
 

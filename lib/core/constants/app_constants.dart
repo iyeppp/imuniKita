@@ -15,6 +15,8 @@ abstract class AppConstants {
   static const String educationQuizScoresBox = 'educationQuizScoresBox';
 
   // ── Key SharedPreferences ─────────────────────────────────────────────
+  /// Cermin sesi untuk fitur non-auth. Sejak Tahap 2 sumber kebenaran login
+  /// adalah Firebase Auth (`FirebaseAuth.currentUser`), bukan key ini.
   /// Harus identik dengan key yang dipakai `LoginScreen`/`RegisterScreen`.
   static const String prefIsLoggedIn = 'is_logged_in';
   static const String prefUserId = 'user_id';

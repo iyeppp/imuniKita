@@ -9,6 +9,12 @@ import '../constants/app_constants.dart';
 /// domain (itu tugas Hive CE). Key yang dipakai identik dengan yang sudah
 /// ditulis langsung oleh `LoginScreen`/`RegisterScreen`, sehingga service ini
 /// bisa membaca sesi yang sama tanpa migrasi data.
+///
+/// Sejak Tahap 2, sumber kebenaran sesi adalah **Firebase Auth**. Key
+/// `is_logged_in`/`user_id`/`user_name` dipertahankan sebagai **cermin** yang
+/// ditulis `AuthRepositoryImpl` untuk fitur non-auth (mis. `BabyNotifier` dan
+/// kunci preferensi notifikasi per pengguna). Jangan memakai key tersebut untuk
+/// memutuskan apakah pengguna benar-benar terautentikasi.
 class LocalStorageService {
   LocalStorageService._();
 

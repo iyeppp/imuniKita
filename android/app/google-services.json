@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "1234567890",
-    "project_id": "imunikita-dev",
-    "storage_bucket": "imunikita-dev.appspot.com"
+    "project_number": "219754293644",
+    "project_id": "imunikita-dev-f",
+    "storage_bucket": "imunikita-dev-f.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1234567890:android:imunikita123456",
+        "mobilesdk_app_id": "1:219754293644:android:092c762cf358018cf8cea9",
         "android_client_info": {
           "package_name": "com.imunikita.app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDevKeyForImuniKitaAndroid12345"
+          "current_key": "AIzaSyCRZ7cbVNp0V2TObjXlkvhZRQCa3vafnsk"
         }
       ],
       "services": {
