@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/services/local_storage_service.dart';
@@ -14,32 +16,58 @@ import '../../domain/usecases/login_usecase.dart';
 /// Akun yang sedang login (Temuan #22: dibaca lewat repository auth, bukan
 /// `Hive.openBox` langsung dari presentation layer).
 ///
+/// B2-6: setelah pembacaan awal, notifier mendengarkan `authStateChanges`
+/// sehingga login/logout (termasuk dari perangkat lain atau sesi kedaluwarsa)
+/// langsung memperbarui state tanpa perlu `ref.invalidate` manual.
+///
 /// Mengembalikan `null` bila sesi tidak ada (mis. setelah logout) sehingga
 /// layar yang mem-`watch` provider ini tetap aman dibuka.
 class CurrentUserNotifier extends AsyncNotifier<UserEntity?> {
   @override
-  Future<UserEntity?> build() =>
-      ref.read(getCurrentUserUseCaseProvider).execute();
+  Future<UserEntity?> build() async {
+    final repository = ref.read(authRepositoryProvider);
+    final currentUser = await ref.read(getCurrentUserUseCaseProvider).execute();
 
-  /// Masuk memakai email. Hasilnya membedakan "belum ada akun" dan
-  /// "email tidak terdaftar" agar layar bisa memberi arahan yang tepat.
-  Future<LoginResult> login(String email) async {
-    final hasil = await ref.read(loginUseCaseProvider).execute(email);
+    // Langganan dipasang setelah pembacaan awal agar state tidak di-set
+    // sebelum build selesai. Stream Firebase langsung memancarkan sesi aktif.
+    var disposed = false;
+    final subscription = repository.authStateChanges().listen((user) {
+      if (disposed) return;
+      state = AsyncData(user);
+    });
+    ref.onDispose(() {
+      disposed = true;
+      subscription.cancel();
+    });
+
+    return currentUser;
+  }
+
+  /// Masuk memakai email + password. Hasilnya membedakan "belum ada akun",
+  /// "email tidak terdaftar", dan "password salah" agar layar bisa memberi
+  /// arahan yang tepat.
+  Future<LoginResult> login(String email, String password) async {
+    final hasil = await ref.read(loginUseCaseProvider).execute(email, password);
     if (hasil.berhasil) ref.invalidateSelf();
     return hasil;
   }
 
   /// Daftarkan akun baru (sekaligus membuat sesi).
-  Future<UserEntity> register(UserEntity user) async {
-    final saved = await ref.read(registerUseCaseProvider).execute(user);
+  Future<UserEntity> register(UserEntity user, String password) async {
+    final saved = await ref
+        .read(registerUseCaseProvider)
+        .execute(user, password);
     ref.invalidateSelf();
     return saved;
   }
 
+  /// Kirim tautan atur ulang password ke email terdaftar.
+  Future<void> sendPasswordReset(String email) =>
+      ref.read(sendPasswordResetUseCaseProvider).execute(email);
+
   /// Simpan perubahan profil dari layar Profil & Pengaturan.
   ///
-  /// Menolak email yang sudah dipakai akun lain (aturan bisnis ada di
-  /// `AuthRepositoryImpl`).
+  /// Penolakan email duplikat di mode lokal ada di `AuthRepositoryImpl`.
   Future<void> updateProfile(UserEntity updated) async {
     await ref.read(updateProfileUseCaseProvider).execute(updated);
     ref.invalidateSelf();

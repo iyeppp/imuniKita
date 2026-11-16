@@ -57,6 +57,23 @@ android/key.properties
 *google-services-prod.json
 *GoogleService-Info-prod.plist
 
+# Firebase SDK config — berisi API key; JANGAN di-commit.
+# File ini tetap dibuat lokal lewat `flutterfire configure`.
+# Template CI non-secret ada di `tool/firebase_options.ci.dart`.
+google-services.json
+GoogleService-Info.plist
+firebase_options.dart
+firebase-messaging-sw.js
+.firebase_tmp/
+
+# Kredensial admin Google/Firebase (service account, dsb.)
+*service-account*.json
+*serviceAccount*.json
+*ServiceAccount*.json
+*firebase-adminsdk*.json
+*.pem
+*.p12
+
 # Widget Preview related
 .widget_preview/
 

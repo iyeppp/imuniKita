@@ -97,7 +97,24 @@ flutter doctor
    flutter pub get
    ```
 
-3. **Jalankan aplikasi**
+3. **Siapkan konfigurasi Firebase (wajib untuk build Firebase)**
+
+   File konfigurasi Firebase **tidak di-commit** karena berisi API key:
+   `android/app/google-services.json`, `lib/firebase_options.dart`,
+   `ios/Runner/GoogleService-Info.plist`, dan `web/firebase-messaging-sw.js`.
+   Generate secara lokal setelah clone:
+
+   ```bash
+   dart pub global activate flutterfire_cli   # sekali saja
+   firebase login
+   dart pub global run flutterfire_cli:flutterfire configure -p imunikita-dev-f --platforms=android,ios,web
+   ```
+
+   CI memakai template non-secret `tool/firebase_options.ci.dart`, jadi tidak
+   perlu menambahkan API key ke repository. Detail rotasi/restriksi key ada di
+   `docs/auth-session.md` §6.
+
+4. **Jalankan aplikasi**
 
    ```bash
    flutter run
@@ -234,7 +251,6 @@ lib/
 
 test/                   # unit & widget test
 .github/workflows/      # pipeline CI (analyze + test)
-docs/                   # dokumen ringkas proyek (persona, peta layar, model data, dst.)
 ```
 
 Daftar fitur di `lib/features/`:
