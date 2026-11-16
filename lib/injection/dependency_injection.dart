@@ -5,6 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/firebase/firebase_bootstrap.dart';
 import '../core/firestore/recursive_delete.dart';
+import '../core/network/network_info.dart';
+import '../core/sync/sync_manager.dart';
+import '../core/sync/sync_queue.dart';
 import '../features/auth/data/datasources/auth_local_datasource.dart';
 import '../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../features/auth/data/repositories/auth_repository_impl.dart';
@@ -123,8 +126,31 @@ final babyRemoteDatasourceProvider = Provider<BabyRemoteDatasource?>((ref) {
   return FirebaseBabyRemoteDatasource();
 });
 
+final syncQueueProvider = Provider<SyncQueue>((ref) {
+  return SyncQueue();
+});
+
+final syncManagerProvider = Provider<SyncManager>((ref) {
+  return SyncManager(
+    babyLocal: ref.watch(babyLocalDatasourceProvider),
+    babyRemote: ref.watch(babyRemoteDatasourceProvider),
+    vaccineLocal: ref.watch(vaccineLocalDatasourceProvider),
+    vaccineRemote: ref.watch(vaccineRemoteDatasourceProvider),
+    growthLocal: ref.watch(growthLocalDatasourceProvider),
+    growthRemote: ref.watch(growthRemoteDatasourceProvider),
+    journalLocal: ref.watch(healthJournalLocalDatasourceProvider),
+    journalRemote: ref.watch(healthJournalRemoteDatasourceProvider),
+    quizRemote: ref.watch(quizScoreRemoteDatasourceProvider),
+    syncQueue: ref.watch(syncQueueProvider),
+  );
+});
+
 final babyRepositoryProvider = Provider<IBabyRepository>((ref) {
-  return BabyRepositoryImpl(ref.watch(babyLocalDatasourceProvider));
+  return BabyRepositoryImpl(
+    ref.watch(babyLocalDatasourceProvider),
+    syncQueue: ref.watch(syncQueueProvider),
+    networkInfo: ref.watch(networkInfoProvider),
+  );
 });
 
 final addBabyUseCaseProvider = Provider<AddBabyUseCase>((ref) {
@@ -170,7 +196,11 @@ final vaccineRemoteDatasourceProvider =
 });
 
 final immunizationRepositoryProvider = Provider<IImmunizationRepository>((ref) {
-  return ImmunizationRepositoryImpl(ref.watch(vaccineLocalDatasourceProvider));
+  return ImmunizationRepositoryImpl(
+    ref.watch(vaccineLocalDatasourceProvider),
+    syncQueue: ref.watch(syncQueueProvider),
+    networkInfo: ref.watch(networkInfoProvider),
+  );
 });
 
 final generateScheduleUseCaseProvider = Provider<GenerateScheduleUseCase>((
@@ -221,7 +251,11 @@ final growthRemoteDatasourceProvider =
 });
 
 final growthRepositoryProvider = Provider<IGrowthRepository>((ref) {
-  return GrowthRepositoryImpl(ref.watch(growthLocalDatasourceProvider));
+  return GrowthRepositoryImpl(
+    ref.watch(growthLocalDatasourceProvider),
+    syncQueue: ref.watch(syncQueueProvider),
+    networkInfo: ref.watch(networkInfoProvider),
+  );
 });
 
 final addGrowthRecordUseCaseProvider = Provider<AddGrowthRecordUseCase>((ref) {
@@ -258,6 +292,8 @@ final healthJournalRepositoryProvider = Provider<IHealthJournalRepository>((
 ) {
   return HealthJournalRepositoryImpl(
     ref.watch(healthJournalLocalDatasourceProvider),
+    syncQueue: ref.watch(syncQueueProvider),
+    networkInfo: ref.watch(networkInfoProvider),
   );
 });
 

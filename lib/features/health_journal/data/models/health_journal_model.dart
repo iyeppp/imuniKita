@@ -27,6 +27,9 @@ class HealthJournalModel extends HiveObject {
   @HiveField(6)
   late List<String> gejala;
 
+  @HiveField(7)
+  DateTime? updatedAt;
+
   HealthJournalModel({
     required this.journalId,
     required this.babyId,
@@ -35,6 +38,7 @@ class HealthJournalModel extends HiveObject {
     required this.isiCatatan,
     this.suhuTubuh,
     required this.gejala,
+    this.updatedAt,
   });
 
   /// Konversi ke entity domain (dipakai repository saat membaca dari Hive).
@@ -46,6 +50,7 @@ class HealthJournalModel extends HiveObject {
     isiCatatan: isiCatatan,
     suhuTubuh: suhuTubuh,
     gejala: List.unmodifiable(gejala),
+    updatedAt: updatedAt,
   );
 
   /// Konversi dari entity domain (dipakai repository saat menulis ke Hive).
@@ -58,5 +63,6 @@ class HealthJournalModel extends HiveObject {
         isiCatatan: entity.isiCatatan,
         suhuTubuh: entity.suhuTubuh,
         gejala: List.from(entity.gejala),
+        updatedAt: entity.updatedAt,
       );
 }

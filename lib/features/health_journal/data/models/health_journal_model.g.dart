@@ -24,13 +24,14 @@ class HealthJournalModelAdapter extends TypeAdapter<HealthJournalModel> {
       isiCatatan: fields[4] as String,
       suhuTubuh: (fields[5] as num?)?.toDouble(),
       gejala: (fields[6] as List).cast<String>(),
+      updatedAt: fields[7] as DateTime?,
     );
   }
 
   @override
   void write(BinaryWriter writer, HealthJournalModel obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.journalId)
       ..writeByte(1)
@@ -44,7 +45,9 @@ class HealthJournalModelAdapter extends TypeAdapter<HealthJournalModel> {
       ..writeByte(5)
       ..write(obj.suhuTubuh)
       ..writeByte(6)
-      ..write(obj.gejala);
+      ..write(obj.gejala)
+      ..writeByte(7)
+      ..write(obj.updatedAt);
   }
 
   @override

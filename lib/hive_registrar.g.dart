@@ -3,6 +3,7 @@
 // Check in to version control
 
 import 'package:hive_ce/hive_ce.dart';
+import 'package:imunikita/core/sync/sync_outbox_model.dart';
 import 'package:imunikita/features/auth/data/models/user_model.dart';
 import 'package:imunikita/features/baby_profile/data/models/baby_model.dart';
 import 'package:imunikita/features/education/data/models/quiz_score_model.dart';
@@ -16,6 +17,7 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(GrowthRecordModelAdapter());
     registerAdapter(HealthJournalModelAdapter());
     registerAdapter(QuizScoreModelAdapter());
+    registerAdapter(SyncOperationModelAdapter());
     registerAdapter(UserModelAdapter());
     registerAdapter(VaccineScheduleModelAdapter());
   }
@@ -27,6 +29,7 @@ extension IsolatedHiveRegistrar on IsolatedHiveInterface {
     registerAdapter(GrowthRecordModelAdapter());
     registerAdapter(HealthJournalModelAdapter());
     registerAdapter(QuizScoreModelAdapter());
+    registerAdapter(SyncOperationModelAdapter());
     registerAdapter(UserModelAdapter());
     registerAdapter(VaccineScheduleModelAdapter());
   }

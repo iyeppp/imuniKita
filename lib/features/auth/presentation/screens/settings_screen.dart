@@ -8,6 +8,7 @@ import '../../../../app/app_version_provider.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/theme_provider.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/sync/sync_status_provider.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/age_calculator.dart';
 import '../../../../injection/dependency_injection.dart';
@@ -528,6 +529,8 @@ class _KartuPengaturan extends ConsumerWidget {
             onTap: () => _tampilkanPilihanTema(context, ref, currentThemeMode),
           ),
           const Divider(height: 1),
+          const _TileStatusSinkron(),
+          const Divider(height: 1),
           ListTile(
             leading: Icon(Icons.info_outline, color: context.primaryTextColor),
             title: Text(
@@ -548,6 +551,51 @@ class _KartuPengaturan extends ConsumerWidget {
             onTap: () => _tampilkanTentang(context, versi),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TileStatusSinkron extends ConsumerWidget {
+  const _TileStatusSinkron();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final syncAsync = ref.watch(syncStatusProvider);
+    final syncData = syncAsync.asData?.value ??
+        const SyncStatusData(isOnline: true, pendingCount: 0);
+
+    final (badgeColor, icon) = switch (syncData.status) {
+      SyncStatus.synced => (AppColors.green, Icons.cloud_done_outlined),
+      SyncStatus.syncing => (AppColors.teal, Icons.sync_rounded),
+      SyncStatus.pendingOffline => (AppColors.yellow, Icons.cloud_off_outlined),
+      SyncStatus.offline => (AppColors.textHint, Icons.wifi_off_rounded),
+    };
+
+    return ListTile(
+      leading: Icon(Icons.sync, color: context.primaryTextColor),
+      title: Text(
+        'Status Sinkronisasi',
+        style: GoogleFonts.poppins(
+          fontSize: 13.5,
+          fontWeight: FontWeight.w600,
+          color: context.primaryTextColor,
+        ),
+      ),
+      subtitle: Text(
+        syncData.isOnline
+            ? 'Sinkronisasi cloud aktif'
+            : 'Perangkat offline — data disimpan di antrean lokal',
+        style: GoogleFonts.poppins(
+          fontSize: 11.5,
+          color: context.secondaryTextColor,
+        ),
+      ),
+      trailing: StatusBadge(
+        label: syncData.label,
+        color: badgeColor,
+        icon: icon,
+        compact: true,
       ),
     );
   }

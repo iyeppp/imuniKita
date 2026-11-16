@@ -21,16 +21,16 @@ class QuizScoreModelAdapter extends TypeAdapter<QuizScoreModel> {
       skor: (fields[1] as num).toInt(),
       totalSoal: (fields[2] as num).toInt(),
       tanggalPengerjaan: fields[3] as DateTime,
-      // Temuan #15: field baru — aman untuk data lama (null bila belum ada).
       attemptCount: (fields[4] as num?)?.toInt(),
       riwayatSkor: (fields[5] as List?)?.cast<int>(),
+      updatedAt: fields[6] as DateTime?,
     );
   }
 
   @override
   void write(BinaryWriter writer, QuizScoreModel obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.quizId)
       ..writeByte(1)
@@ -42,7 +42,9 @@ class QuizScoreModelAdapter extends TypeAdapter<QuizScoreModel> {
       ..writeByte(4)
       ..write(obj.attemptCount)
       ..writeByte(5)
-      ..write(obj.riwayatSkor);
+      ..write(obj.riwayatSkor)
+      ..writeByte(6)
+      ..write(obj.updatedAt);
   }
 
   @override

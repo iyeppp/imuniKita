@@ -11,6 +11,7 @@ class GrowthRecordEntity {
     required this.beratBadan,
     required this.tinggiBadan,
     this.lingkarKepala,
+    this.updatedAt,
   });
 
   final String recordId;
@@ -26,11 +27,14 @@ class GrowthRecordEntity {
   /// Lingkar kepala (cm) — opsional.
   final double? lingkarKepala;
 
+  final DateTime? updatedAt;
+
   GrowthRecordEntity copyWith({
     DateTime? tanggalPengukuran,
     double? beratBadan,
     double? tinggiBadan,
     double? lingkarKepala,
+    DateTime? updatedAt,
   }) {
     return GrowthRecordEntity(
       recordId: recordId,
@@ -39,6 +43,7 @@ class GrowthRecordEntity {
       beratBadan: beratBadan ?? this.beratBadan,
       tinggiBadan: tinggiBadan ?? this.tinggiBadan,
       lingkarKepala: lingkarKepala ?? this.lingkarKepala,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

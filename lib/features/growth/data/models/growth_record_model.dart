@@ -24,6 +24,9 @@ class GrowthRecordModel extends HiveObject {
   @HiveField(5)
   double? lingkarKepala; // cm
 
+  @HiveField(6)
+  DateTime? updatedAt;
+
   GrowthRecordModel({
     required this.recordId,
     required this.babyId,
@@ -31,6 +34,7 @@ class GrowthRecordModel extends HiveObject {
     required this.beratBadan,
     required this.tinggiBadan,
     this.lingkarKepala,
+    this.updatedAt,
   });
 
   /// Konversi ke entity domain (dipakai repository saat membaca dari Hive).
@@ -41,6 +45,7 @@ class GrowthRecordModel extends HiveObject {
     beratBadan: beratBadan,
     tinggiBadan: tinggiBadan,
     lingkarKepala: lingkarKepala,
+    updatedAt: updatedAt,
   );
 
   /// Konversi dari entity domain (dipakai repository saat menulis ke Hive).
@@ -52,5 +57,6 @@ class GrowthRecordModel extends HiveObject {
         beratBadan: entity.beratBadan,
         tinggiBadan: entity.tinggiBadan,
         lingkarKepala: entity.lingkarKepala,
+        updatedAt: entity.updatedAt,
       );
 }

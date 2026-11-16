@@ -24,13 +24,14 @@ class BabyModelAdapter extends TypeAdapter<BabyModel> {
       jenisKelamin: fields[4] as String,
       fotoProfilPath: fields[5] as String?,
       createdAt: fields[6] as DateTime,
+      updatedAt: fields[7] as DateTime?,
     );
   }
 
   @override
   void write(BinaryWriter writer, BabyModel obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.babyId)
       ..writeByte(1)
@@ -44,7 +45,9 @@ class BabyModelAdapter extends TypeAdapter<BabyModel> {
       ..writeByte(5)
       ..write(obj.fotoProfilPath)
       ..writeByte(6)
-      ..write(obj.createdAt);
+      ..write(obj.createdAt)
+      ..writeByte(7)
+      ..write(obj.updatedAt);
   }
 
   @override
