@@ -16,12 +16,32 @@ Future<void> defaultFirestoreSyncHandler(SyncOperationModel op) async {
   if (op.op == 'delete') {
     await docRef.delete();
   } else {
-    final Map<String, dynamic> payload =
-        op.payloadJson.isEmpty
-            ? <String, dynamic>{}
-            : (jsonDecode(op.payloadJson) as Map<String, dynamic>);
+    final Map<String, dynamic> rawPayload = op.payloadJson.isEmpty
+        ? <String, dynamic>{}
+        : (jsonDecode(op.payloadJson) as Map<String, dynamic>);
+    final payload = _restoreTimestamps(rawPayload);
     await docRef.set(payload, SetOptions(merge: true));
   }
+}
+
+Map<String, dynamic> _restoreTimestamps(Map<String, dynamic> map) {
+  final restored = <String, dynamic>{};
+  for (final entry in map.entries) {
+    final val = entry.value;
+    if (val is String && _isIso8601Date(val)) {
+      restored[entry.key] = Timestamp.fromDate(DateTime.parse(val));
+    } else if (val is Map<String, dynamic>) {
+      restored[entry.key] = _restoreTimestamps(val);
+    } else {
+      restored[entry.key] = val;
+    }
+  }
+  return restored;
+}
+
+bool _isIso8601Date(String str) {
+  if (str.length < 10) return false;
+  return DateTime.tryParse(str) != null && (str.contains('T') || str.contains('-'));
 }
 
 /// Antrean outbox offline-first untuk menampung mutasi lokal dan memprosesnya ke Firestore.
@@ -45,6 +65,16 @@ class SyncQueue {
       return Hive.box<SyncOperationModel>(AppConstants.syncOutboxBox);
     }
     return Hive.openBox<SyncOperationModel>(AppConstants.syncOutboxBox);
+  }
+
+  static Object? _jsonEncodable(Object? object) {
+    if (object is Timestamp) {
+      return object.toDate().toIso8601String();
+    }
+    if (object is DateTime) {
+      return object.toIso8601String();
+    }
+    return object;
   }
 
   /// Memasukkan operasi mutasi baru ke dalam outbox Hive.
@@ -73,7 +103,9 @@ class SyncQueue {
       op: op,
       path: path,
       entityId: entityId,
-      payloadJson: payload != null ? jsonEncode(payload) : '',
+      payloadJson: payload != null
+          ? jsonEncode(payload, toEncodable: _jsonEncodable)
+          : '',
       attempts: 0,
       createdAt: DateTime.now(),
     );

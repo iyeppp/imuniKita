@@ -74,6 +74,13 @@ firebase-messaging-sw.js
 *.pem
 *.p12
 
+# Backend Node & Firebase Emulator
+backend/node_modules/
+backend/.env
+backend/.firebase/
+backend/dist/
+backend/build/
+
 # Widget Preview related
 .widget_preview/
 
