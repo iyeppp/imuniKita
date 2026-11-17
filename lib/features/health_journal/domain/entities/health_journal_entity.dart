@@ -10,6 +10,7 @@ class HealthJournalEntity {
     required this.isiCatatan,
     this.suhuTubuh,
     this.gejala = const [],
+    this.updatedAt,
   });
 
   final String journalId;
@@ -26,11 +27,14 @@ class HealthJournalEntity {
   /// Daftar gejala yang timbul.
   final List<String> gejala;
 
+  final DateTime? updatedAt;
+
   HealthJournalEntity copyWith({
     DateTime? tanggalCatatan,
     String? isiCatatan,
     double? suhuTubuh,
     List<String>? gejala,
+    DateTime? updatedAt,
   }) {
     return HealthJournalEntity(
       journalId: journalId,
@@ -40,6 +44,7 @@ class HealthJournalEntity {
       isiCatatan: isiCatatan ?? this.isiCatatan,
       suhuTubuh: suhuTubuh ?? this.suhuTubuh,
       gejala: gejala ?? this.gejala,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

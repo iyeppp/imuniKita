@@ -18,6 +18,7 @@ class BabyEntity {
     required this.jenisKelamin,
     this.fotoProfilPath,
     required this.createdAt,
+    this.updatedAt,
   });
 
   /// UUID lokal bayi.
@@ -36,12 +37,14 @@ class BabyEntity {
   final String? fotoProfilPath;
 
   final DateTime createdAt;
+  final DateTime? updatedAt;
 
   BabyEntity copyWith({
     String? namaAnak,
     DateTime? tanggalLahir,
     String? jenisKelamin,
     String? fotoProfilPath,
+    DateTime? updatedAt,
     // Temuan #37: flag eksplisit agar foto profil bisa dihapus (di-set null).
     bool clearFotoProfilPath = false,
   }) {
@@ -55,6 +58,7 @@ class BabyEntity {
           ? null
           : (fotoProfilPath ?? this.fotoProfilPath),
       createdAt: createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

@@ -13,6 +13,11 @@ class HealthJournalLocalDatasource {
   Future<Box<HealthJournalModel>> _openBox() =>
       Hive.openBox<HealthJournalModel>(AppConstants.healthJournalsBox);
 
+  Future<HealthJournalModel?> getById(String journalId) async {
+    final box = await _openBox();
+    return box.get(journalId);
+  }
+
   Future<List<HealthJournalModel>> getByBaby(String babyId) async {
     final box = await _openBox();
     final list = box.values.where((j) => j.babyId == babyId).toList();

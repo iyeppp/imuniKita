@@ -23,13 +23,14 @@ class GrowthRecordModelAdapter extends TypeAdapter<GrowthRecordModel> {
       beratBadan: (fields[3] as num).toDouble(),
       tinggiBadan: (fields[4] as num).toDouble(),
       lingkarKepala: (fields[5] as num?)?.toDouble(),
+      updatedAt: fields[6] as DateTime?,
     );
   }
 
   @override
   void write(BinaryWriter writer, GrowthRecordModel obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.recordId)
       ..writeByte(1)
@@ -41,7 +42,9 @@ class GrowthRecordModelAdapter extends TypeAdapter<GrowthRecordModel> {
       ..writeByte(4)
       ..write(obj.tinggiBadan)
       ..writeByte(5)
-      ..write(obj.lingkarKepala);
+      ..write(obj.lingkarKepala)
+      ..writeByte(6)
+      ..write(obj.updatedAt);
   }
 
   @override

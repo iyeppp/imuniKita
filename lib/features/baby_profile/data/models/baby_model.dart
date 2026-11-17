@@ -31,6 +31,9 @@ class BabyModel extends HiveObject {
   @HiveField(6)
   late DateTime createdAt;
 
+  @HiveField(7)
+  DateTime? updatedAt;
+
   BabyModel({
     required this.babyId,
     required this.userId,
@@ -39,6 +42,7 @@ class BabyModel extends HiveObject {
     required this.jenisKelamin,
     this.fotoProfilPath,
     required this.createdAt,
+    this.updatedAt,
   });
 
   /// Konversi ke entity domain (dipakai repository saat membaca dari Hive).
@@ -50,6 +54,7 @@ class BabyModel extends HiveObject {
     jenisKelamin: jenisKelamin,
     fotoProfilPath: fotoProfilPath,
     createdAt: createdAt,
+    updatedAt: updatedAt,
   );
 
   /// Konversi dari entity domain (dipakai repository saat menulis ke Hive).
@@ -61,5 +66,6 @@ class BabyModel extends HiveObject {
     jenisKelamin: entity.jenisKelamin,
     fotoProfilPath: entity.fotoProfilPath,
     createdAt: entity.createdAt,
+    updatedAt: entity.updatedAt,
   );
 }

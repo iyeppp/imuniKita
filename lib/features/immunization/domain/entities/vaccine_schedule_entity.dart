@@ -55,6 +55,7 @@ class VaccineScheduleEntity {
     this.catatanReaksi,
     this.reminderH7Sent = false,
     this.reminderH1Sent = false,
+    this.updatedAt,
   });
 
   final String scheduleId;
@@ -77,12 +78,15 @@ class VaccineScheduleEntity {
   final bool reminderH7Sent;
   final bool reminderH1Sent;
 
+  final DateTime? updatedAt;
+
   VaccineScheduleEntity copyWith({
     String? status,
     DateTime? tanggalRealisasi,
     String? catatanReaksi,
     bool? reminderH7Sent,
     bool? reminderH1Sent,
+    DateTime? updatedAt,
     // Temuan #37: field nullable perlu flag eksplisit agar bisa dikosongkan
     // (`?? this.x` saja tidak pernah bisa men-set null).
     bool clearTanggalRealisasi = false,
@@ -104,6 +108,7 @@ class VaccineScheduleEntity {
           : (catatanReaksi ?? this.catatanReaksi),
       reminderH7Sent: reminderH7Sent ?? this.reminderH7Sent,
       reminderH1Sent: reminderH1Sent ?? this.reminderH1Sent,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

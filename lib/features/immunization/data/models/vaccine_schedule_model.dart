@@ -43,6 +43,9 @@ class VaccineScheduleModel extends HiveObject {
   @HiveField(10)
   bool reminderH1Sent;
 
+  @HiveField(11)
+  DateTime? updatedAt;
+
   VaccineScheduleModel({
     required this.scheduleId,
     required this.babyId,
@@ -55,6 +58,7 @@ class VaccineScheduleModel extends HiveObject {
     this.catatanReaksi,
     this.reminderH7Sent = false,
     this.reminderH1Sent = false,
+    this.updatedAt,
   });
 
   VaccineScheduleEntity toEntity() => VaccineScheduleEntity(
@@ -69,6 +73,7 @@ class VaccineScheduleModel extends HiveObject {
     catatanReaksi: catatanReaksi,
     reminderH7Sent: reminderH7Sent,
     reminderH1Sent: reminderH1Sent,
+    updatedAt: updatedAt,
   );
 
   factory VaccineScheduleModel.fromEntity(VaccineScheduleEntity entity) =>
@@ -84,5 +89,6 @@ class VaccineScheduleModel extends HiveObject {
         catatanReaksi: entity.catatanReaksi,
         reminderH7Sent: entity.reminderH7Sent,
         reminderH1Sent: entity.reminderH1Sent,
+        updatedAt: entity.updatedAt,
       );
 }

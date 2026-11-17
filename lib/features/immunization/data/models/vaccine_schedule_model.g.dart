@@ -28,13 +28,14 @@ class VaccineScheduleModelAdapter extends TypeAdapter<VaccineScheduleModel> {
       catatanReaksi: fields[8] as String?,
       reminderH7Sent: fields[9] == null ? false : fields[9] as bool,
       reminderH1Sent: fields[10] == null ? false : fields[10] as bool,
+      updatedAt: fields[11] as DateTime?,
     );
   }
 
   @override
   void write(BinaryWriter writer, VaccineScheduleModel obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.scheduleId)
       ..writeByte(1)
@@ -56,7 +57,9 @@ class VaccineScheduleModelAdapter extends TypeAdapter<VaccineScheduleModel> {
       ..writeByte(9)
       ..write(obj.reminderH7Sent)
       ..writeByte(10)
-      ..write(obj.reminderH1Sent);
+      ..write(obj.reminderH1Sent)
+      ..writeByte(11)
+      ..write(obj.updatedAt);
   }
 
   @override

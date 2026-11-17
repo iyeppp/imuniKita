@@ -1,17 +1,43 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../../../core/errors/failures.dart';
+import '../../../../core/firebase/firebase_bootstrap.dart';
+import '../../../../core/network/network_info.dart';
+import '../../../../core/sync/sync_queue.dart';
 import '../../domain/entities/baby_entity.dart';
 import '../../domain/repositories/i_baby_repository.dart';
 import '../datasources/baby_local_datasource.dart';
+import '../mappers/baby_mapper.dart';
 import '../models/baby_model.dart';
 
-/// Implementasi `IBabyRepository` fase UTS — sepenuhnya di atas Hive CE.
+/// Implementasi offline-first `IBabyRepository`.
 ///
-/// Menerjemahkan `BabyModel` (data layer) ↔ `BabyEntity` (domain layer) dan
-/// membungkus error Hive menjadi `Failure` yang siap tampil ke pengguna.
+/// Menyimpan lokal ke Hive CE terlebih dahulu, lalu mendaftarkan mutasi
+/// ke `SyncQueue` outbox untuk disinkronkan ke Firestore.
 class BabyRepositoryImpl implements IBabyRepository {
-  const BabyRepositoryImpl(this._localDatasource);
+  const BabyRepositoryImpl(
+    this._localDatasource, {
+    this.syncQueue,
+    this.networkInfo,
+    this.auth,
+  });
 
   final BabyLocalDatasource _localDatasource;
+  final SyncQueue? syncQueue;
+  final INetworkInfo? networkInfo;
+  final FirebaseAuth? auth;
+
+  String? get _uid {
+    if (auth != null) return auth?.currentUser?.uid;
+    if (!FirebaseBootstrap.isInitialized) return null;
+    try {
+      return FirebaseAuth.instance.currentUser?.uid;
+    } catch (_) {
+      return null;
+    }
+  }
 
   @override
   Future<List<BabyEntity>> getBabiesByUser(String userId) async {
@@ -38,7 +64,25 @@ class BabyRepositoryImpl implements IBabyRepository {
   @override
   Future<BabyEntity> addBaby(BabyEntity baby) async {
     try {
-      final saved = await _localDatasource.add(BabyModel.fromEntity(baby));
+      final now = DateTime.now();
+      final updatedBaby = baby.copyWith(updatedAt: baby.updatedAt ?? now);
+      final model = BabyModel.fromEntity(updatedBaby);
+
+      final saved = await _localDatasource.add(model);
+
+      final uid = _uid ?? baby.userId;
+      if (uid.isNotEmpty) {
+        await syncQueue?.enqueue(
+          op: 'upsert',
+          path: 'users/$uid/babies/${baby.babyId}',
+          entityId: baby.babyId,
+          payload: BabyMapper.toFirestore(saved, updatedAt: saved.updatedAt),
+        );
+        if (await networkInfo?.isConnected ?? false) {
+          unawaited(syncQueue?.drain());
+        }
+      }
+
       return saved.toEntity();
     } catch (_) {
       throw const LocalStorageFailure('Gagal menyimpan profil bayi.');
@@ -48,7 +92,25 @@ class BabyRepositoryImpl implements IBabyRepository {
   @override
   Future<BabyEntity> updateBaby(BabyEntity baby) async {
     try {
-      final updated = await _localDatasource.update(BabyModel.fromEntity(baby));
+      final now = DateTime.now();
+      final updatedBaby = baby.copyWith(updatedAt: now);
+      final model = BabyModel.fromEntity(updatedBaby);
+
+      final updated = await _localDatasource.update(model);
+
+      final uid = _uid ?? baby.userId;
+      if (uid.isNotEmpty) {
+        await syncQueue?.enqueue(
+          op: 'upsert',
+          path: 'users/$uid/babies/${baby.babyId}',
+          entityId: baby.babyId,
+          payload: BabyMapper.toFirestore(updated, updatedAt: updated.updatedAt),
+        );
+        if (await networkInfo?.isConnected ?? false) {
+          unawaited(syncQueue?.drain());
+        }
+      }
+
       return updated.toEntity();
     } catch (_) {
       throw const LocalStorageFailure('Gagal memperbarui profil bayi.');
@@ -58,7 +120,21 @@ class BabyRepositoryImpl implements IBabyRepository {
   @override
   Future<void> deleteBaby(String babyId) async {
     try {
+      final existing = await _localDatasource.getById(babyId);
+      final uid = _uid ?? existing?.userId ?? '';
+
       await _localDatasource.delete(babyId);
+
+      if (uid.isNotEmpty) {
+        await syncQueue?.enqueue(
+          op: 'delete',
+          path: 'users/$uid/babies/$babyId',
+          entityId: babyId,
+        );
+        if (await networkInfo?.isConnected ?? false) {
+          unawaited(syncQueue?.drain());
+        }
+      }
     } catch (_) {
       throw const LocalStorageFailure('Gagal menghapus profil bayi.');
     }

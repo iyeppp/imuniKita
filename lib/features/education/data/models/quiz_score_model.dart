@@ -37,6 +37,9 @@ class QuizScoreModel extends HiveObject {
   @HiveField(5)
   List<int>? riwayatSkor;
 
+  @HiveField(6)
+  DateTime? updatedAt;
+
   QuizScoreModel({
     required this.quizId,
     required this.skor,
@@ -44,6 +47,7 @@ class QuizScoreModel extends HiveObject {
     required this.tanggalPengerjaan,
     this.attemptCount,
     this.riwayatSkor,
+    this.updatedAt,
   });
 
   /// Persentase 0–100, dipakai untuk badge hasil akhir.
