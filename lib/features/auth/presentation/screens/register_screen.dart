@@ -7,6 +7,8 @@ import 'package:uuid/uuid.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/sync/migration_dialog.dart';
+import '../../../../injection/dependency_injection.dart';
 import '../../../../widgets/custom_text_field.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
@@ -76,6 +78,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ),
             _passwordController.text,
           );
+
+      if (!mounted) return;
+
+      final migration = ref.read(dataMigrationProvider);
+      final summary = await migration.detectLegacyData(saved.localId);
+      if (summary.hasData && mounted) {
+        await MigrationDialog.show(
+          context: context,
+          uid: saved.localId,
+          summary: summary,
+        );
+      }
 
       if (!mounted) return;
       SnackbarHelper.showSuccess(

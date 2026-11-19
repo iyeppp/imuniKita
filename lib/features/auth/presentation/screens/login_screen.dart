@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/sync/migration_dialog.dart';
+import '../../../../injection/dependency_injection.dart';
 import '../../../../widgets/custom_text_field.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../providers/auth_provider.dart';
@@ -73,9 +75,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             'Password salah. Periksa kembali lalu coba lagi.',
           );
         case LoginStatus.sukses:
+          final user = hasil.user!;
+          final migration = ref.read(dataMigrationProvider);
+          final summary = await migration.detectLegacyData(user.localId);
+
+          if (summary.hasData && mounted) {
+            await MigrationDialog.show(
+              context: context,
+              uid: user.localId,
+              summary: summary,
+            );
+          }
+
+          if (!mounted) return;
           SnackbarHelper.showSuccess(
             context,
-            'Selamat datang kembali, ${hasil.user!.namaLengkap}!',
+            'Selamat datang kembali, ${user.namaLengkap}!',
           );
           context.go(AppRoutes.dashboard);
       }

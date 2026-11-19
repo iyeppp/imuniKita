@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/firebase/firebase_bootstrap.dart';
 import '../core/firestore/recursive_delete.dart';
 import '../core/network/network_info.dart';
+import '../core/sync/data_migration.dart';
 import '../core/sync/sync_manager.dart';
 import '../core/sync/sync_queue.dart';
 import '../features/auth/data/datasources/auth_local_datasource.dart';
@@ -142,6 +143,19 @@ final syncManagerProvider = Provider<SyncManager>((ref) {
     journalRemote: ref.watch(healthJournalRemoteDatasourceProvider),
     quizRemote: ref.watch(quizScoreRemoteDatasourceProvider),
     syncQueue: ref.watch(syncQueueProvider),
+  );
+});
+
+final dataMigrationProvider = Provider<DataMigration>((ref) {
+  return DataMigration(
+    babyRemote: ref.watch(babyRemoteDatasourceProvider),
+    vaccineLocal: ref.watch(vaccineLocalDatasourceProvider),
+    vaccineRemote: ref.watch(vaccineRemoteDatasourceProvider),
+    growthLocal: ref.watch(growthLocalDatasourceProvider),
+    growthRemote: ref.watch(growthRemoteDatasourceProvider),
+    journalLocal: ref.watch(healthJournalLocalDatasourceProvider),
+    journalRemote: ref.watch(healthJournalRemoteDatasourceProvider),
+    quizRemote: ref.watch(quizScoreRemoteDatasourceProvider),
   );
 });
 
