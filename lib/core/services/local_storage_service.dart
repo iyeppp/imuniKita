@@ -104,4 +104,17 @@ class LocalStorageService {
     };
     await (await instance).setString(AppConstants.prefThemeMode, modeStr);
   }
+
+  /// Penanda migrasi data domain UTS → Firebase per-uid (B6-4).
+  static String _migrationKey(String uid) => 'migration_done_$uid';
+
+  static Future<bool> isMigrationDone(String uid) async {
+    if (uid.isEmpty) return false;
+    return (await instance).getBool(_migrationKey(uid)) ?? false;
+  }
+
+  static Future<void> markMigrationDone(String uid) async {
+    if (uid.isEmpty) return;
+    await (await instance).setBool(_migrationKey(uid), true);
+  }
 }

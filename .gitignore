@@ -49,6 +49,9 @@ android/key.properties
 *.jks
 *.keystore
 
+# Test temporary directories
+test/hive_*/
+
 # Config Backend & Environment Secrets
 .env
 .env.*
