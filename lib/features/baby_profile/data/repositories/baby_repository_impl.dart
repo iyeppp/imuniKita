@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/firebase/firebase_bootstrap.dart';
 import '../../../../core/network/network_info.dart';
+import '../../../../core/services/photo_storage_service.dart';
 import '../../../../core/sync/sync_queue.dart';
 import '../../domain/entities/baby_entity.dart';
 import '../../domain/repositories/i_baby_repository.dart';
@@ -22,12 +23,14 @@ class BabyRepositoryImpl implements IBabyRepository {
     this.syncQueue,
     this.networkInfo,
     this.auth,
+    this.photoStorageService,
   });
 
   final BabyLocalDatasource _localDatasource;
   final SyncQueue? syncQueue;
   final INetworkInfo? networkInfo;
   final FirebaseAuth? auth;
+  final PhotoStorageService? photoStorageService;
 
   String? get _uid {
     if (auth != null) return auth?.currentUser?.uid;
@@ -92,11 +95,19 @@ class BabyRepositoryImpl implements IBabyRepository {
   @override
   Future<BabyEntity> updateBaby(BabyEntity baby) async {
     try {
+      final existing = await _localDatasource.getById(baby.babyId);
       final now = DateTime.now();
       final updatedBaby = baby.copyWith(updatedAt: now);
       final model = BabyModel.fromEntity(updatedBaby);
 
       final updated = await _localDatasource.update(model);
+
+      // Jika foto diganti, hapus file foto lama (B7-4)
+      if (existing?.fotoProfilPath != null &&
+          existing!.fotoProfilPath!.isNotEmpty &&
+          existing.fotoProfilPath != updated.fotoProfilPath) {
+        await photoStorageService?.deletePhoto(existing.fotoProfilPath);
+      }
 
       final uid = _uid ?? baby.userId;
       if (uid.isNotEmpty) {
@@ -122,6 +133,11 @@ class BabyRepositoryImpl implements IBabyRepository {
     try {
       final existing = await _localDatasource.getById(babyId);
       final uid = _uid ?? existing?.userId ?? '';
+
+      // Hapus file foto lokal jika ada (B7-4)
+      if (existing?.fotoProfilPath != null && existing!.fotoProfilPath!.isNotEmpty) {
+        await photoStorageService?.deletePhoto(existing.fotoProfilPath);
+      }
 
       await _localDatasource.delete(babyId);
 
