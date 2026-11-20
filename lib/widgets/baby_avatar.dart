@@ -43,6 +43,8 @@ class BabyAvatar extends StatelessWidget {
       backgroundColor:
           backgroundColor ?? AppColors.teal.withValues(alpha: 0.15),
       backgroundImage: foto,
+      onBackgroundImageError:
+          foto != null ? (exception, stackTrace) {} : null,
       child: foto != null
           ? null
           : Text(

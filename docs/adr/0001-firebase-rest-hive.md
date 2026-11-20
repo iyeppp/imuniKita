@@ -49,6 +49,13 @@ Layanan berikut **tidak digunakan** karena membutuhkan Blaze + verifikasi kartu 
 - Cloud Functions / Cloud Run / Cloud Scheduler → cascade delete dilakukan dari klien; penjadwal memakai GitHub Actions atau notifikasi lokal.
 - Test Lab, Extensions, Google Maps API → tidak dipakai (peta tetap OpenStreetMap).
 
+### 7. Kebijakan Foto Profil Anak (Tanpa Cloud Storage - B7-1)
+- **Firebase Storage TIDAK digunakan** (alasan batasan biaya/billing Firebase Spark).
+- Foto profil anak adalah **data lokal (device-bound)** yang disimpan di folder khusus aplikasi (`<appDocsDir>/baby_photos/<babyId>.jpg`).
+- Path lokal disimpan di field Hive `BabyModel.fotoProfilPath` dan **TIDAK disinkronkan** ke Firestore (tidak ada field `fotoProfilUrl` di cloud).
+- Foto **tidak berpindah antar-perangkat** (device-bound limitation).
+- File gambar dari `ImagePicker` disalin secara persisten ke folder `baby_photos/` dengan kompresi `maxWidth: 800` dan `imageQuality: 75`. File foto lama otomatis dibersihkan saat foto diganti atau data profil anak dihapus.
+
 ## 📈 Consequences & Trade-offs
 
 - **Keuntungan**:

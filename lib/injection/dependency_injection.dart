@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/firebase/firebase_bootstrap.dart';
 import '../core/firestore/recursive_delete.dart';
 import '../core/network/network_info.dart';
+import '../core/services/photo_storage_service.dart';
 import '../core/sync/data_migration.dart';
 import '../core/sync/sync_manager.dart';
 import '../core/sync/sync_queue.dart';
@@ -159,11 +160,16 @@ final dataMigrationProvider = Provider<DataMigration>((ref) {
   );
 });
 
+final photoStorageServiceProvider = Provider<PhotoStorageService>((ref) {
+  return PhotoStorageService();
+});
+
 final babyRepositoryProvider = Provider<IBabyRepository>((ref) {
   return BabyRepositoryImpl(
     ref.watch(babyLocalDatasourceProvider),
     syncQueue: ref.watch(syncQueueProvider),
     networkInfo: ref.watch(networkInfoProvider),
+    photoStorageService: ref.watch(photoStorageServiceProvider),
   );
 });
 

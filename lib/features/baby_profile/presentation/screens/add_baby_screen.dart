@@ -53,7 +53,8 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
       final picker = ImagePicker();
       final picked = await picker.pickImage(
         source: ImageSource.gallery,
-        imageQuality: 80,
+        maxWidth: 800,
+        imageQuality: 75,
       );
       if (picked != null) {
         if (!mounted) return;
@@ -112,13 +113,23 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
         );
       }
 
+      final newBabyId = const Uuid().v4();
+      String? persistentPhotoPath = _fotoProfilPath;
+      if (_fotoProfilPath != null && _fotoProfilPath!.isNotEmpty) {
+        final photoStorage = ref.read(photoStorageServiceProvider);
+        persistentPhotoPath = await photoStorage.savePhoto(
+          File(_fotoProfilPath!),
+          newBabyId,
+        );
+      }
+
       final baby = BabyEntity(
-        babyId: const Uuid().v4(),
+        babyId: newBabyId,
         userId: userId,
         namaAnak: _nameController.text.trim(),
         tanggalLahir: _tanggalLahir!,
         jenisKelamin: _jenisKelamin!,
-        fotoProfilPath: _fotoProfilPath,
+        fotoProfilPath: persistentPhotoPath,
         createdAt: DateTime.now(),
       );
 
