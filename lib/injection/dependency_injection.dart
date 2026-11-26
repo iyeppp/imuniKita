@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/firebase/firebase_bootstrap.dart';
 import '../core/firestore/recursive_delete.dart';
+import '../core/network/api_cache.dart';
+import '../core/network/api_client.dart';
 import '../core/network/network_info.dart';
 import '../core/services/photo_storage_service.dart';
 import '../core/sync/data_migration.dart';
@@ -37,6 +39,9 @@ import '../features/immunization/domain/usecases/generate_schedule_usecase.dart'
 import '../features/immunization/domain/usecases/reschedule_all_reminders_usecase.dart';
 import '../features/immunization/domain/usecases/schedule_reminder_usecase.dart';
 import '../features/immunization/domain/usecases/sync_baby_schedule_usecase.dart';
+import '../features/chatbot/data/datasources/chatbot_remote_datasource.dart';
+import '../features/education/data/datasources/education_remote_datasource.dart';
+import '../features/faskes/data/datasources/faskes_remote_datasource.dart';
 import '../features/growth/data/datasources/growth_local_datasource.dart';
 import '../features/growth/data/datasources/growth_remote_datasource.dart';
 import '../features/growth/data/repositories/growth_repository_impl.dart';
@@ -162,6 +167,34 @@ final dataMigrationProvider = Provider<DataMigration>((ref) {
 
 final photoStorageServiceProvider = Provider<PhotoStorageService>((ref) {
   return PhotoStorageService();
+});
+
+final apiClientProvider = Provider<ApiClient>((ref) {
+  return ApiClient();
+});
+
+final apiCacheProvider = Provider<ApiCache>((ref) {
+  return ApiCache();
+});
+
+final educationRemoteDatasourceProvider = Provider<EducationRemoteDatasource>((ref) {
+  return EducationRemoteDatasource(
+    apiClient: ref.watch(apiClientProvider),
+    apiCache: ref.watch(apiCacheProvider),
+  );
+});
+
+final faskesRemoteDatasourceProvider = Provider<FaskesRemoteDatasource>((ref) {
+  return FaskesRemoteDatasource(
+    apiClient: ref.watch(apiClientProvider),
+    apiCache: ref.watch(apiCacheProvider),
+  );
+});
+
+final chatbotRemoteDatasourceProvider = Provider<ChatbotRemoteDatasource>((ref) {
+  return ChatbotRemoteDatasource(
+    apiClient: ref.watch(apiClientProvider),
+  );
 });
 
 final babyRepositoryProvider = Provider<IBabyRepository>((ref) {

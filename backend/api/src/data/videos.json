@@ -1,0 +1,26 @@
+[
+  {
+    "videoId": "vid-01",
+    "judul": "Teknik Menyusui & Perlekatan Benar untuk Ibu Menyusui",
+    "kategori": "Nutrisi",
+    "deskripsi": "Panduan langkah demi langkah perlekatan ASI agar tidak lecet dan ASI lancar.",
+    "durasiDetik": 285,
+    "thumbnailUrl": "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    "videoId": "vid-02",
+    "judul": "Cara Mengatasi Demam Setelah Imunisasi DPT",
+    "kategori": "Imunisasi",
+    "deskripsi": "Penanganan pertama reaksi KIPI ringan pada bayi pasca vaksinasi DPT.",
+    "durasiDetik": 195,
+    "thumbnailUrl": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    "videoId": "vid-03",
+    "judul": "Stimulasi Motorik Kasar Anak Usia 6–12 Bulan",
+    "kategori": "Tumbuh Kembang",
+    "deskripsi": "Latihan merangkak, duduk, dan berdiri menggunakan permainan edukatif sederhana.",
+    "durasiDetik": 340,
+    "thumbnailUrl": "https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=600&q=80"
+  }
+]

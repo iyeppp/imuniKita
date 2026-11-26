@@ -1,0 +1,68 @@
+[
+  {
+    "id": "rs-01",
+    "nama": "RSUPN Dr. Cipto Mangunkusumo",
+    "tipe": "RS",
+    "alamat": "Jl. Diponegoro No.71, Kenari, Senen",
+    "kota": "Jakarta",
+    "telepon": "021-1500135",
+    "lat": -6.1969,
+    "lng": 106.8468,
+    "jamOperasional": "24 Jam"
+  },
+  {
+    "id": "pusk-01",
+    "nama": "Puskesmas Kebayoran Baru",
+    "tipe": "Puskesmas",
+    "alamat": "Jl. Kyai Maja No.33, Kebayoran Baru",
+    "kota": "Jakarta",
+    "telepon": "021-7245678",
+    "lat": -6.2389,
+    "lng": 106.7972,
+    "jamOperasional": "07.30 - 16.00 WIB"
+  },
+  {
+    "id": "klinik-01",
+    "nama": "Klinik Tumbuh Kembang Anak Bunda",
+    "tipe": "Klinik",
+    "alamat": "Jl. Cikini Raya No.82, Menteng",
+    "kota": "Jakarta",
+    "telepon": "021-3192200",
+    "lat": -6.1912,
+    "lng": 106.8385,
+    "jamOperasional": "08.00 - 20.00 WIB"
+  },
+  {
+    "id": "apotek-01",
+    "nama": "Apotek Kimia Farma Matraman",
+    "tipe": "Apotek",
+    "alamat": "Jl. Matraman Raya No.12, Matraman",
+    "kota": "Jakarta",
+    "telepon": "021-8580123",
+    "lat": -6.2081,
+    "lng": 106.8562,
+    "jamOperasional": "24 Jam"
+  },
+  {
+    "id": "rs-02",
+    "nama": "RSHS Bandung",
+    "tipe": "RS",
+    "alamat": "Jl. Pasteur No.38",
+    "kota": "Bandung",
+    "telepon": "022-2034953",
+    "lat": -6.8966,
+    "lng": 107.5982,
+    "jamOperasional": "24 Jam"
+  },
+  {
+    "id": "rs-03",
+    "nama": "RSUD Dr. Soetomo",
+    "tipe": "RS",
+    "alamat": "Jl. Mayjen Prof. Dr. Moestopo No.6-8",
+    "kota": "Surabaya",
+    "telepon": "031-5501078",
+    "lat": -7.2683,
+    "lng": 112.7586,
+    "jamOperasional": "24 Jam"
+  }
+]

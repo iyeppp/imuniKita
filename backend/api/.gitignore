@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.env
+*.json
+!package.json
+!tsconfig.json
+!src/data/*.json

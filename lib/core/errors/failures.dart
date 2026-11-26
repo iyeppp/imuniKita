@@ -101,6 +101,13 @@ class NetworkFailure extends Failure {
   ]);
 }
 
+/// Server mengembalikan respon error (5xx / REST API error).
+class ServerFailure extends Failure {
+  const ServerFailure([
+    super.message = 'Layanan server mengalami gangguan. Coba lagi nanti.',
+  ]);
+}
+
 /// Konfigurasi Firebase belum valid (mis. `firebase_options.dart` masih
 /// placeholder atau project tidak cocok dengan `ENV`).
 class FirebaseConfigFailure extends Failure {

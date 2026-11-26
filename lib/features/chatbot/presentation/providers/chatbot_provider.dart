@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../data/datasources/chatbot_mock_datasource.dart';
+import '../../../../injection/dependency_injection.dart';
+import '../../data/datasources/chatbot_remote_datasource.dart';
 import '../../data/models/chat_message_model.dart';
 
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -26,7 +27,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   ChatNotifier(this._datasource)
     : super(const ChatState(messages: [], isLoading: false));
 
-  final ChatbotMockDatasource _datasource;
+  final ChatbotRemoteDatasource _datasource;
   final _uuid = const Uuid();
 
   Future<void> sendMessage(String text) async {
@@ -45,7 +46,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       isLoading: true,
     );
 
-    // 2. Ambil respons dari datasource (mock delay)
+    // 2. Ambil respons dari datasource (REST API / Mock Fallback)
     try {
       final responseText = await _datasource.getResponse(trimmed);
 
@@ -82,10 +83,10 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
 // ── Providers ─────────────────────────────────────────────────────────────────
 
-final chatbotDatasourceProvider = Provider<ChatbotMockDatasource>(
-  (ref) => ChatbotMockDatasource(),
+final chatbotDatasourceProvider = Provider<ChatbotRemoteDatasource>(
+  (ref) => ref.watch(chatbotRemoteDatasourceProvider),
 );
 
 final chatProvider = StateNotifierProvider<ChatNotifier, ChatState>(
-  (ref) => ChatNotifier(ref.read(chatbotDatasourceProvider)),
+  (ref) => ChatNotifier(ref.watch(chatbotDatasourceProvider)),
 );

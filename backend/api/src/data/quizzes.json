@@ -1,0 +1,36 @@
+[
+  {
+    "quizId": "quiz-01",
+    "judul": "Kuis Imunisasi Dasar Bayi",
+    "deskripsi": "Uji pengetahuan Anda tentang jadwal vaksinasi wajib bayi usia 0-12 bulan.",
+    "kategori": "Imunisasi",
+    "soal": [
+      {
+        "pertanyaan": "Vaksin apa yang pertama kali diberikan kepada bayi baru lahir (usia < 24 jam)?",
+        "pilihan": ["BCG", "Hepatitis B (HB-0)", "DPT-HB-Hib", "Campak / MR"],
+        "indexJawabanBenar": 1,
+        "penjelasan": "Vaksin Hepatitis B0 diberikan secepatnya setelah lahir (< 24 jam) untuk mencegah penularan Hepatitis B dari ibu ke bayi."
+      },
+      {
+        "pertanyaan": "Vaksin BCG diberikan untuk melindungi bayi dari penyakit apa?",
+        "pilihan": ["Polio", "TBC (Tuberkulosis)", "Difteri", "Tetanus"],
+        "indexJawabanBenar": 1,
+        "penjelasan": "Vaksin BCG berguna untuk memberikan kekebalan tubuh dari penyakit Tuberkulosis (TBC) berat seperti meningitis TBC."
+      }
+    ]
+  },
+  {
+    "quizId": "quiz-02",
+    "judul": "Kuis Makanan Pendamping ASI (MPASI)",
+    "deskripsi": "Evaluasi pemahaman mengenai pemberian MPASI gizi seimbang.",
+    "kategori": "MPASI",
+    "soal": [
+      {
+        "pertanyaan": "Kapan usia ideal bayi mulai diberikan MPASI?",
+        "pilihan": ["4 Bulan", "6 Bulan", "8 Bulan", "12 Bulan"],
+        "indexJawabanBenar": 1,
+        "penjelasan": "WHO dan IDAI merekomendasikan pemberian ASI Eksklusif hingga 6 bulan, lalu dilanjutkan MPASI pada usia 6 bulan."
+      }
+    ]
+  }
+]

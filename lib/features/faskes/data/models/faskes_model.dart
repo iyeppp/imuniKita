@@ -26,4 +26,18 @@ class FaskesModel {
   final double lat;
   final double lng;
   final String jamOperasional;
+
+  factory FaskesModel.fromJson(Map<String, dynamic> json) {
+    return FaskesModel(
+      id: (json['id'] as String?) ?? '',
+      nama: (json['nama'] as String?) ?? '',
+      tipe: (json['tipe'] as String?) ?? 'RS',
+      alamat: (json['alamat'] as String?) ?? '',
+      kota: (json['kota'] as String?) ?? '',
+      telepon: (json['telepon'] as String?) ?? '',
+      lat: (json['lat'] as num?)?.toDouble() ?? 0.0,
+      lng: (json['lng'] as num?)?.toDouble() ?? 0.0,
+      jamOperasional: (json['jamOperasional'] as String?) ?? '',
+    );
+  }
 }
