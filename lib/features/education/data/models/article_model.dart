@@ -34,4 +34,20 @@ class ArticleModel {
   /// Thumbnail & hero image. `null` → UI memakai placeholder gradien + ikon
   /// agar tetap tampil rapi saat perangkat offline.
   final String? imageUrl;
+
+  factory ArticleModel.fromJson(Map<String, dynamic> json) {
+    return ArticleModel(
+      articleId: (json['articleId'] as String?) ?? '',
+      judul: (json['judul'] as String?) ?? '',
+      kategori: (json['kategori'] as String?) ?? '',
+      penulis: (json['penulis'] as String?) ?? '',
+      ringkasan: (json['ringkasan'] as String?) ?? '',
+      kontenHtml: (json['kontenHtml'] as String?) ?? '',
+      tanggalPublish: json['tanggalPublish'] != null
+          ? DateTime.parse(json['tanggalPublish'] as String)
+          : DateTime.now(),
+      estimasiBacaMenit: (json['estimasiBacaMenit'] as num?)?.toInt() ?? 3,
+      imageUrl: json['imageUrl'] as String?,
+    );
+  }
 }

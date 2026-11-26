@@ -37,4 +37,15 @@ class VideoModel {
   /// menghasilkan tautan mati. UAS: ganti ke URL video asli dari CMS.
   String get tontonUrl =>
       'https://www.youtube.com/results?search_query=${Uri.encodeComponent(judul)}';
+
+  factory VideoModel.fromJson(Map<String, dynamic> json) {
+    return VideoModel(
+      videoId: (json['videoId'] as String?) ?? '',
+      judul: (json['judul'] as String?) ?? '',
+      kategori: (json['kategori'] as String?) ?? '',
+      deskripsi: (json['deskripsi'] as String?) ?? '',
+      durasiDetik: (json['durasiDetik'] as num?)?.toInt() ?? 180,
+      thumbnailUrl: json['thumbnailUrl'] as String?,
+    );
+  }
 }

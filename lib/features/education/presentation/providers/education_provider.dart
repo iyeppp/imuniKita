@@ -2,21 +2,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive_ce.dart';
 
 import '../../../../core/constants/app_constants.dart';
+import '../../../../injection/dependency_injection.dart';
 import '../../data/datasources/education_mock_datasource.dart';
+import '../../data/datasources/education_remote_datasource.dart';
 import '../../data/models/article_model.dart';
 import '../../data/models/quiz_model.dart';
 import '../../data/models/quiz_score_model.dart';
 import '../../data/models/video_model.dart';
 
-// ── Konten (mock) ────────────────────────────────────────────────────────
-//
-// Provider ditulis manual (tanpa codegen) mengikuti pola yang dipakai fitur
-// lain — lihat dev plan §2.
+// ── Konten (REST API + Cache + Mock Fallback) ────────────────────────────
 
-/// Akses konten edukasi. Fase UAS: ganti isi provider ini dengan
-/// implementasi CMS tanpa menyentuh screen.
-final educationDatasourceProvider = Provider<EducationMockDatasource>((ref) {
-  return const EducationMockDatasource();
+/// Akses konten edukasi (B8-6, B8-7).
+final educationDatasourceProvider = Provider<EducationRemoteDatasource>((ref) {
+  return ref.watch(educationRemoteDatasourceProvider);
 });
 
 /// Kategori aktif pada chip filter — dipakai bersama tab Artikel, Video,
@@ -25,19 +23,50 @@ final educationKategoriProvider = StateProvider<String>(
   (ref) => EducationKategori.semua,
 );
 
-final educationArtikelProvider = Provider<List<ArticleModel>>((ref) {
+final educationArtikelAsyncProvider = FutureProvider<List<ArticleModel>>((ref) async {
   final kategori = ref.watch(educationKategoriProvider);
   return ref.watch(educationDatasourceProvider).getArtikel(kategori: kategori);
 });
 
-final educationVideoProvider = Provider<List<VideoModel>>((ref) {
+final educationArtikelProvider = Provider<List<ArticleModel>>((ref) {
+  final asyncVal = ref.watch(educationArtikelAsyncProvider);
+  return asyncVal.asData?.value ??
+      const EducationMockDatasource().getArtikel(
+        kategori: ref.watch(educationKategoriProvider),
+      );
+});
+
+final educationVideoAsyncProvider = FutureProvider<List<VideoModel>>((ref) async {
   final kategori = ref.watch(educationKategoriProvider);
   return ref.watch(educationDatasourceProvider).getVideo(kategori: kategori);
 });
 
-final educationKuisProvider = Provider<List<QuizModel>>((ref) {
+final educationVideoProvider = Provider<List<VideoModel>>((ref) {
+  final asyncVal = ref.watch(educationVideoAsyncProvider);
+  return asyncVal.asData?.value ??
+      const EducationMockDatasource().getVideo(
+        kategori: ref.watch(educationKategoriProvider),
+      );
+});
+
+final educationKuisAsyncProvider = FutureProvider<List<QuizModel>>((ref) async {
   final kategori = ref.watch(educationKategoriProvider);
   return ref.watch(educationDatasourceProvider).getKuis(kategori: kategori);
+});
+
+final educationKuisProvider = Provider<List<QuizModel>>((ref) {
+  final asyncVal = ref.watch(educationKuisAsyncProvider);
+  return asyncVal.asData?.value ??
+      const EducationMockDatasource().getKuis(
+        kategori: ref.watch(educationKategoriProvider),
+      );
+});
+
+final artikelDetailAsyncProvider = FutureProvider.family<ArticleModel?, String>((
+  ref,
+  articleId,
+) async {
+  return ref.watch(educationDatasourceProvider).getArtikelById(articleId);
 });
 
 /// Artikel tunggal untuk Article Detail (`null` bila id tidak dikenal).
@@ -45,7 +74,9 @@ final artikelDetailProvider = Provider.family<ArticleModel?, String>((
   ref,
   articleId,
 ) {
-  return ref.watch(educationDatasourceProvider).getArtikelById(articleId);
+  final asyncVal = ref.watch(artikelDetailAsyncProvider(articleId));
+  return asyncVal.asData?.value ??
+      const EducationMockDatasource().getArtikelById(articleId);
 });
 
 // ── Skor kuis ────────────────────────────────────────────────────────────

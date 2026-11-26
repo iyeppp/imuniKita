@@ -14,6 +14,7 @@ abstract class AppConstants {
   static const String healthJournalsBox = 'healthJournalsBox';
   static const String educationQuizScoresBox = 'educationQuizScoresBox';
   static const String syncOutboxBox = 'syncOutboxBox';
+  static const String apiCacheBox = 'apiCacheBox';
 
   // ── Key SharedPreferences ─────────────────────────────────────────────
   /// Cermin sesi untuk fitur non-auth. Sejak Tahap 2 sumber kebenaran login

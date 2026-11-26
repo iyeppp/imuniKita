@@ -20,6 +20,19 @@ class QuizModel {
   final List<QuizQuestion> soal;
 
   int get totalSoal => soal.length;
+
+  factory QuizModel.fromJson(Map<String, dynamic> json) {
+    return QuizModel(
+      quizId: (json['quizId'] as String?) ?? '',
+      judul: (json['judul'] as String?) ?? '',
+      deskripsi: (json['deskripsi'] as String?) ?? '',
+      kategori: (json['kategori'] as String?) ?? '',
+      soal: (json['soal'] as List<dynamic>?)
+              ?.map((s) => QuizQuestion.fromJson(s as Map<String, dynamic>))
+              .toList() ??
+          const [],
+    );
+  }
 }
 
 /// Satu butir soal pilihan ganda.
@@ -43,4 +56,16 @@ class QuizQuestion {
   final String penjelasan;
 
   String get jawabanBenar => pilihan[indexJawabanBenar];
+
+  factory QuizQuestion.fromJson(Map<String, dynamic> json) {
+    return QuizQuestion(
+      pertanyaan: (json['pertanyaan'] as String?) ?? '',
+      pilihan: (json['pilihan'] as List<dynamic>?)
+              ?.map((p) => p.toString())
+              .toList() ??
+          const [],
+      indexJawabanBenar: (json['indexJawabanBenar'] as num?)?.toInt() ?? 0,
+      penjelasan: (json['penjelasan'] as String?) ?? '',
+    );
+  }
 }

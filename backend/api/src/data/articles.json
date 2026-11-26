@@ -1,0 +1,46 @@
+[
+  {
+    "articleId": "art-01",
+    "judul": "Panduan Lengkap Imunisasi Dasar Lengkap untuk Bayi Usia 0–12 Bulan",
+    "kategori": "Imunisasi",
+    "penulis": "Tim Medis ImuniKita",
+    "ringkasan": "Ketahui jenis-jenis vaksin wajib usia 0-12 bulan beserta jadwal pemberian yang direkomendasikan IDAI.",
+    "kontenHtml": "<h3>Pentingnya Imunisasi Usia Dini</h3><p>Imunisasi melindungi bayi dari penyakit berbahaya seperti Hepatitis B, Polio, TBC, DPT, dan Campak. Vaksinasi memberikan kekebalan aktif buatan.</p><h4>Jadwal Imunisasi Utama:</h4><ul><li><b>0 Bulan:</b> Hepatitis B (HB-0) & Polio 0</li><li><b>1 Bulan:</b> BCG</li><li><b>2 Bulan:</b> DPT-HB-Hib 1, Polio 1</li></ul>",
+    "tanggalPublish": "2026-01-10T08:00:00.000Z",
+    "estimasiBacaMenit": 4,
+    "imageUrl": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    "articleId": "art-02",
+    "judul": "Nutrisi Utama Penunjang Tumbuh Kembang Optimal Anak",
+    "kategori": "Nutrisi",
+    "penulis": "dr. Ratna Susanti, Sp.A",
+    "ringkasan": "Asupan gizi seimbang, makronutrisi dan mikronutrisi penting untuk pembentukan otak dan kekebalan tubuh.",
+    "kontenHtml": "<h3>Nutrisi untuk Otak dan Tubuh Anak</h3><p>ASI eksklusif selama 6 bulan pertama merupakan nutrisi terbaik bagi bayi. Setelah 6 bulan, pendampingan MPASI kaya zat besi sangat disarankan.</p>",
+    "tanggalPublish": "2026-02-01T10:30:00.000Z",
+    "estimasiBacaMenit": 5,
+    "imageUrl": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    "articleId": "art-03",
+    "judul": "Tanda-tanda Red Flags Tumbuh Kembang Bayi yang Wajib Diwaspadai",
+    "kategori": "Tumbuh Kembang",
+    "penulis": "dr. Budi Santoso, Sp.A(K)",
+    "ringkasan": "Deteksi dini keterlambatan motorik, bahasa, dan sosial anak untuk intervensi yang lebih cepat.",
+    "kontenHtml": "<h3>Mengenal Red Flags</h3><p>Jika bayi belum bisa menatap mata saat usia 3 bulan atau belum bisa duduk mandiri di usia 9 bulan, segera konsultasikan ke dokter anak.</p>",
+    "tanggalPublish": "2026-02-15T14:00:00.000Z",
+    "estimasiBacaMenit": 3,
+    "imageUrl": "https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    "articleId": "art-04",
+    "judul": "Resep & Panduan Tekstur MPASI Menurut Usia Anak",
+    "kategori": "MPASI",
+    "penulis": "Nutrisionis ImuniKita",
+    "ringkasan": "Dari puree saring di usia 6 bulan hingga makanan keluarga di usia 12 bulan.",
+    "kontenHtml": "<h3>Tahapan Tekstur MPASI</h3><p>Mulai dengan saring halus 2x sehari, bertahap ke cincang halus, cincang kasar, hingga makanan meja keluarga saat 12 bulan.</p>",
+    "tanggalPublish": "2026-03-01T09:15:00.000Z",
+    "estimasiBacaMenit": 6,
+    "imageUrl": null
+  }
+]

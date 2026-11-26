@@ -39,10 +39,12 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
+# Android Studio & Kotlin build artifacts
 /android/app/debug
 /android/app/profile
 /android/app/release
+android/.kotlin/
+.kotlin/
 
 # Signing rilis (Temuan #39) — JANGAN di-commit
 android/key.properties
