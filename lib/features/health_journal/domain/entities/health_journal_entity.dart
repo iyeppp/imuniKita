@@ -1,6 +1,4 @@
 /// Entity domain — satu catatan jurnal kesehatan bayi.
-///
-/// Bebas dari Hive CE (`HealthJournalModel` hanya dipakai di lapisan data).
 class HealthJournalEntity {
   const HealthJournalEntity({
     required this.journalId,

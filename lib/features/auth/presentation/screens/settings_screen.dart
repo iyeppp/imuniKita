@@ -30,17 +30,13 @@ import '../providers/auth_provider.dart';
 import '../utils/auth_validators.dart';
 
 /// Settings / Profile (poin 8.1) — `lib/features/auth/presentation/screens/settings_screen.dart`.
-///
-/// Berisi: profil pengguna + sunting profil, daftar bayi terdaftar (+ tambah
-/// bayi), preferensi notifikasi pengingat, info versi aplikasi, dan tombol
-/// keluar (hapus sesi SharedPreferences tanpa menghapus data Hive CE).
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(currentUserProvider);
-    // Temuan #20: versi dibaca dari metadata platform (bukan hardcode).
+    // Versi dibaca dari metadata platform (bukan hardcode).
     final versi =
         ref.watch(appVersionProvider).asData?.value ?? AppConstants.appVersion;
 
@@ -328,15 +324,14 @@ class _KartuAnak extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Ringkasan progres imunisasi (13 jadwal dibuat otomatis saat bayi
-    // didaftarkan) — sekaligus bukti data tersimpan untuk bayi ini.
+    // Ringkasan progres imunisasi (13 jadwal dibuat otomatis saat bayi didaftarkan) — sekaligus bukti data tersimpan untuk bayi ini.
     final jadwalAsync = ref.watch(immunizationProvider(baby.babyId));
     final jadwal = jadwalAsync.asData?.value;
     final selesai = jadwal
         ?.where((s) => s.status == VaccineStatus.selesai)
         .length;
 
-    // Temuan #35: jangan biarkan layar tampak "memuat" selamanya saat gagal.
+    // Jangan biarkan layar tampak "memuat" selamanya saat gagal.
     final String ringkasanJadwal;
     if (jadwalAsync.hasError) {
       ringkasanJadwal = 'Gagal memuat jadwal imunisasi';
@@ -467,7 +462,7 @@ class _KartuPengaturan extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notifAsync = ref.watch(notificationEnabledProvider);
     final aktif = notifAsync.asData?.value ?? true;
-    // Temuan #35: kegagalan memuat preferensi tidak lagi disembunyikan.
+    // Kegagalan memuat preferensi tidak lagi disembunyikan.
     final gagal = notifAsync.hasError;
     final versi =
         ref.watch(appVersionProvider).asData?.value ?? AppConstants.appVersion;
@@ -623,9 +618,6 @@ class _TombolKeluar extends ConsumerWidget {
 // ───────────────────────────────────────────────────────────────────────────
 
 /// Toggle preferensi notifikasi pengingat.
-///
-/// Saat diaktifkan kembali, pengingat untuk seluruh jadwal yang masih
-/// `BELUM` didaftarkan ulang (pada 1.5 penjadwalan hanya terjadi sekali).
 Future<void> _ubahNotifikasi(
   BuildContext context,
   WidgetRef ref,
@@ -667,17 +659,13 @@ Future<void> _ubahNotifikasi(
 }
 
 /// Daftarkan ulang pengingat H-7 & H-1 untuk semua bayi milik user.
-///
-/// Mengembalikan jumlah jadwal berstatus `BELUM` yang diproses.
 Future<int> _daftarkanUlangPengingat(WidgetRef ref) async {
   final babies = await ref.read(babyNotifierProvider.future);
   if (babies.isEmpty) return 0;
 
-  // Bug #34: loop lintas-bayi dipindahkan ke `RescheduleAllRemindersUseCase`.
   return ref.read(rescheduleAllRemindersUseCaseProvider).execute(babies);
 }
 
-/// Keluar dari akun — selalu lewat konfirmasi karena sesi akan dihapus.
 Future<void> _keluar(BuildContext context, WidgetRef ref) async {
   final konfirmasi = await ConfirmDialog.show(
     context: context,

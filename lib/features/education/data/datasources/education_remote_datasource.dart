@@ -7,7 +7,7 @@ import '../models/quiz_model.dart';
 import '../models/video_model.dart';
 import 'education_mock_datasource.dart';
 
-/// Remote datasource konten edukasi dengan cache Hive & fallback mock offline (B8-6, B8-7).
+/// Remote datasource konten edukasi dengan cache Hive & fallback mock offline.
 class EducationRemoteDatasource {
   EducationRemoteDatasource({
     this.apiClient,
@@ -49,7 +49,7 @@ class EducationRemoteDatasource {
       }
     }
 
-    // 1. Coba baca dari cache Hive
+    // 1.
     final cached = await _apiCache.get(cacheKey);
     if (cached != null) {
       final rawList = cached['data'] as List<dynamic>? ?? [];
@@ -58,7 +58,7 @@ class EducationRemoteDatasource {
           .toList();
     }
 
-    // 2. Fallback ke mock lokal
+    // 2.
     return _mockDatasource.getArtikel(kategori: kategori);
   }
 

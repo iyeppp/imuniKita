@@ -5,9 +5,6 @@ import '../../domain/entities/baby_entity.dart';
 part 'baby_model.g.dart';
 
 /// Model persistensi Hive CE untuk profil bayi.
-///
-/// `typeId: 1` — jangan dipakai ulang untuk model lain (lihat `UserModel`
-/// yang memakai `typeId: 0`). Skema mengikuti dev plan §3.1 "BabyModel".
 @HiveType(typeId: 1)
 class BabyModel extends HiveObject {
   @HiveField(0)

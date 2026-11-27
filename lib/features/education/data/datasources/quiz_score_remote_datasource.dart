@@ -11,8 +11,6 @@ abstract class QuizScoreRemoteDatasource {
 }
 
 /// Implementasi Firebase Firestore untuk [QuizScoreRemoteDatasource].
-///
-/// Dokumen tersimpan di `users/{uid}/quizScores/{quizId}`.
 class FirebaseQuizScoreRemoteDatasource implements QuizScoreRemoteDatasource {
   FirebaseQuizScoreRemoteDatasource({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;

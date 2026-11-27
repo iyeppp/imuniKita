@@ -1,10 +1,4 @@
 /// Representasi error tingkat domain.
-///
-/// Konvensi lapisan ini:
-/// - `UseCase` **melempar** (`throw`) [Failure] saat operasi gagal.
-/// - UI menangkapnya lewat `try/catch` (atau `AsyncValue.guard` bila memakai
-///   `AsyncNotifier`), sehingga pesan error bisa ditampilkan langsung lewat
-///   `failure.message` tanpa membongkar `Exception` mentah ke pengguna.
 sealed class Failure implements Exception {
   const Failure(this.message);
 
@@ -56,9 +50,6 @@ class AuthFailure extends Failure {
 }
 
 /// Email atau password tidak cocok dengan akun yang terdaftar.
-///
-/// Pesannya sengaja digabung (bukan "email tidak ditemukan") agar tidak
-/// membocorkan email mana yang terdaftar — praktik umum pada autentikasi.
 class InvalidCredentialsFailure extends AuthFailure {
   const InvalidCredentialsFailure([
     super.message = 'Email atau password salah. Periksa kembali.',
@@ -108,8 +99,7 @@ class ServerFailure extends Failure {
   ]);
 }
 
-/// Konfigurasi Firebase belum valid (mis. `firebase_options.dart` masih
-/// placeholder atau project tidak cocok dengan `ENV`).
+/// Konfigurasi Firebase belum valid (mis. `firebase_options.dart` masih placeholder atau project tidak cocok dengan `ENV`).
 class FirebaseConfigFailure extends Failure {
   const FirebaseConfigFailure([
     super.message =

@@ -4,14 +4,6 @@ import '../repositories/i_immunization_repository.dart';
 import 'schedule_reminder_usecase.dart';
 
 /// Daftarkan ulang pengingat H-7 & H-1 untuk **semua** bayi milik user.
-///
-/// Dipakai toggle notifikasi di layar Profil & Pengaturan: saat user
-/// mengaktifkan kembali notifikasi, pengingat untuk seluruh jadwal `BELUM`
-/// perlu didaftarkan lagi (penjadwalan hanya terjadi saat bayi didaftarkan).
-///
-/// Fix Bug #34: sebelumnya loop ini ditulis di dalam `settings_screen.dart`;
-/// kini menjadi use case agar bisa diuji dan tidak lagi mencampur logika
-/// bisnis ke lapisan UI.
 class RescheduleAllRemindersUseCase {
   const RescheduleAllRemindersUseCase({
     required this.repository,

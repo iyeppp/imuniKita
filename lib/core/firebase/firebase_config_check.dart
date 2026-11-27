@@ -3,10 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import '../env/env_config.dart';
 
 /// Validasi konfigurasi Firebase sebelum aplikasi memakainya.
-///
-/// Tujuan: misconfiguration (mis. `firebase_options.dart` masih berisi nilai
-/// placeholder) tidak lagi gagal secara senyap. Deteksi dilakukan **tanpa**
-/// memanggil jaringan, sehingga aman diuji sebagai unit test.
 class FirebaseConfigCheck {
   FirebaseConfigCheck._();
 
@@ -34,8 +30,7 @@ class FirebaseConfigCheck {
     );
   }
 
-  /// Mengembalikan pesan masalah bila konfigurasi tidak layak dipakai,
-  /// atau `null` bila konfigurasi terlihat benar.
+  /// Mengembalikan pesan masalah bila konfigurasi tidak layak dipakai, atau `null` bila konfigurasi terlihat benar.
   static String? issue(FirebaseOptions options) {
     if (isPlaceholder(options)) {
       return 'Kredensial Firebase masih placeholder (bukan project asli). '

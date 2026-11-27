@@ -3,8 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/growth_record_model.dart';
 
 /// Mapper dua arah antara [GrowthRecordModel] dan dokumen Firestore.
-///
-/// Path Firestore: `users/{uid}/babies/{babyId}/growthRecords/{recordId}`.
 class GrowthRecordMapper {
   const GrowthRecordMapper._();
 

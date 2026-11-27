@@ -62,8 +62,7 @@ class _FakeImmunizationRepository implements IImmunizationRepository {
   }
 }
 
-/// Test Temuan #9 — unit test use case inti Sprint 1–2
-/// (`GenerateScheduleUseCase` & `ScheduleReminderUseCase`).
+/// Test unit use case inti (`GenerateScheduleUseCase` & `ScheduleReminderUseCase`).
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -73,8 +72,7 @@ void main() {
     // `NotificationService` memakai `tz.local` → samakan dengan `main.dart`.
     tz_data.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation('Asia/Jakarta'));
-    // Daftarkan implementasi platform Android (biasanya oleh plugin registrant)
-    // supaya `FlutterLocalNotificationsPlatform.instance` tersedia di test.
+    // Daftarkan implementasi platform Android (biasanya oleh plugin registrant) supaya `FlutterLocalNotificationsPlatform.instance` tersedia di test.
     AndroidFlutterLocalNotificationsPlugin.registerWith();
   });
 
@@ -285,8 +283,7 @@ void main() {
           as Map<Object?, Object?>;
     }
 
-    /// `NotificationService` mengonversi waktu ke zona waktu lokal perangkat
-    /// (`Asia/Jakarta` pada test ini), jadi pembandingnya pun dikonversi sama.
+    /// `NotificationService` mengonversi waktu ke zona waktu lokal perangkat (`Asia/Jakarta` pada test ini), jadi pembandingnya pun dikonversi sama.
     String isoJakarta(DateTime waktu) => tz.TZDateTime.from(
       waktu,
       tz.getLocation('Asia/Jakarta'),
@@ -436,7 +433,7 @@ void main() {
     });
   });
 
-  // ── ScheduleReminderUseCase + flag anti-duplikasi (Bug #11) ─────────────
+  // ── ScheduleReminderUseCase + flag anti-duplikasi ──────────────────────
 
   group('ScheduleReminderUseCase - flag reminderH7Sent/reminderH1Sent', () {
     const kanal = MethodChannel('dexterous.com/flutter/local_notifications');
@@ -542,7 +539,7 @@ void main() {
     );
   });
 
-  // ── Fallback alarm presisi (Bug #29) ────────────────────────────────────
+  // ── Fallback alarm presisi ──────────────────────────────────────────────
 
   group('NotificationService — fallback exact → inexact alarm', () {
     const kanal = MethodChannel('dexterous.com/flutter/local_notifications');
@@ -635,7 +632,7 @@ void main() {
     });
   });
 
-  // ── Use case gabungan alur jadwal (Bug #34) ─────────────────────────────
+  // ── Use case gabungan alur jadwal ───────────────────────────────────────
 
   group('SyncBabyScheduleUseCase (#34)', () {
     const kanal = MethodChannel('dexterous.com/flutter/local_notifications');

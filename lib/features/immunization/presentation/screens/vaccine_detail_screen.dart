@@ -55,7 +55,7 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
     final suhu = double.tryParse(_suhuController.text);
 
     try {
-      // 1. Update status jadwal + catatan reaksi.
+      // 1.
       await ref
           .read(immunizationProvider(schedule.babyId).notifier)
           .updateStatus(
@@ -65,7 +65,7 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
             reaksi: _catatanController.text.trim(),
           );
 
-      // 2. Otomatis catat ke Jurnal Kesehatan dan tautkan ke jadwal ini.
+      // 2.
       final journalId = const Uuid().v4();
       final newJournal = HealthJournalEntity(
         journalId: journalId,
@@ -106,8 +106,7 @@ class _VaccineDetailScreenState extends ConsumerState<VaccineDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Dibaca lewat repository (bukan Hive box langsung) supaya status
-    // `TERLEWAT` ternormalisasi dan tampil konsisten dengan Kalender.
+    // Dibaca lewat repository (bukan Hive box langsung) supaya status `TERLEWAT` ternormalisasi dan tampil konsisten dengan Kalender.
     final jadwalAsync = ref.watch(
       vaccineScheduleByIdProvider(widget.scheduleId),
     );

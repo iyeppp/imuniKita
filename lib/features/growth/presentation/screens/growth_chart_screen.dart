@@ -149,7 +149,6 @@ class _GrowthChartScreenState extends ConsumerState<GrowthChartScreen>
   }
 
   /// Sumbu X grafik = **usia (bulan)** saat pengukuran & umur anak saat ini.
-  /// Kurva acuan WHO menyesuaikan secara dinamis sampai umur anak saat ini.
   Widget _buildChartTab(
     List<GrowthRecordEntity> records,
     String mode, {

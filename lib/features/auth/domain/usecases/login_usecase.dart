@@ -27,11 +27,6 @@ class LoginResult {
 }
 
 /// Masuk memakai **email + password**.
-///
-/// Fase UAS: kredensial diverifikasi Firebase Auth; password tidak pernah
-/// menyentuh penyimpanan lokal. Status khusus dipertahankan agar layar dapat
-/// memberi arahan yang tepat (daftar dulu / periksa password) tanpa harus
-/// membongkar tipe `Failure` di presentation layer.
 class LoginUseCase {
   const LoginUseCase(this._repository);
 

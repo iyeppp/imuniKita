@@ -8,16 +8,13 @@ import 'app/app.dart';
 import 'core/errors/failures.dart';
 import 'core/firebase/firebase_bootstrap.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/push_service.dart';
 import 'hive_registrar.g.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 0. Inisialisasi Firebase Foundation.
-  //
-  // Di mode debug, konfigurasi yang salah (placeholder/project tidak cocok)
-  // sengaja dilempar sebagai `FirebaseConfigFailure` agar tidak gagal senyap.
-  // Aplikasi lalu menampilkan instruksi perbaikan, bukan layar kosong.
+  // 0.
   try {
     await FirebaseBootstrap.initialize();
   } on FirebaseConfigFailure catch (failure) {
@@ -25,30 +22,24 @@ void main() async {
     return;
   }
 
-  // 1. Inisialisasi Hive CE (local database)
+  // 1.
   await Hive.initFlutter();
   Hive.registerAdapters();
 
-  // 2. Inisialisasi timezone — default WIB (UTC+7)
+  // 2.
   tz.initializeTimeZones();
   tz_loc.setLocalLocation(tz_loc.getLocation('Asia/Jakarta'));
 
-  // 3. Inisialisasi NotificationService
-  //
-  // Pengingat H-7/H-1 dijadwalkan sekali via `zonedSchedule` (AlarmManager),
-  // lalu dipulihkan otomatis setelah reboot oleh `ScheduledNotificationBootReceiver`
-  // di AndroidManifest. WorkManager tidak dipakai lagi (Temuan #6): normalisasi
-  // status `TERLEWAT` sudah dilakukan saat data dibaca (`VaccineStatus.effective`),
-  // sehingga task background harian tidak diperlukan.
+  // 3.
   await NotificationService.init();
+
+  // 4.
+  await PushService.instance.init();
 
   runApp(const ProviderScope(child: ImuniKitaApp()));
 }
 
 /// Layar darurat saat konfigurasi Firebase belum benar.
-///
-/// Hanya muncul di mode debug; menampilkan perintah yang harus dijalankan agar
-/// masalah langsung terlihat saat pengembangan.
 class _BootstrapErrorApp extends StatelessWidget {
   const _BootstrapErrorApp({required this.message});
 

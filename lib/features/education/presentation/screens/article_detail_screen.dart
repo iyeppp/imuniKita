@@ -17,20 +17,12 @@ import '../widgets/education_kategori_badge.dart';
 import '../widgets/education_thumbnail.dart';
 
 /// Article Detail (FR-05 / poin 5.2).
-///
-/// Body artikel dirender dari HTML memakai `flutter_html`, lalu di bawahnya
-/// ditampilkan daftar artikel terkait dari kategori yang sama.
 class ArticleDetailScreen extends ConsumerWidget {
   const ArticleDetailScreen({super.key, required this.articleId});
 
   final String articleId;
 
   /// Tombol share artikel.
-  ///
-  /// Temuan #13: memakai **share sheet native** (`share_plus`) agar user bisa
-  /// mengirim artikel ke aplikasi lain, bukan hanya menyalin ke clipboard.
-  /// Bila platform tidak menyediakan share sheet (mis. desktop tanpa
-  /// implementasi), otomatis jatuh kembali ke clipboard.
   Future<void> _bagikan(BuildContext context, ArticleModel artikel) async {
     final messenger = ScaffoldMessenger.of(context);
     final teks =

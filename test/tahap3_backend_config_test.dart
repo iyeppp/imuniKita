@@ -2,16 +2,13 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// Test unit Tahap 3 — verifikasi keberadaan & isi file konfigurasi backend.
-///
-/// Test ini memastikan file-file penting Tahap 3 (rules, indexes, firebase config)
-/// ada dan berisi konten yang benar. Tidak memerlukan emulator Firebase.
+/// Test unit — verifikasi keberadaan & isi file konfigurasi backend.
 void main() {
   // Cari root project (naik dari folder `test/`)
   late Directory projectRoot;
 
   setUpAll(() {
-    // test dijalankan dari root project
+    // Test dijalankan dari root project
     projectRoot = Directory.current;
     // Jika dijalankan dari subfolder, coba naik
     if (!File('${projectRoot.path}/pubspec.yaml').existsSync()) {

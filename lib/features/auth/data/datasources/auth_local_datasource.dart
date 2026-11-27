@@ -4,8 +4,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/services/local_storage_service.dart';
 import '../models/user_model.dart';
 
-/// Sumber data lokal autentikasi: akun di Hive CE (`userBox`) + sesi di
-/// `SharedPreferences` (lewat [LocalStorageService]).
+/// Sumber data lokal autentikasi: akun di Hive CE (`userBox`) + sesi di `SharedPreferences` (lewat [LocalStorageService]).
 class AuthLocalDatasource {
   const AuthLocalDatasource();
 

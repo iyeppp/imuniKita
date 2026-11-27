@@ -3,11 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// Service terpusat untuk menyimpan & menghapus foto profil anak secara persisten (B7-2, B7-4).
-///
-/// Kebijakan (ADR 0001):
-/// - Foto hanya disimpan lokal di folder `<docsDir>/baby_photos/<babyId>.jpg`.
-/// - Foto TIDAK diunggah ke cloud (tanpa Firebase Storage).
+/// Service terpusat untuk menyimpan & menghapus foto profil anak secara persisten.
 class PhotoStorageService {
   PhotoStorageService({Future<Directory> Function()? getDocsDir})
       : _getDocsDir = getDocsDir ?? getApplicationDocumentsDirectory;
@@ -25,8 +21,6 @@ class PhotoStorageService {
   }
 
   /// Menyimpan/menyalin foto dari [sourceFile] ke lokasi persisten `<docsDir>/baby_photos/<babyId>.jpg`.
-  ///
-  /// Mengembalikan path file persisten yang baru.
   Future<String> savePhoto(File sourceFile, String babyId) async {
     try {
       if (!await sourceFile.exists()) {

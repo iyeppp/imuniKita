@@ -2,33 +2,35 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/services/local_storage_service.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../../../core/services/push_service.dart';
 import '../../../../core/utils/notification_helper.dart';
 import '../entities/vaccine_schedule_entity.dart';
 import '../repositories/i_immunization_repository.dart';
 
 /// Daftarkan notifikasi lokal H-7 dan H-1 untuk setiap jadwal `BELUM`.
-///
-/// Dipanggil `AddBabyScreen` setelah `GenerateScheduleUseCase` selesai (dev
-/// plan SS4 "Alur Kerja"). Reminder yang tanggalnya sudah lewat (mis. vaksin
-/// HB0 usia 0 bulan, H-7-nya jatuh sebelum bayi lahir) otomatis dilewati.
-///
-/// Fix Bug #11: setelah zonedSchedule berhasil, flag `reminderH7Sent` /
-/// `reminderH1Sent` di-set `true` lewat repository sehingga alur ini tidak
-/// mendaftarkan ulang pengingat yang sudah terjadwal.
 class ScheduleReminderUseCase {
-  const ScheduleReminderUseCase({this.repository});
+  const ScheduleReminderUseCase({this.repository, this.pushService});
 
-  /// Opsional -- bila diisi, flag `reminderH7Sent`/`reminderH1Sent` akan
-  /// diperbarui setelah notifikasi berhasil dijadwalkan (Bug #11).
+  /// Opsional -- bila diisi, flag `reminderH7Sent`/`reminderH1Sent` akan diperbarui setelah notifikasi berhasil dijadwalkan.
   final IImmunizationRepository? repository;
+
+  /// Opsional -- sumber status FCM untuk deduplikasi.
+  final IPushService? pushService;
 
   Future<void> execute({
     required String namaAnak,
     required List<VaccineScheduleEntity> schedules,
   }) async {
-    // Hormati preferensi "Notifikasi Pengingat" di layar Profil & Pengaturan:
-    // bila user mematikannya, tidak ada pengingat baru yang didaftarkan.
+    // Hormati preferensi "Notifikasi Pengingat" di layar Profil & Pengaturan: bila user mematikannya, tidak ada pengingat baru yang didaftarkan.
     if (!await LocalStorageService.isNotificationEnabled()) return;
+
+    // Bila FCM aktif, server (GitHub Actions) yang mengirim pengingat.
+    if (pushService != null && await pushService!.isPushActive()) {
+      debugPrint(
+        'ScheduleReminderUseCase: FCM aktif — pengingat lokal dilewati.',
+      );
+      return;
+    }
 
     for (final schedule in schedules) {
       if (schedule.status != VaccineStatus.belum) continue;
@@ -38,7 +40,7 @@ class ScheduleReminderUseCase {
       bool anyFlagChanged = false;
 
       for (final daysBefore in NotificationHelper.supportedDaysBefore) {
-        // Bug #11: lewati jika pengingat ini sudah dijadwalkan sebelumnya
+        // Lewati jika pengingat ini sudah dijadwalkan sebelumnya
         final alreadySent = daysBefore == 7
             ? schedule.reminderH7Sent
             : schedule.reminderH1Sent;
@@ -66,7 +68,7 @@ class ScheduleReminderUseCase {
             payload: schedule.scheduleId,
           );
 
-          // Bug #11: tandai flag setelah berhasil
+          // Tandai flag setelah berhasil
           if (daysBefore == 7) {
             flagH7Updated = true;
           } else {
@@ -74,8 +76,7 @@ class ScheduleReminderUseCase {
           }
           anyFlagChanged = true;
         } catch (e) {
-          // Non-fatal: gagal jadwalkan notifikasi tidak hentikan alur, tetapi
-          // dicatat agar kegagalan (mis. izin alarm ditolak) tidak senyap.
+          // Non-fatal: gagal jadwalkan notifikasi tidak hentikan alur, tetapi dicatat agar kegagalan (mis. izin alarm ditolak) tidak senyap.
           debugPrint(
             'ScheduleReminderUseCase: gagal menjadwalkan '
             '${schedule.namaVaksin} H-$daysBefore — $e',
@@ -93,8 +94,7 @@ class ScheduleReminderUseCase {
             ),
           );
         } catch (e) {
-          // Non-fatal: flag hanya penanda anti-duplikasi; kegagalan simpan
-          // dicatat agar tidak menutupi masalah storage.
+          // Non-fatal: flag hanya penanda anti-duplikasi; kegagalan simpan dicatat agar tidak menutupi masalah storage.
           debugPrint(
             'ScheduleReminderUseCase: gagal menyimpan flag pengingat — $e',
           );

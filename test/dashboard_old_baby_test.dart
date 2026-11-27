@@ -16,16 +16,7 @@ import 'package:imunikita/hive_registrar.g.dart';
 import 'package:imunikita/injection/dependency_injection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Regresi Bug #53 — dashboard kosong/freeze untuk bayi berusia > 18 bulan.
-///
-/// Saat seluruh jadwal imunisasi sudah lewat, Dashboard menampilkan kartu
-/// "Semua imunisasi telah diselesaikan! 🎉" yang berisi `ElevatedButton` di
-/// dalam `Row`. Theme global memakai `minimumSize: Size(infinity, 52)` sehingga
-/// tombol meminta lebar tak terbatas → assertion "BoxConstraints forces an
-/// infinite width" saat layout, dan Dashboard gagal dirender.
-///
-/// Pengujian ini memakai `tester.runAsync` karena provider menyentuh I/O Hive
-/// yang nyata (fake-async bawaan `testWidgets` akan menggantung).
+/// Regresi dashboard kosong/freeze untuk bayi berusia > 18 bulan.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 

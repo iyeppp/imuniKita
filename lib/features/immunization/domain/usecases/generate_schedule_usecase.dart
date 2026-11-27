@@ -6,11 +6,6 @@ import '../entities/vaccine_schedule_entity.dart';
 import '../repositories/i_immunization_repository.dart';
 
 /// Bangun seluruh jadwal imunisasi nasional untuk satu bayi.
-///
-/// Dipanggil `AddBabyScreen` tepat setelah `AddBabyUseCase` berhasil (lihat
-/// dev plan §4 "Alur Kerja"). `tanggalTarget` tiap vaksin dihitung dari
-/// `tanggalLahir + usiaBulan` (lihat `VaccineMaster`), dengan
-/// `AgeCalculator.addMonths` agar aman terhadap kasus akhir bulan.
 class GenerateScheduleUseCase {
   GenerateScheduleUseCase(this._repository, {Uuid? uuid})
     : _uuid = uuid ?? const Uuid();
@@ -22,8 +17,7 @@ class GenerateScheduleUseCase {
     required String babyId,
     required DateTime tanggalLahir,
   }) async {
-    // Guard: jangan generate ulang bila bayi ini sudah punya jadwal
-    // (mis. layar Add Baby ter-trigger dua kali karena double tap).
+    // Guard: jangan generate ulang bila bayi ini sudah punya jadwal (mis. layar Add Baby ter-trigger dua kali karena double tap).
     final existing = await _repository.getSchedulesByBaby(babyId);
     if (existing.isNotEmpty) return existing;
 

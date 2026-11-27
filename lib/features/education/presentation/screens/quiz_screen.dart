@@ -11,10 +11,6 @@ import '../../data/models/quiz_score_model.dart';
 import '../providers/education_provider.dart';
 
 /// Quiz Screen (FR-05 / poin 5.3).
-///
-/// Alur: satu soal per layar → user memilih satu jawaban → feedback
-/// langsung (benar/salah + penjelasan) → lanjut sampai soal terakhir →
-/// layar hasil dengan skor + badge → skor disimpan ke Hive CE.
 class QuizScreen extends ConsumerStatefulWidget {
   const QuizScreen({super.key, required this.quizId});
 
@@ -394,7 +390,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         ? 0
         : ((_jumlahBenar / kuis.totalSoal) * 100).round();
 
-    // Temuan #15: riwayat percobaan tersimpan di provider.
+    // Riwayat percobaan tersimpan di provider.
     final skorTersimpan = ref
         .watch(quizScoresProvider)
         .asData
@@ -463,7 +459,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          // Temuan #15: tampilkan percobaan ke-berapa & skor terbaik.
+          // Tampilkan percobaan ke-berapa & skor terbaik.
           if (skorTersimpan != null)
             Center(
               child: Text(

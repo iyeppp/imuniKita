@@ -5,13 +5,6 @@ abstract class VaccineStatus {
   static const String terlewat = 'TERLEWAT';
 
   /// Status **efektif** pada tanggal [now] (default: hari ini).
-  ///
-  /// Jadwal [belum] yang tanggal targetnya sudah lewat dihitung [terlewat].
-  /// Perhitungan dilakukan saat data dibaca (bukan disimpan), sehingga status
-  /// ikut berubah begitu hari berganti tanpa perlu migrasi/penulisan ulang.
-  ///
-  /// Jadwal yang jatuh **hari ini** tetap [belum] — belum bisa disebut terlewat.
-  /// Status selain [belum] (mis. sudah [selesai]) tidak pernah ditimpa.
   static String effective({
     required String status,
     required DateTime tanggalTarget,
@@ -38,10 +31,6 @@ abstract class VaccineStatus {
 }
 
 /// Entity domain — satu baris jadwal imunisasi milik seorang bayi.
-///
-/// Dibuat otomatis oleh `GenerateScheduleUseCase` saat bayi didaftarkan, lalu
-/// diperbarui saat statusnya berubah (lewat `ImmunizationNotifier.updateStatus`,
-/// yang sekaligus membatalkan pengingat H-7/H-1 bila ditandai `SELESAI`).
 class VaccineScheduleEntity {
   const VaccineScheduleEntity({
     required this.scheduleId,
@@ -63,7 +52,7 @@ class VaccineScheduleEntity {
   final String namaVaksin;
   final String deskripsi;
 
-  /// Usia target pemberian dalam bulan (0, 1, 2, ... dari `VaccineMaster`).
+  /// Usia target pemberian dalam bulan (0, 1, 2,...
   final int usiaBulanTarget;
   final DateTime tanggalTarget;
 
@@ -87,8 +76,7 @@ class VaccineScheduleEntity {
     bool? reminderH7Sent,
     bool? reminderH1Sent,
     DateTime? updatedAt,
-    // Temuan #37: field nullable perlu flag eksplisit agar bisa dikosongkan
-    // (`?? this.x` saja tidak pernah bisa men-set null).
+    // Field nullable perlu flag eksplisit agar bisa dikosongkan (`??
     bool clearTanggalRealisasi = false,
     bool clearCatatanReaksi = false,
   }) {

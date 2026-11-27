@@ -1,0 +1,75 @@
+name: Vaccine Reminder (FCM)
+
+# Pengingat H-7/H-1 opsional tanpa Cloud Functions/Scheduler.
+# Jalur wajib tetap notifikasi lokal di perangkat; workflow ini hanya dipakai
+# bila `--dart-define=ENABLE_PUSH=true` diaktifkan.
+on:
+  schedule:
+    # 23:00 UTC = 06:00 WIB, setiap hari.
+    - cron: '0 23 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Hanya cetak jadwal yang jatuh tempo (tidak mengirim)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vaccine-reminder
+  cancel-in-progress: false
+
+jobs:
+  send:
+    name: Send reminders
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: backend/reminders
+        run: npm install --no-audit --no-fund
+
+      # Service account disimpan sebagai repository secret (B-20). Jangan commit.
+      - name: Check service account secret
+        id: check
+        env:
+          SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$SA" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::FIREBASE_SERVICE_ACCOUNT belum diisi — pengingat FCM dilewati."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Write service account
+        if: steps.check.outputs.skip != 'true'
+        env:
+          SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: printf '%s' "$SA" > "$RUNNER_TEMP/service-account.json"
+
+      - name: Send reminders
+        if: steps.check.outputs.skip != 'true'
+        working-directory: backend/reminders
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/service-account.json
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: node index.mjs
+
+      - name: Clean up credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/service-account.json"

@@ -1,8 +1,4 @@
 /// Entity domain — satu rekam pengukuran pertumbuhan bayi.
-///
-/// Bebas dari Hive CE (`GrowthRecordModel` hanya dipakai di lapisan data),
-/// sehingga logika bisnis tetap sama saat data source di-swap ke Firestore
-/// (dev plan §6.1).
 class GrowthRecordEntity {
   const GrowthRecordEntity({
     required this.recordId,

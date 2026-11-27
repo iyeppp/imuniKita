@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 /// Palet warna resmi ImuniKita (Design System v1.0).
-/// Mengacu pada DNA Visual Petdegree: Bold Flat Illustration & High Contrast.
 abstract class AppColors {
   // ── Primary Palette ───────────────────────────────────────────────────
   static const Color coral = Color(
@@ -47,8 +46,7 @@ abstract class AppColors {
   static const Color textPrimary = darkText;
   static const Color textSecondary = Color(0xFF4A4A4A);
 
-  /// Warna teks tersier/“hint”. Digelapkan dari #888888 (kontras ±3.5:1) agar
-  /// tetap terbaca pada ukuran 10–11.5px — lihat Temuan #42.
+  /// Warna teks tersier/“hint”.
   static const Color textHint = Color(0xFF6B7280);
   static const Color textOnPrimary = darkText;
 

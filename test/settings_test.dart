@@ -14,16 +14,13 @@ import 'package:imunikita/hive_registrar.g.dart';
 import 'package:imunikita/widgets/confirm_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Test untuk poin 8 — Profil & Pengaturan: sesi (SharedPreferences),
-/// pembaruan profil (Hive CE), dan dialog konfirmasi keluar.
+/// Test untuk poin 8 — Profil & Pengaturan: sesi (SharedPreferences), pembaruan profil (Hive CE), dan dialog konfirmasi keluar.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late Directory tempDir;
 
   setUpAll(() async {
-    // Satu store prefs untuk semua test (instance SharedPreferences di-cache
-    // oleh LocalStorageService, jadi mock tidak boleh diganti di tengah).
     SharedPreferences.setMockInitialValues({});
 
     tempDir = await Directory.systemTemp.createTemp('imunikita_settings_test');
@@ -86,7 +83,7 @@ void main() {
       await store.setString(AppConstants.prefUserId, 'user-1');
       await store.setString(AppConstants.prefUserName, 'Ibu Sari');
       await store.setBool(AppConstants.prefSeenOnboarding, true);
-      // Dinonaktifkan untuk user-1 (Temuan #19 → key per pengguna).
+      // Dinonaktifkan untuk user-1.
       await LocalStorageService.setNotificationEnabled(false);
       await LocalStorageService.setActiveBabyId('baby-1');
 
@@ -97,11 +94,9 @@ void main() {
       expect(await LocalStorageService.getCurrentUserName(), isNull);
       // Tidak ikut terhapus → user logout langsung ke Login, bukan Onboarding.
       expect(store.getBool(AppConstants.prefSeenOnboarding), isTrue);
-      // Fix Bug #41: pilihan bayi aktif ikut dibersihkan agar tidak bocor ke
-      // akun berikutnya di perangkat yang sama.
+      // Pilihan bayi aktif ikut dibersihkan agar tidak bocor ke akun berikutnya di perangkat yang sama.
       expect(await LocalStorageService.getActiveBabyId(), isNull);
-      // Tanpa sesi, preferensi kembali ke key dasar (default aktif) — preferensi
-      // milik user-1 tetap tersimpan untuk login berikutnya.
+      // Tanpa sesi, preferensi kembali ke key dasar (default aktif) — preferensi milik user-1 tetap tersimpan untuk login berikutnya.
       expect(await LocalStorageService.isNotificationEnabled(), isTrue);
       expect(
         store.getBool('${AppConstants.prefNotificationsEnabled}_user-1'),
@@ -223,7 +218,6 @@ void main() {
 
       expect(await LocalStorageService.isLoggedIn(), isFalse);
       expect(await container.read(currentUserProvider.future), isNull);
-      // Data domain tetap ada — hanya sesi yang dihapus.
       final box = await Hive.openBox<UserModel>(AppConstants.usersBox);
       expect(box.length, 1);
     });

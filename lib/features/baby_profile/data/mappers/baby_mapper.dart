@@ -4,17 +4,12 @@ import '../../domain/entities/baby_entity.dart';
 import '../models/baby_model.dart';
 
 /// Mapper dua arah antara [BabyModel] dan dokumen Firestore.
-///
-/// Path Firestore: `users/{uid}/babies/{babyId}`.
-/// Sesuai aturan B4-2 & ADR 0001: `fotoProfilPath` TIDAK disimpan di cloud
-/// (foto hanya lokal per perangkat).
 class BabyMapper {
   const BabyMapper._();
 
   static const int currentSchemaVersion = 1;
 
-  /// Ubah nilai internal jenis kelamin ('L' / 'P') menjadi format Firestore
-  /// ('Laki-laki' / 'Perempuan') sesuai validasi `validBaby` di firestore.rules.
+  /// Ubah nilai internal jenis kelamin ('L' / 'P') menjadi format Firestore ('Laki-laki' / 'Perempuan') sesuai validasi `validBaby` di firestore.rules.
   static String genderToFirestore(String gender) {
     if (gender == BabyGender.laki || gender == 'Laki-laki') {
       return 'Laki-laki';
@@ -22,8 +17,7 @@ class BabyMapper {
     return 'Perempuan';
   }
 
-  /// Ubah format Firestore ('Laki-laki' / 'Perempuan') kembali ke kode
-  /// internal domain [BabyGender.laki] ('L') atau [BabyGender.perempuan] ('P').
+  /// Ubah format Firestore ('Laki-laki' / 'Perempuan') kembali ke kode internal domain [BabyGender.laki] ('L') atau [BabyGender.perempuan] ('P').
   static String genderFromFirestore(String gender) {
     if (gender == 'Laki-laki' || gender == BabyGender.laki) {
       return BabyGender.laki;

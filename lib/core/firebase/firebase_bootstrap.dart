@@ -9,14 +9,6 @@ import '../errors/failures.dart';
 import 'firebase_config_check.dart';
 
 /// Service bootstrap terpusat untuk inisialisasi Firebase Foundation.
-///
-/// Perilaku penting:
-/// - Platform yang tidak didukung `DefaultFirebaseOptions` (Windows/Linux/macOS)
-///   **dilewati** agar aplikasi tetap bisa berjalan dengan Hive lokal.
-/// - Konfigurasi placeholder / project yang tidak cocok **gagal keras di mode
-///   debug** (exception dengan instruksi), bukan ditelan diam-diam.
-/// - Di mode release, kegagalan hanya dicatat agar aplikasi tetap degraded
-///   (local-only) dan tidak crash di tangan pengguna.
 class FirebaseBootstrap {
   FirebaseBootstrap._();
 
@@ -74,8 +66,7 @@ class FirebaseBootstrap {
     }
   }
 
-  /// Menghubungkan Auth & Firestore ke Firebase Emulator Suite saat:
-  /// `kDebugMode` + `--dart-define=USE_EMULATOR=true`.
+  /// Menghubungkan Auth & Firestore ke Firebase Emulator Suite saat: `kDebugMode` + `--dart-define=USE_EMULATOR=true`.
   static Future<void> _connectToEmulators() async {
     if (!kDebugMode || !EnvConfig.useEmulators) return;
 

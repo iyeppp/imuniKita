@@ -14,8 +14,7 @@ import 'package:imunikita/features/health_journal/data/repositories/health_journ
 import 'package:imunikita/features/health_journal/domain/entities/health_journal_entity.dart';
 import 'package:imunikita/hive_registrar.g.dart';
 
-/// Test Temuan #32 — lapisan data/domain baru untuk Pertumbuhan & Jurnal:
-/// mapping model ↔ entity, error dibungkus `Failure`, dan operasi CRUD.
+/// Test lapisan data/domain baru untuk Pertumbuhan & Jurnal: mapping model ↔ entity, error dibungkus `Failure`, dan operasi CRUD.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -252,8 +251,7 @@ void main() {
   });
 }
 
-/// Datasource palsu yang selalu gagal — memastikan repository membungkus error
-/// penyimpanan menjadi `Failure` (bukan membocorkan error mentah ke UI).
+/// Datasource palsu yang selalu gagal — memastikan repository membungkus error penyimpanan menjadi `Failure` (bukan membocorkan error mentah ke UI).
 class _ThrowingGrowthDatasource extends GrowthLocalDatasource {
   const _ThrowingGrowthDatasource();
 

@@ -20,8 +20,10 @@ cp .env.example .env
 
 Isi variabel environment sesuai kebutuhan:
 - `PORT`: Port server (default: `3000`).
-- `GEMINI_API_KEY`: API Key Google Gemini (opsional — jika kosong, chatbot otomatis memakai fallback 31 aturan kata kunci medis ImuniKita).
+- `DEEPSEEK_API_KEY`: API key DeepSeek untuk chatbot. Jika kosong/gagal, chatbot memakai fallback 31 aturan kata kunci medis.
 - `GOOGLE_APPLICATION_CREDENTIALS`: Path ke file Service Account JSON Firebase (opsional — jika belum dipasang, server berjalan dalam mode demo lokal).
+
+Model dikunci di kode ke **`deepseek-flash` (DeepSeek-V4.1-Flash)** dengan mode **non-thinking** (`thinking: { type: "disabled" }` dan `reasoning_effort: "none"`), sehingga balasan tidak memakai reasoning/chain-of-thought.
 
 ### 3. Menjalankan Server
 Mode Pengembangan (*Hot Reload*):

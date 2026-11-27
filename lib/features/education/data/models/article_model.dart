@@ -1,8 +1,4 @@
 /// Model konten artikel edukasi (FR-05).
-///
-/// Fase UTS: konten dibaca dari `EducationMockDatasource` (hardcoded), sehingga
-/// model ini tidak dipersist ke Hive. Di fase UAS sumbernya diganti CMS API
-/// (dev plan §6.4) tanpa mengubah screen-nya.
 class ArticleModel {
   const ArticleModel({
     required this.articleId,
@@ -31,8 +27,7 @@ class ArticleModel {
   final DateTime tanggalPublish;
   final int estimasiBacaMenit;
 
-  /// Thumbnail & hero image. `null` → UI memakai placeholder gradien + ikon
-  /// agar tetap tampil rapi saat perangkat offline.
+  /// Thumbnail & hero image.
   final String? imageUrl;
 
   factory ArticleModel.fromJson(Map<String, dynamic> json) {

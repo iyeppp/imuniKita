@@ -1,0 +1,17 @@
+{
+  "name": "imunikita-reminders",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pengirim pengingat imunisasi H-7/H-1 via FCM HTTP v1 (GitHub Actions cron)",
+  "type": "module",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.1.0"
+  }
+}

@@ -4,9 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../app/theme/app_colors.dart';
 
 /// Empty state seragam (komponen UI global).
-///
-/// Sebelumnya empty state ditulis manual di Dashboard, Kalender, Jurnal,
-/// Pertumbuhan, Edukasi, dan Faskes dengan gaya yang berbeda-beda.
 class EmptyStateWidget extends StatelessWidget {
   const EmptyStateWidget({
     super.key,

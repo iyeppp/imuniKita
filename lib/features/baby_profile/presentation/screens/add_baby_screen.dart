@@ -19,11 +19,6 @@ import '../../domain/entities/baby_entity.dart';
 import '../providers/baby_provider.dart';
 
 /// FR-01 — Form tambah profil bayi.
-///
-/// Alur setelah "Simpan Profil" ditekan (lihat dev plan §4 "Alur Kerja"):
-/// `AddBabyUseCase` → `GenerateScheduleUseCase` (buat seluruh jadwal vaksin
-/// nasional) → `ScheduleReminderUseCase` (daftarkan notifikasi lokal H-7 &
-/// H-1 untuk tiap jadwal).
 class AddBabyScreen extends ConsumerStatefulWidget {
   const AddBabyScreen({super.key});
 
@@ -133,14 +128,12 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
         createdAt: DateTime.now(),
       );
 
-      // 1. Simpan profil bayi.
+      // 1.
       final savedBaby = await ref
           .read(babyNotifierProvider.notifier)
           .addBaby(baby);
 
-      // 2. Bangun seluruh jadwal imunisasi + daftarkan pengingat H-7/H-1.
-      //    Bug #34: satu alur (`SyncBabyScheduleUseCase`) agar tidak divergen
-      //    dengan Kelola Profil Anak & auto-generate di provider.
+      // 2.
       final schedules = await ref
           .read(syncBabyScheduleUseCaseProvider)
           .execute(
@@ -455,8 +448,7 @@ class _AddBabyScreenState extends ConsumerState<AddBabyScreen> {
 }
 }
 
-/// Toggle kartu pilihan jenis kelamin (L/P) bergaya neo-brutalist konsisten
-/// dengan tombol lain di aplikasi (border tebal + drop shadow tegas saat aktif).
+/// Toggle kartu pilihan jenis kelamin (L/P) bergaya neo-brutalist konsisten dengan tombol lain di aplikasi (border tebal + drop shadow tegas saat aktif).
 class _GenderOption extends StatelessWidget {
   const _GenderOption({
     required this.label,

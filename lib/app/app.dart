@@ -21,9 +21,7 @@ class _ImuniKitaAppState extends ConsumerState<ImuniKitaApp> {
   @override
   void initState() {
     super.initState();
-    // Fix Temuan #43: registrasi router ke NotificationService (untuk navigasi
-    // dari ketukan notifikasi) dilakukan sekali di `initState`, bukan di dalam
-    // `build()` yang bisa dipanggil berkali-kali.
+    // Registrasi router ke NotificationService (untuk navigasi dari ketukan notifikasi) dilakukan sekali di `initState`.
     _router = ref.read(appRouterProvider);
     NotificationService.setRouter(_router);
   }

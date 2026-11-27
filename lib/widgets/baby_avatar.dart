@@ -5,11 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../app/theme/app_colors.dart';
 
-/// Avatar bayi: foto profil lokal bila ada, jika tidak inisial nama
-/// (komponen UI global).
-///
-/// Menyatukan tiga implementasi berbeda yang sebelumnya ditulis ulang di
-/// Dashboard (2×), Profil & Pengaturan, dan Kelola Profil Anak.
+/// Avatar bayi: foto profil lokal bila ada, jika tidak inisial nama (komponen UI global).
 class BabyAvatar extends StatelessWidget {
   const BabyAvatar({
     super.key,

@@ -11,13 +11,6 @@ import '../../../../injection/dependency_injection.dart';
 import '../widgets/confetti_dots_painter.dart';
 
 /// Splash Screen ImuniKita (Design System v1.0).
-/// Mengikuti spesifikasi revisi:
-/// - Two-zone layout: Zona coral 62% (atas) + Zona teal 38% (bawah garis lurus)
-/// - Confetti dots bervariasi ukuran (XL, M, S) di layer belakang
-/// - Karakter Ibu & Bayi flat vector style Petdegree (tanpa background, transparent PNG)
-/// - Scaling responsif mengikuti tinggi & lebar layar pengguna
-/// - Headline Baloo 2 ExtraBold & Subtitle Poppins di zona teal bawah
-/// - Animasi entry berurutan & routing otomatis ke Onboarding / Login / Dashboard
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
@@ -44,13 +37,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   void initState() {
     super.initState();
 
-    // 1. Controller Animasi Masuk (1200ms)
+    // 1.
     _mainAnimController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
 
-    // 2. Controller Animasi Floating halus untuk karakter
+    // 2.
     _floatAnimController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2400),
@@ -117,8 +110,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       if (!mounted) return;
 
       try {
-        // Temuan #22: status sesi dibaca lewat use case, bukan SharedPreferences
-        // langsung dari layar.
+        // Status sesi dibaca lewat use case, bukan SharedPreferences langsung dari layar.
         final status = await ref.read(checkAuthStateUseCaseProvider).execute();
 
         if (!mounted) return;

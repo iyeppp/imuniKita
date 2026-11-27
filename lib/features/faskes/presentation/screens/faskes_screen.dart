@@ -82,11 +82,6 @@ class _FaskesScreenState extends ConsumerState<FaskesScreen> {
   }
 
   /// Buka [uri] lewat aplikasi eksternal.
-  ///
-  /// Mengembalikan `true` bila berhasil. `launchUrl` mengembalikan `false`
-  /// (atau melempar `PlatformException`) bila tidak ada aplikasi yang bisa
-  /// menangani URI — kegagalan itu kini dilaporkan lewat snackbar, tidak lagi
-  /// senyap seperti pemakaian `canLaunchUrl` sebelumnya.
   Future<bool> _launch(
     Uri uri, {
     required String gagal,
@@ -102,7 +97,7 @@ class _FaskesScreenState extends ConsumerState<FaskesScreen> {
         return true;
       }
     } catch (_) {
-      // dilanjutkan ke pesan gagal di bawah
+      // Dilanjutkan ke pesan gagal di bawah
     }
 
     if (gagal.isNotEmpty && mounted) {

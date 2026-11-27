@@ -4,17 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/app_constants.dart';
 
 /// Wrapper tipis untuk `SharedPreferences`.
-///
-/// Hanya menyimpan data **sesi** (status login, user aktif) — bukan data
-/// domain (itu tugas Hive CE). Key yang dipakai identik dengan yang sudah
-/// ditulis langsung oleh `LoginScreen`/`RegisterScreen`, sehingga service ini
-/// bisa membaca sesi yang sama tanpa migrasi data.
-///
-/// Sejak Tahap 2, sumber kebenaran sesi adalah **Firebase Auth**. Key
-/// `is_logged_in`/`user_id`/`user_name` dipertahankan sebagai **cermin** yang
-/// ditulis `AuthRepositoryImpl` untuk fitur non-auth (mis. `BabyNotifier` dan
-/// kunci preferensi notifikasi per pengguna). Jangan memakai key tersebut untuk
-/// memutuskan apakah pengguna benar-benar terautentikasi.
 class LocalStorageService {
   LocalStorageService._();
 
@@ -48,14 +37,6 @@ class LocalStorageService {
       (await instance).remove(AppConstants.prefActiveBabyId);
 
   /// Hapus data sesi login (dipakai tombol "Keluar" di layar Profil).
-  ///
-  /// Key `seen_onboarding` sengaja **tidak** dihapus agar user yang logout
-  /// langsung diarahkan ke Login, bukan mengulang Onboarding. Data domain
-  /// (Hive CE) juga tetap tersimpan.
-  ///
-  /// Fix Bug #41: `active_baby_id` ikut dibersihkan — sebelumnya pilihan bayi
-  /// aktif milik akun sebelumnya terbawa ke akun berikutnya di perangkat yang
-  /// sama (preferensi antar-akun bocor).
   static Future<void> clearSession() async {
     final prefs = await instance;
     await prefs.remove(AppConstants.prefIsLoggedIn);
@@ -65,10 +46,6 @@ class LocalStorageService {
   }
 
   /// Preferensi notifikasi pengingat H-7 & H-1 — default **aktif**.
-  ///
-  /// Temuan #19: key disimpan **per pengguna** (`notifications_enabled_<userId>`)
-  /// agar preferensi satu akun tidak terbawa ke akun lain di perangkat yang
-  /// sama. Bila belum ada sesi login, dipakai key dasar sebagai fallback.
   static Future<String> _notificationPrefKey() async {
     final userId = await getCurrentUserId();
     return userId == null
@@ -81,6 +58,13 @@ class LocalStorageService {
 
   static Future<void> setNotificationEnabled(bool enabled) async =>
       (await instance).setBool(await _notificationPrefKey(), enabled);
+
+  /// Penanda token FCM perangkat sudah terdaftar.
+  static Future<bool> isPushRegistered() async =>
+      (await instance).getBool(AppConstants.prefPushRegistered) ?? false;
+
+  static Future<void> setPushRegistered(bool registered) async =>
+      (await instance).setBool(AppConstants.prefPushRegistered, registered);
 
   /// Preferensi tema aplikasi (system, light, dark).
   static Future<ThemeMode> getThemeMode() async {
@@ -105,7 +89,6 @@ class LocalStorageService {
     await (await instance).setString(AppConstants.prefThemeMode, modeStr);
   }
 
-  /// Penanda migrasi data domain UTS → Firebase per-uid (B6-4).
   static String _migrationKey(String uid) => 'migration_done_$uid';
 
   static Future<bool> isMigrationDone(String uid) async {

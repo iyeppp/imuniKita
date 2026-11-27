@@ -48,14 +48,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
-  /// Temuan #22: registrasi kini lewat `RegisterUseCase`
-  /// (`currentUserProvider.notifier.register`), bukan Hive/SharedPreferences
-  /// langsung dari layar.
-  ///
-  /// B2-3: password diteruskan ke Firebase Auth dan tidak disimpan lokal.
-  /// Document ID/profil akhirnya memakai `uid` Firebase (di-assign repository),
-  /// sehingga `localId` dari UUID di bawah hanya dipakai pada mode fallback
-  /// tanpa Firebase.
+  /// Registrasi kini lewat `RegisterUseCase` (`currentUserProvider.notifier.register`).
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
 

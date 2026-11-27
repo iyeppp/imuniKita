@@ -4,10 +4,6 @@ import '../../../../injection/dependency_injection.dart';
 import '../../domain/entities/health_journal_entity.dart';
 
 /// Seluruh catatan jurnal kesehatan satu bayi (terurut baru → lama).
-///
-/// Sejak Temuan #32 dibaca lewat `IHealthJournalRepository` (bukan
-/// `Hive.openBox` langsung) sehingga error dibungkus `Failure` dan data source
-/// siap di-swap ke Firestore pada fase UAS (dev plan §6.1).
 class JournalNotifier
     extends FamilyAsyncNotifier<List<HealthJournalEntity>, String> {
   @override
@@ -27,7 +23,6 @@ class JournalNotifier
     ref.invalidateSelf();
   }
 
-  /// Hapus seluruh jurnal bayi ini (dipakai saat bayi dihapus).
   Future<void> deleteAllForBaby() async {
     await ref.read(deleteHealthJournalsByBabyUseCaseProvider).execute(arg);
     ref.invalidateSelf();

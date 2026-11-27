@@ -4,8 +4,6 @@ import '../mappers/baby_mapper.dart';
 import '../models/baby_model.dart';
 
 /// Kontrak remote datasource profil bayi.
-///
-/// Disusun sebagai abstract class agar dapat di-fake di unit test tanpa koneksi SDK.
 abstract class BabyRemoteDatasource {
   Future<List<BabyModel>> getAll(String uid);
   Future<BabyModel?> getById(String uid, String babyId);
@@ -14,8 +12,6 @@ abstract class BabyRemoteDatasource {
 }
 
 /// Implementasi Firebase Firestore untuk [BabyRemoteDatasource].
-///
-/// Dokumen tersimpan di `users/{uid}/babies/{babyId}`.
 class FirebaseBabyRemoteDatasource implements BabyRemoteDatasource {
   FirebaseBabyRemoteDatasource({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;

@@ -6,9 +6,6 @@ import '../../app/theme/app_colors.dart';
 import '../../injection/dependency_injection.dart';
 import 'data_migration.dart';
 
-/// Dialog progress migrasi data domain UTS ke Firebase Cloud (B6-5).
-///
-/// Data lokal Hive CE TIDAK dihapus meskipun migrasi gagal.
 class MigrationDialog extends ConsumerStatefulWidget {
   const MigrationDialog({
     super.key,

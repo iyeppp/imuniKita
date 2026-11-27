@@ -16,7 +16,6 @@ import '../constants/app_constants.dart';
 import '../firebase/firebase_bootstrap.dart';
 import '../services/local_storage_service.dart';
 
-/// Ringkasan jumlah data domain lokal yang terdeteksi untuk dimigrasikan.
 class MigrationSummary {
   const MigrationSummary({
     required this.babyCount,
@@ -38,7 +37,6 @@ class MigrationSummary {
   bool get hasData => totalRecords > 0;
 }
 
-/// Modul migrasi data domain UTS lokal ke Firebase Cloud Firestore (B6-1 s/d B6-4).
 class DataMigration {
   DataMigration({
     this.babyRemote,
@@ -75,7 +73,7 @@ class DataMigration {
     return LocalStorageService.isMigrationDone(newUid);
   }
 
-  /// B6-1: Deteksi data lokal milik `userId` lama (UUID lokal / bukan newUid).
+  /// Deteksi data lokal milik `userId` lama (UUID lokal / bukan newUid).
   Future<MigrationSummary> detectLegacyData(String newUid) async {
     if (newUid.isEmpty || await isDone(newUid)) {
       return const MigrationSummary(
@@ -137,7 +135,7 @@ class DataMigration {
     );
   }
 
-  /// B6-2 s/d B6-4: Menjalankan alur migrasi lengkap secara idempoten.
+  /// Menjalankan alur migrasi lengkap secara idempoten.
   Future<MigrationSummary> run(String newUid) async {
     if (newUid.isEmpty) {
       return const MigrationSummary(
@@ -173,13 +171,13 @@ class DataMigration {
         .where((b) => b.userId != newUid && b.userId.isNotEmpty)
         .toList();
 
-    // B6-2: Rewrite hanya BabyModel.userId -> newUid di Hive lokal
+    // Rewrite hanya BabyModel.userId -> newUid di Hive lokal
     for (final baby in legacyBabies) {
       baby.userId = newUid;
       await baby.save();
     }
 
-    // B6-3: Upload batch via set() per dokumen
+    // Upload batch via set() per dokumen
     final effectiveBabyRemote =
         babyRemote ?? (FirebaseBootstrap.isInitialized ? FirebaseBabyRemoteDatasource() : null);
     final effectiveVaccineRemote =
@@ -227,7 +225,7 @@ class DataMigration {
       }
     }
 
-    // B6-4: Write syncMeta/main di Firestore
+    // Write syncMeta/main di Firestore
     final firestore = _effectiveFirestore;
     if (firestore != null) {
       await firestore.collection('users').doc(newUid).collection('syncMeta').doc('main').set(

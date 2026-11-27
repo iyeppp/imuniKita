@@ -1,10 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-/// data akun minimal yang dibutuhkan lapisan domain dari Firebase Auth.
-///
-/// Sengaja bukan `User` langsung agar repository/use case tidak bergantung
-/// pada tipe Firebase dan mudah di-fake di unit test.
+/// Data akun minimal yang dibutuhkan lapisan domain dari Firebase Auth.
 class RemoteAuthUser {
   const RemoteAuthUser({
     required this.uid,
@@ -41,9 +38,6 @@ class RemoteUserProfile {
 }
 
 /// Kontrak remote datasource autentikasi.
-///
-/// Implementasi produksi memakai Firebase Auth + Firestore; unit test cukup
-/// membuat fake dari antarmuka ini sehingga tidak perlu jaringan.
 abstract class AuthRemoteDatasource {
   /// Pengguna yang sedang login menurut SDK (null bila belum masuk).
   Future<RemoteAuthUser?> currentUser();
@@ -64,7 +58,6 @@ abstract class AuthRemoteDatasource {
     required String password,
   });
 
-  /// Keluar dari Firebase Auth (token persisten dihapus).
   Future<void> logout();
 
   /// Kirim email atur ulang password.
@@ -82,10 +75,6 @@ abstract class AuthRemoteDatasource {
 }
 
 /// Implementasi [AuthRemoteDatasource] di atas Firebase Auth + Cloud Firestore.
-///
-/// Instance Firebase diakses lewat getter agar objek ini boleh dibuat sebelum
-/// `Firebase.initializeApp` (mis. saat provider DI dievaluasi); pemakaian
-/// sebenarnya baru menyentuh SDK ketika salah satu method dipanggil.
 class FirebaseAuthRemoteDatasource implements AuthRemoteDatasource {
   const FirebaseAuthRemoteDatasource();
 

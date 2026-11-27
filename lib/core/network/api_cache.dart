@@ -4,7 +4,7 @@ import 'package:hive_ce/hive_ce.dart';
 
 import '../constants/app_constants.dart';
 
-/// Service cache lokal berbasis Hive CE untuk menyimpan respons REST API (B8-8).
+/// Service cache lokal berbasis Hive CE untuk menyimpan respons REST API.
 class ApiCache {
   ApiCache([Box<String>? box]) : _boxOverride = box;
 

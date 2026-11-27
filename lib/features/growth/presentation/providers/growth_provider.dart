@@ -4,10 +4,6 @@ import '../../../../injection/dependency_injection.dart';
 import '../../domain/entities/growth_record_entity.dart';
 
 /// Seluruh rekam pertumbuhan satu bayi (terurut lama → baru).
-///
-/// Sejak Temuan #32 dibaca lewat `IGrowthRepository` (bukan `Hive.openBox`
-/// langsung), sehingga error dibungkus `Failure` dan data source bisa di-swap
-/// ke Firestore pada fase UAS tanpa menyentuh layar mana pun.
 class GrowthNotifier
     extends FamilyAsyncNotifier<List<GrowthRecordEntity>, String> {
   @override
@@ -21,7 +17,6 @@ class GrowthNotifier
     ref.invalidateSelf();
   }
 
-  /// Hapus seluruh rekam pertumbuhan bayi ini (dipakai saat bayi dihapus).
   Future<void> deleteAllForBaby() async {
     await ref.read(deleteGrowthRecordsByBabyUseCaseProvider).execute(arg);
     ref.invalidateSelf();

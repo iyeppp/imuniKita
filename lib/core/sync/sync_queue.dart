@@ -151,8 +151,6 @@ class SyncQueue {
   }
 
   /// Mengecek apakah ada antrean `delete` yang belum terproses untuk [entityId].
-  ///
-  /// Dipakai saat Pull untuk mencegah data yang baru dihapus di lokal "hidup kembali".
   Future<bool> hasPendingDeleteFor(String entityId) async {
     final box = await _box;
     return box.values.any(

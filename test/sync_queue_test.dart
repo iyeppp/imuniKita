@@ -138,7 +138,7 @@ void main() {
       // Jalankan pullAll
       await manager.pullAll('uid123');
 
-      // b1 tidak boleh ada di lokal karena ada antrean delete
+      // B1 tidak boleh ada di lokal karena ada antrean delete
       expect(babyBox.containsKey('b1'), isFalse);
     });
   });

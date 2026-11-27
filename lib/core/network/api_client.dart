@@ -7,13 +7,7 @@ import 'package:flutter/foundation.dart';
 import '../errors/failures.dart';
 import '../firebase/firebase_bootstrap.dart';
 
-/// Client HTTP Dio terpusat untuk komunikasi dengan backend REST API (B8-5).
-///
-/// Fitur:
-/// - Base URL dinamis dari `--dart-define=API_BASE_URL` (default `http://10.0.2.2:3000`).
-/// - Interceptor penyemat `Authorization: Bearer <Firebase ID Token>`.
-/// - Retry otomatis untuk transient error (max 2 kali).
-/// - Pemetaan error DioException ke Failure (`NetworkFailure`, `ServerFailure`, `AuthFailure`).
+/// Client HTTP Dio terpusat untuk komunikasi dengan backend REST API.
 class ApiClient {
   ApiClient({Dio? dio, String? baseUrl, this._auth})
       : _isCustomDio = dio != null,

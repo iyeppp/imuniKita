@@ -9,6 +9,7 @@ import '../core/network/api_cache.dart';
 import '../core/network/api_client.dart';
 import '../core/network/network_info.dart';
 import '../core/services/photo_storage_service.dart';
+import '../core/services/push_service.dart';
 import '../core/sync/data_migration.dart';
 import '../core/sync/sync_manager.dart';
 import '../core/sync/sync_queue.dart';
@@ -60,21 +61,13 @@ import '../features/health_journal/domain/usecases/get_health_journals_usecase.d
 import '../features/education/data/datasources/quiz_score_remote_datasource.dart';
 
 // Registry pusat Riverpod: datasource -> repository -> use case.
-//
-// Semua provider ditulis manual (tanpa `riverpod_generator`) -- lihat dev
-// plan bagian 2 catatan konflik `build_runner` dengan `hive_ce_generator`.
-// Screen/notifier cukup memanggil `ref.read(xUseCaseProvider)`, tidak
-// pernah menyentuh datasource/repository secara langsung.
 
-// -- Auth (Temuan #22) ---------------------------------------------------------
+// -- Auth ---------------------------------------------------------------
 final authLocalDatasourceProvider = Provider<AuthLocalDatasource>((ref) {
   return const AuthLocalDatasource();
 });
 
 /// Remote datasource Firebase hanya dibuat bila bootstrap berhasil.
-///
-/// `null` berarti aplikasi berjalan local-only (desktop, atau init Firebase
-/// gagal) dan repository otomatis memakai fallback lokal ala UTS.
 final authRemoteDatasourceProvider = Provider<AuthRemoteDatasource?>((ref) {
   if (!FirebaseBootstrap.isInitialized) return null;
   return const FirebaseAuthRemoteDatasource();
@@ -169,6 +162,11 @@ final photoStorageServiceProvider = Provider<PhotoStorageService>((ref) {
   return PhotoStorageService();
 });
 
+/// Token FCM opsional.
+final pushServiceProvider = Provider<IPushService>((ref) {
+  return PushService.instance;
+});
+
 final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient();
 });
@@ -177,7 +175,9 @@ final apiCacheProvider = Provider<ApiCache>((ref) {
   return ApiCache();
 });
 
-final educationRemoteDatasourceProvider = Provider<EducationRemoteDatasource>((ref) {
+final educationRemoteDatasourceProvider = Provider<EducationRemoteDatasource>((
+  ref,
+) {
   return EducationRemoteDatasource(
     apiClient: ref.watch(apiClientProvider),
     apiCache: ref.watch(apiCacheProvider),
@@ -191,10 +191,10 @@ final faskesRemoteDatasourceProvider = Provider<FaskesRemoteDatasource>((ref) {
   );
 });
 
-final chatbotRemoteDatasourceProvider = Provider<ChatbotRemoteDatasource>((ref) {
-  return ChatbotRemoteDatasource(
-    apiClient: ref.watch(apiClientProvider),
-  );
+final chatbotRemoteDatasourceProvider = Provider<ChatbotRemoteDatasource>((
+  ref,
+) {
+  return ChatbotRemoteDatasource(apiClient: ref.watch(apiClientProvider));
 });
 
 final babyRepositoryProvider = Provider<IBabyRepository>((ref) {
@@ -242,8 +242,9 @@ final vaccineLocalDatasourceProvider = Provider<VaccineLocalDatasource>((ref) {
   return const VaccineLocalDatasource();
 });
 
-final vaccineRemoteDatasourceProvider =
-    Provider<VaccineRemoteDatasource?>((ref) {
+final vaccineRemoteDatasourceProvider = Provider<VaccineRemoteDatasource?>((
+  ref,
+) {
   if (!FirebaseBootstrap.isInitialized) return null;
   return FirebaseVaccineRemoteDatasource();
 });
@@ -265,15 +266,15 @@ final generateScheduleUseCaseProvider = Provider<GenerateScheduleUseCase>((
 final scheduleReminderUseCaseProvider = Provider<ScheduleReminderUseCase>((
   ref,
 ) {
-  // Bug #11: repository diinjek agar flag reminderH7Sent/reminderH1Sent
-  // bisa di-set setelah notifikasi berhasil dijadwalkan.
+  // Repository diinjek agar flag reminderH7Sent/reminderH1Sent bisa di-set setelah notifikasi berhasil dijadwalkan.
   return ScheduleReminderUseCase(
     repository: ref.watch(immunizationRepositoryProvider),
+    // Deduplikasi lokal vs FCM.
+    pushService: ref.watch(pushServiceProvider),
   );
 });
 
-/// Bug #34: alur "generate jadwal + daftarkan pengingat" dipakai bersama oleh
-/// Tambah Bayi, Kelola Profil Anak, dan `ImmunizationNotifier.build`.
+/// Alur "generate jadwal + daftarkan pengingat" dipakai bersama oleh Tambah Bayi, Kelola Profil Anak, dan `ImmunizationNotifier.build`.
 final syncBabyScheduleUseCaseProvider = Provider<SyncBabyScheduleUseCase>((
   ref,
 ) {
@@ -283,7 +284,7 @@ final syncBabyScheduleUseCaseProvider = Provider<SyncBabyScheduleUseCase>((
   );
 });
 
-/// Bug #34: dipakai toggle notifikasi di Profil & Pengaturan.
+/// Dipakai toggle notifikasi di Profil & Pengaturan.
 final rescheduleAllRemindersUseCaseProvider =
     Provider<RescheduleAllRemindersUseCase>((ref) {
       return RescheduleAllRemindersUseCase(
@@ -292,13 +293,12 @@ final rescheduleAllRemindersUseCaseProvider =
       );
     });
 
-// -- Growth (Temuan #32) --------------------------------------------------------
+// -- Growth --------------------------------------------------------------
 final growthLocalDatasourceProvider = Provider<GrowthLocalDatasource>((ref) {
   return const GrowthLocalDatasource();
 });
 
-final growthRemoteDatasourceProvider =
-    Provider<GrowthRemoteDatasource?>((ref) {
+final growthRemoteDatasourceProvider = Provider<GrowthRemoteDatasource?>((ref) {
   if (!FirebaseBootstrap.isInitialized) return null;
   return FirebaseGrowthRemoteDatasource();
 });
@@ -328,7 +328,7 @@ final deleteGrowthRecordsByBabyUseCaseProvider =
       );
     });
 
-// -- Health Journal (Temuan #32) ------------------------------------------------
+// -- Health Journal ------------------------------------------------------
 final healthJournalLocalDatasourceProvider =
     Provider<HealthJournalLocalDatasource>((ref) {
       return const HealthJournalLocalDatasource();
@@ -336,9 +336,9 @@ final healthJournalLocalDatasourceProvider =
 
 final healthJournalRemoteDatasourceProvider =
     Provider<HealthJournalRemoteDatasource?>((ref) {
-  if (!FirebaseBootstrap.isInitialized) return null;
-  return FirebaseHealthJournalRemoteDatasource();
-});
+      if (!FirebaseBootstrap.isInitialized) return null;
+      return FirebaseHealthJournalRemoteDatasource();
+    });
 
 final healthJournalRepositoryProvider = Provider<IHealthJournalRepository>((
   ref,
@@ -378,8 +378,9 @@ final deleteHealthJournalsByBabyUseCaseProvider =
     });
 
 // -- Education (Quiz Score) ----------------------------------------------------
-final quizScoreRemoteDatasourceProvider =
-    Provider<QuizScoreRemoteDatasource?>((ref) {
+final quizScoreRemoteDatasourceProvider = Provider<QuizScoreRemoteDatasource?>((
+  ref,
+) {
   if (!FirebaseBootstrap.isInitialized) return null;
   return FirebaseQuizScoreRemoteDatasource();
 });

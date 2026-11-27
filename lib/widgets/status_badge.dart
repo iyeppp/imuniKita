@@ -14,9 +14,6 @@ enum StatusBadgeStyle {
 }
 
 /// Badge status/pill kecil yang seragam (komponen UI global).
-///
-/// Menggantikan `Chip` ad-hoc dan `Container` berulang untuk status vaksin,
-/// suhu jurnal, label usia, badge "Aktif", dsb.
 class StatusBadge extends StatelessWidget {
   const StatusBadge({
     super.key,

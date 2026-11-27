@@ -4,10 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../app/theme/app_colors.dart';
 
 /// Tampilan error yang konsisten (komponen UI global).
-///
-/// Menggantikan pola berulang
-/// `error: (err, _) => Center(child: Text('Gagal: $err'))` yang tersebar di
-/// banyak layar. Bila [onRetry] diberikan, tombol "Coba Lagi" ikut tampil.
 class ErrorStateWidget extends StatelessWidget {
   const ErrorStateWidget({
     super.key,

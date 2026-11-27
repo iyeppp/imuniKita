@@ -12,11 +12,7 @@ abstract class FaskesTipe {
   static const List<String> filter = [semua, rs, puskesmas, klinik, apotek];
 }
 
-/// Sumber data mock fasilitas kesehatan (FR-06) — fase UTS.
-///
-/// Mencakup minimal 12 faskes di 3 kota (Jakarta, Bandung, Surabaya) dengan
-/// seluruh 4 tipe terwakili. Di fase UAS, kelas ini diganti implementasi yang
-/// mengambil data dari API — screen dan provider tidak perlu diubah.
+/// Mencakup minimal 12 faskes di 3 kota (Jakarta, Bandung, Surabaya) dengan seluruh 4 tipe terwakili.
 class FaskesMockDatasource {
   const FaskesMockDatasource();
 

@@ -13,8 +13,7 @@ import 'package:imunikita/widgets/section_header.dart';
 import 'package:imunikita/widgets/status_badge.dart';
 import 'package:imunikita/widgets/vaccine_card.dart';
 
-/// Test Temuan #49 — smoke test komponen UI global di `lib/widgets/`
-/// (sebelumnya hanya `ConfirmDialog` yang punya test).
+/// Test smoke test komponen UI global di `lib/widgets/` (sebelumnya hanya `ConfirmDialog` yang punya test).
 void main() {
   Widget bungkus(Widget child) => MaterialApp(home: Scaffold(body: child));
 

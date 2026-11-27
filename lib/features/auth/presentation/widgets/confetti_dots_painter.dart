@@ -16,10 +16,7 @@ class ConfettiDot {
   });
 }
 
-/// CustomPainter untuk sistem confetti dots khas ImuniKita & Petdegree branding:
-/// - 3 variasi ukuran: XL, M, S
-/// - Warna: Warm White (#FFFDE8), Bold Yellow (#FAC532), Accent Red (#D94F3D)
-/// - Solid flat tanpa border/outline, beberapa overlap dan terpotong tepi.
+/// CustomPainter untuk sistem confetti dots khas ImuniKita & Petdegree branding: - 3 variasi ukuran: XL, M, S - Warna: Warm White (#FFFDE8).
 class ConfettiDotsPainter extends CustomPainter {
   final double animationProgress;
 

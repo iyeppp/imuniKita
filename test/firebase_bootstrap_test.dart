@@ -21,8 +21,7 @@ FirebaseOptions _options({
 void main() {
   group('FirebaseConfigCheck — deteksi placeholder (P1)', () {
     test('menolak apiKey placeholder', () {
-      // String dipecah agar file test tidak memuat pola key yang bisa memicu
-      // secret scanning; gabungannya tetap mengandung marker placeholder.
+      // String dipecah agar file test tidak memuat pola key yang bisa memicu secret scanning; gabungannya tetap mengandung marker placeholder.
       const placeholderKey =
           'AIzaSyDevKeyFor'
           '-unit-test';
@@ -68,10 +67,7 @@ void main() {
   });
 
   group('Konfigurasi project (P1)', () {
-    // Catatan: di CI, `lib/firebase_options.dart` berasal dari template
-    // non-secret `tool/firebase_options.ci.dart`. Test ini memastikan nilai
-    // project konsisten dan bukan placeholder — bukan memastikan API key asli
-    // tersimpan di repo.
+    // Catatan: di CI, `lib/firebase_options.dart` berasal dari template non-secret `tool/firebase_options.ci.dart`.
     test('firebase_options tidak lagi placeholder', () {
       expect(
         FirebaseConfigCheck.isPlaceholder(DefaultFirebaseOptions.android),

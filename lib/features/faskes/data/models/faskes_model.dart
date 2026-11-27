@@ -1,7 +1,4 @@
 /// Model fasilitas kesehatan untuk Direktori Faskes (FR-06).
-///
-/// Plain Dart class — tidak dipersist ke Hive karena data bersumber dari
-/// mock datasource. Fase UAS: ganti datasource, model ini tidak perlu diubah.
 class FaskesModel {
   const FaskesModel({
     required this.id,
