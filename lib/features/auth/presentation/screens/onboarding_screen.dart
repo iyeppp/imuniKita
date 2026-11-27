@@ -41,7 +41,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   ];
 
   Future<void> _completeOnboarding() async {
-    // Temuan #22: penanda onboarding disimpan lewat use case auth.
+    // Penanda onboarding disimpan lewat use case auth.
     await ref.read(markOnboardingSeenUseCaseProvider).execute();
     if (mounted) {
       context.go(AppRoutes.login);

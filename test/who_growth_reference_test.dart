@@ -1,8 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:imunikita/core/constants/who_growth_reference.dart';
 
-/// Test Temuan #8 — tabel referensi WHO (median, −2SD, +2SD) yang dipakai
-/// grafik pertumbuhan, plus interpolasi antar bulan.
+/// Test tabel referensi WHO (median, −2SD, +2SD) yang dipakai grafik pertumbuhan, plus interpolasi antar bulan.
 void main() {
   final daftarSeri = <String, WhoSeries>{
     'BB laki-laki': WhoGrowthReference.bbLaki,

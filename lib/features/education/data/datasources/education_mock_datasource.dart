@@ -20,12 +20,6 @@ abstract class EducationKategori {
   ];
 }
 
-/// Sumber data mock konten edukasi (FR-05) — fase UTS.
-///
-/// Seluruh konten di-hardcode di sini sesuai dev plan §1.1
-/// (`education_mock_datasource.dart # [UTS] hardcoded mock`). Di fase UAS,
-/// kelas ini diganti implementasi yang menarik data dari CMS API — screen
-/// tidak perlu diubah karena semua akses konten lewat datasource ini.
 class EducationMockDatasource {
   const EducationMockDatasource();
 
@@ -44,8 +38,7 @@ class EducationMockDatasource {
     return null;
   }
 
-  /// Artikel terkait: kategori sama dulu, lalu dilengkapi artikel lain
-  /// agar section "Artikel Terkait" tidak pernah kosong.
+  /// Artikel terkait: kategori sama dulu, lalu dilengkapi artikel lain agar section "Artikel Terkait" tidak pernah kosong.
   List<ArticleModel> getArtikelTerkait(ArticleModel artikel, {int limit = 3}) {
     final hasil = <ArticleModel>[];
     final kandidat = [

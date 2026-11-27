@@ -1,9 +1,4 @@
 /// Data master jadwal imunisasi nasional (hardcoded, offline).
-///
-/// Dipakai `GenerateScheduleUseCase` untuk membangun seluruh
-/// `VaccineScheduleEntity` bayi begitu profilnya disimpan. Nilai
-/// [VaccineMasterItem.usiaBulan] dipetakan lewat `AgeCalculator.addMonths`
-/// dari tanggal lahir bayi untuk mendapatkan `tanggalTarget`.
 library;
 
 /// Satu baris jadwal imunisasi nasional.

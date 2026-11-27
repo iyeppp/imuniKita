@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/network/api_client.dart';
 import 'chatbot_mock_datasource.dart';
 
-/// Remote datasource AI Chatbot dengan fallback mock offline (B8-6, B8-7).
+/// Remote datasource AI Chatbot dengan fallback mock offline.
 class ChatbotRemoteDatasource {
   ChatbotRemoteDatasource({
     this.apiClient,

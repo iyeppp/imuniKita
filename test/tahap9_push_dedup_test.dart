@@ -13,7 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
-/// Fake push service — menguji deduplikasi B9-4 tanpa Firebase.
+/// Fake push service — menguji deduplikasi tanpa Firebase.
 class _FakePushService implements IPushService {
   _FakePushService({required this.active});
 
@@ -72,7 +72,7 @@ class _FakeImmunizationRepository implements IImmunizationRepository {
   }
 }
 
-/// Test Tahap 9 — notifikasi H-7/H-1 dan deduplikasi lokal vs FCM.
+/// Test — notifikasi H-7/H-1 dan deduplikasi lokal vs FCM.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 

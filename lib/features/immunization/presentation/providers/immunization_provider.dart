@@ -6,11 +6,6 @@ import '../../../../injection/dependency_injection.dart';
 import '../../domain/entities/vaccine_schedule_entity.dart';
 
 /// Seluruh jadwal imunisasi satu bayi, terurut berdasarkan usia target.
-///
-/// Dibaca lewat `IImmunizationRepository` -- bukan Hive box langsung -- supaya:
-/// 1. status `TERLEWAT` ternormalisasi sekali di lapisan data (Temuan #3), dan
-/// 2. data source bisa di-swap ke Firestore pada fase UAS tanpa menyentuh
-///    screen mana pun (dev plan SS6.1).
 class ImmunizationNotifier
     extends FamilyAsyncNotifier<List<VaccineScheduleEntity>, String> {
   @override
@@ -21,16 +16,11 @@ class ImmunizationNotifier
       return schedules;
     }
 
-    // Auto-generate seluruh jadwal jika bayi ada tetapi belum punya jadwal
-    // (mis. data jadwal terhapus / dibuat sebelum fitur ini ada).
-    //
-    // Fix Bug #31: kegagalan tidak lagi ditelan diam-diam (dulu `catch (_)`
-    // membuat kalender tampak kosong tanpa pesan) sehingga `AsyncError` bisa
-    // ditampilkan layar lewat `ErrorStateWidget` + tombol coba lagi.
+    // Auto-generate seluruh jadwal jika bayi ada tetapi belum punya jadwal (mis. data jadwal terhapus / dibuat sebelum fitur ini ada).
     final baby = await ref.read(babyRepositoryProvider).getBabyById(arg);
     if (baby == null) return schedules;
 
-    // Bug #34: generate + penjadwalan pengingat lewat satu use case bersama.
+    // Generate + penjadwalan pengingat lewat satu use case bersama.
     return ref
         .read(syncBabyScheduleUseCaseProvider)
         .execute(
@@ -40,11 +30,7 @@ class ImmunizationNotifier
         );
   }
 
-  /// Perbarui satu jadwal -- dipakai layar Detail Vaksin saat menandai
-  /// "Sudah Diberikan" sekaligus menyimpan catatan KIPI.
-  ///
-  /// Fix Bug #7: saat status berubah ke [VaccineStatus.selesai], notifikasi
-  /// H-7 dan H-1 untuk jadwal ini dibatalkan agar tidak muncul lagi.
+  /// Perbarui satu jadwal -- dipakai layar Detail Vaksin saat menandai "Sudah Diberikan" sekaligus menyimpan catatan KIPI.
   Future<void> updateStatus(
     String scheduleId,
     String status, {
@@ -64,8 +50,7 @@ class ImmunizationNotifier
       ),
     );
 
-    // Bug #7: batalkan notifikasi H-7 & H-1 saat jadwal ditandai selesai
-    // agar pengingat tidak muncul setelah vaksin sudah diberikan.
+    // Batalkan notifikasi H-7 & H-1 saat jadwal ditandai selesai agar pengingat tidak muncul setelah vaksin sudah diberikan.
     if (status == VaccineStatus.selesai) {
       for (final daysBefore in NotificationHelper.supportedDaysBefore) {
         final notifId = NotificationHelper.notificationId(
@@ -84,7 +69,6 @@ class ImmunizationNotifier
     ref.invalidate(vaccineScheduleByIdProvider(scheduleId));
   }
 
-  /// Hapus seluruh jadwal bayi ini -- dipakai saat profil bayi dihapus.
   Future<void> deleteAllForBaby() async {
     await ref.read(immunizationRepositoryProvider).deleteSchedulesByBaby(arg);
     ref.invalidateSelf();
@@ -99,8 +83,6 @@ final immunizationProvider =
     >(ImmunizationNotifier.new);
 
 /// Satu jadwal berdasarkan id -- dipakai layar Detail Vaksin (3.3).
-///
-/// Turut menormalkan status `TERLEWAT` karena membacanya lewat repository.
 final vaccineScheduleByIdProvider =
     FutureProvider.family<VaccineScheduleEntity?, String>((ref, scheduleId) {
       return ref

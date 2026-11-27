@@ -18,9 +18,6 @@ import '../widgets/education_kategori_badge.dart';
 import '../widgets/education_thumbnail.dart';
 
 /// Education Hub (FR-05) — titik masuk fitur edukasi.
-///
-/// Tiga tab konten (Artikel, Video, Kuis) dengan satu chip filter kategori
-/// yang dipakai bersama, sehingga filter terasa konsisten di seluruh tab.
 class EducationHubScreen extends StatelessWidget {
   const EducationHubScreen({super.key});
 
@@ -41,9 +38,7 @@ class EducationHubScreen extends StatelessWidget {
         child: Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          // `/education` adalah route top-level. Bila dibuka tanpa riwayat
-          // (mis. deep link), tidak ada halaman untuk di-`pop` — karena itu
-          // tombol kembali selalu disediakan dan jatuh ke Dashboard.
+          // `/education` adalah route top-level.
           leading: IconButton(
             tooltip: 'Kembali',
             icon: const Icon(Icons.arrow_back),
@@ -257,8 +252,7 @@ class _VideoTab extends ConsumerWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        // Tinggi kartu dipatok agar judul 2 baris + label kategori tidak
-        // berisiko overflow di layar sempit.
+        // Tinggi kartu dipatok agar judul 2 baris + label kategori tidak berisiko overflow di layar sempit.
         mainAxisExtent: 205,
       ),
       itemCount: video.length,
@@ -272,8 +266,6 @@ class _VideoCard extends StatelessWidget {
 
   final VideoModel video;
 
-  /// Fase UTS membuka pencarian YouTube di aplikasi/browser eksternal
-  /// (belum ada video resmi yang di-host tim).
   Future<void> _buka(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
     try {
@@ -486,7 +478,7 @@ class _KuisCard extends StatelessWidget {
                       color: AppColors.textHint,
                     ),
                   ),
-                  // Temuan #15: tampilkan riwayat percobaan bila sudah > 1×.
+                  // Tampilkan riwayat percobaan bila sudah > 1×.
                   if ((skor?.totalPercobaan ?? 1) > 1) ...[
                     const SizedBox(width: 8),
                     Text(

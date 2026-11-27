@@ -8,13 +8,10 @@ import '../datasources/auth_local_datasource.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../models/user_model.dart';
 
-/// Versi skema dokumen `users/{uid}` (lihat Tahap 3 / B3-7).
+/// Versi skema dokumen `users/{uid}`.
 const int _profileSchemaVersion = 1;
 
 /// Terjemahkan kode error Firebase Auth menjadi [Failure] berbahasa Indonesia.
-///
-/// Dipisah dari [mapFirebaseAuthException] agar mudah diuji tanpa harus
-/// membuat instance `FirebaseAuthException` (konstruktornya `@protected`).
 Failure authFailureFromCode(String? code) {
   switch (code) {
     case 'email-already-in-use':
@@ -52,17 +49,6 @@ Failure mapFirebaseAuthException(FirebaseAuthException error) {
 }
 
 /// Implementasi `IAuthRepository` Firebase-first.
-///
-/// Alur utama:
-/// - **Firebase tersedia** (`remote != null`): login/daftar lewat Firebase
-///   Auth, profil disimpan di `users/{uid}` + cache Hive `userBox`.
-/// - **Firebase tidak tersedia** (`remote == null`, mis. desktop atau bootstrap
-///   gagal): fallback lokal seperti fase UTS agar aplikasi tetap bisa dipakai.
-///
-/// Password **tidak pernah** disimpan di Hive/SharedPreferences. Key
-/// `is_logged_in`/`user_id`/`user_name` hanya ditulis sebagai cermin agar fitur
-/// lain (mis. `BabyNotifier`) tetap berjalan; keputusan auth selalu memakai
-/// sesi Firebase.
 class AuthRepositoryImpl implements IAuthRepository {
   const AuthRepositoryImpl(this._localDatasource, {this.remote});
 
@@ -98,8 +84,7 @@ class AuthRepositoryImpl implements IAuthRepository {
 
     return remote.authStateChanges().asyncMap((authUser) async {
       if (authUser == null) {
-        // Sesi dicabut/kedaluwarsa di luar alur logout eksplisit: bersihkan
-        // cermin lokal agar fitur non-auth tidak memakai uid lama.
+        // Sesi dicabut/kedaluwarsa di luar alur logout eksplisit: bersihkan cermin lokal agar fitur non-auth tidak memakai uid lama.
         try {
           await _localDatasource.clearSession();
         } catch (error) {
@@ -158,8 +143,7 @@ class AuthRepositoryImpl implements IAuthRepository {
         displayName: user.namaLengkap,
       );
 
-      // Document ID = uid Firebase (bukan UUID lokal) agar data domain di
-      // bawah `users/{uid}` konsisten.
+      // Document ID = uid Firebase (bukan UUID lokal) agar data domain di bawah `users/{uid}` konsisten.
       final entity = UserEntity(
         localId: authUser.uid,
         namaLengkap: user.namaLengkap.trim(),
@@ -216,8 +200,7 @@ class AuthRepositoryImpl implements IAuthRepository {
       createdAt: user.createdAt,
     );
 
-    // Penolakan email duplikat hanya relevan pada mode lokal: Firebase Auth
-    // sudah menjamin email unik, dan akun lokal lama bukan akun Firebase.
+    // Penolakan email duplikat hanya relevan pada mode lokal: Firebase Auth sudah menjamin email unik, dan akun lokal lama bukan akun Firebase.
     if (remote == null) {
       await _ensureEmailNotUsedLocally(entity);
     }
@@ -242,8 +225,7 @@ class AuthRepositoryImpl implements IAuthRepository {
       try {
         await remote.logout();
       } catch (error) {
-        // signOut Firebase bersifat lokal dan jarang gagal; sesi lokal tetap
-        // dibersihkan supaya tombol keluar tidak macet.
+        // SignOut Firebase bersifat lokal dan jarang gagal; sesi lokal tetap dibersihkan supaya tombol keluar tidak macet.
         debugPrint('AuthRepository: gagal signOut Firebase — $error');
       }
     }
@@ -276,7 +258,7 @@ class AuthRepositoryImpl implements IAuthRepository {
   @override
   Future<void> markOnboardingSeen() => _localDatasource.setSeenOnboarding(true);
 
-  // ── Helper: mode lokal (fallback UTS) ────────────────────────────────────
+  // ── Helper: fallback mode lokal ─────────────────────────────□
 
   Future<UserEntity?> _readLocalSession() async {
     try {
@@ -298,9 +280,7 @@ class AuthRepositoryImpl implements IAuthRepository {
       final model = await _localDatasource.getByEmail(email);
       if (model == null) throw const UserNotFoundFailure();
 
-      // Catatan: password akun lokal UTS memang tidak pernah disimpan,
-      // sehingga tidak bisa diverifikasi. Mode ini hanya dipakai saat
-      // Firebase tidak tersedia (desktop / bootstrap gagal).
+      // Mode ini hanya dipakai saat Firebase tidak tersedia (desktop / bootstrap gagal).
       await _localDatasource.saveSession(model);
       return model.toEntity();
     } on Failure {
@@ -349,9 +329,7 @@ class AuthRepositoryImpl implements IAuthRepository {
 
   // ── Helper: sinkronisasi profil Firebase ↔ Hive ─────────────────────────
 
-  /// Ambil profil cloud (bila bisa), simpan ke cache Hive, dan selaraskan
-  /// cermin sesi. Kegagalan Firestore tidak menggagalkan login: profil lokal
-  /// tetap dipakai agar aplikasi bisa dibuka offline.
+  /// Ambil profil cloud (bila bisa), simpan ke cache Hive, dan selaraskan cermin sesi.
   Future<UserEntity> _syncRemoteUser(RemoteAuthUser authUser) async {
     final cached = await _localDatasource.getById(authUser.uid);
 
@@ -403,10 +381,6 @@ class AuthRepositoryImpl implements IAuthRepository {
   }
 
   /// Simpan profil ke `users/{uid}` secara best-effort.
-  ///
-  /// Firestore bisa menolak (rules belum dideploy pada Tahap 3) atau gagal
-  /// karena offline. Profil lokal sudah tersimpan, jadi kegagalan ini hanya
-  /// dicatat — antrean sinkronisasi penuh menyusul di Tahap 5.
   Future<void> _trySaveProfile(UserEntity entity) async {
     final remote = this.remote;
     if (remote == null) return;

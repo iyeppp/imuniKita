@@ -11,25 +11,14 @@ import 'local_storage_service.dart';
 import 'notification_service.dart';
 
 /// Kontrak layanan push (FCM) agar mudah diganti pada unit test.
-///
-/// Implementasi nyata adalah [PushService]. Use case hanya bergantung pada
-/// [isPushActive] untuk deduplikasi (B9-4), sehingga test tidak perlu
-/// menyentuh Firebase sama sekali.
 abstract class IPushService {
-  /// Inisialisasi minimal: minta izin, daftarkan token, dan pantau perubahan
-  /// sesi/token. Aman dipanggil walau Firebase tidak aktif atau FCM dimatikan.
+  /// Inisialisasi minimal: minta izin, daftarkan token, dan pantau perubahan sesi/token.
   Future<void> init();
 
   /// `true` bila pengiriman lewat FCM sedang aktif di perangkat ini.
-  ///
-  /// Saat `true`, pengingat lokal H-7/H-1 tidak perlu dijadwalkan karena
-  /// server (GitHub Actions) yang mengirimkannya. Saat `false` (FCM tidak
-  /// diaktifkan, izin ditolak, atau offline saat registrasi), pengingat lokal
-  /// tetap berjalan sebagai fallback.
   Future<bool> isPushActive();
 
-  /// Samakan status preferensi notifikasi dengan dokumen perangkat di
-  /// Firestore (`users/{uid}/devices/{token}`).
+  /// Samakan status preferensi notifikasi dengan dokumen perangkat di Firestore (`users/{uid}/devices/{token}`).
   Future<void> syncNotificationsPreference(bool enabled);
 
   /// Hapus token perangkat sebelum sesi Firebase diakhiri.
@@ -40,18 +29,6 @@ abstract class IPushService {
 }
 
 /// Layanan token FCM opsional untuk pengingat H-7/H-1 lintas perangkat.
-///
-/// Fitur ini **opt-in** lewat `--dart-define=ENABLE_PUSH=true`. Default
-/// nonaktif supaya jalur wajib (notifikasi lokal) tetap berjalan tanpa
-/// ketergantungan server. Bila aktif:
-///
-/// 1. Minta izin notifikasi ke OS.
-/// 2. Simpan token ke `users/{uid}/devices/{token}` (rules sudah owner-only).
-/// 3. Perbarui token saat berubah dan hapus saat logout.
-/// 4. Batalkan pengingat lokal agar tidak dobel dengan FCM (B9-4).
-///
-/// API key/service account FCM **tidak pernah** ada di APK; pengiriman
-/// dilakukan GitHub Actions (lihat `.github/workflows/vaccine-reminder.yml`).
 class PushService implements IPushService {
   PushService._();
 
@@ -67,7 +44,6 @@ class PushService implements IPushService {
   StreamSubscription<User?>? _authSubscription;
   StreamSubscription<String>? _tokenSubscription;
 
-  /// Platform yang didukung FCM native pada fase UAS.
   bool get _isSupportedPlatform =>
       !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.android ||
@@ -81,8 +57,7 @@ class PushService implements IPushService {
     if (_initialized) return;
     _initialized = true;
 
-    // Jalur wajib (lokal) tidak boleh bergantung pada FCM. Bila fitur tidak
-    // diminta secara eksplisit, seluruh langkah di bawah dilewati.
+    // Jalur wajib (lokal) tidak boleh bergantung pada FCM.
     if (!EnvConfig.pushEnabled) {
       debugPrint(
         'PushService: ENABLE_PUSH tidak aktif — memakai notifikasi lokal.',
@@ -112,10 +87,7 @@ class PushService implements IPushService {
         return;
       }
 
-      // firebase_messaging 17 menandai `onTokenRefresh`/`getToken` deprecated
-      // dan mengarahkan ke API FID (`register`/`onRegistered`). Server kita
-      // (FCM HTTP v1 multicast) masih memakai registration token, jadi API
-      // lama dipertahankan sampai migrasi target pengiriman selesai.
+      // Firebase_messaging 17 menandai `onTokenRefresh`/`getToken` deprecated dan mengarahkan ke API FID (`register`/`onRegistered`).
       // ignore: deprecated_member_use
       _tokenSubscription = messaging.onTokenRefresh.listen((token) {
         _token = token;
@@ -136,7 +108,7 @@ class PushService implements IPushService {
         await _registerForCurrentUser();
       }
     } catch (error) {
-      // Non-fatal: FCM opsional. Fallback lokal tetap berjalan.
+      // Non-fatal: FCM opsional.
       debugPrint('PushService: inisialisasi FCM gagal — $error');
       _active = false;
       await LocalStorageService.setPushRegistered(false);
@@ -216,8 +188,7 @@ class PushService implements IPushService {
     final notificationsEnabled =
         await LocalStorageService.isNotificationEnabled();
     if (!notificationsEnabled) {
-      // Preferensi perangkat mematikan pengingat: hapus token agar server
-      // tidak mengirim push ke perangkat ini.
+      // Preferensi perangkat mematikan pengingat: hapus token agar server tidak mengirim push ke perangkat ini.
       await _deleteDeviceDoc(user.uid);
       await _clearActive();
       return;
@@ -227,8 +198,7 @@ class PushService implements IPushService {
     final token = _token ?? await FirebaseMessaging.instance.getToken();
     if (token == null || token.isEmpty) return;
 
-    // Token lama bisa basi setelah `onTokenRefresh`; pastikan tidak ada dua
-    // dokumen perangkat untuk perangkat yang sama.
+    // Token lama bisa basi setelah `onTokenRefresh`; pastikan tidak ada dua dokumen perangkat untuk perangkat yang sama.
     if (_lastSyncedToken != null && _lastSyncedToken != token) {
       try {
         await _deviceDoc(user.uid, _lastSyncedToken!).delete();
@@ -248,8 +218,7 @@ class PushService implements IPushService {
     _active = true;
     await LocalStorageService.setPushRegistered(true);
 
-    // B9-4: FCM kini menjadi kanal pengiriman. Hentikan pengingat lokal yang
-    // mungkin sudah terjadwal agar user tidak menerima notifikasi ganda.
+    // FCM kini menjadi kanal pengiriman.
     try {
       await NotificationService.cancelAllNotifications();
     } catch (_) {

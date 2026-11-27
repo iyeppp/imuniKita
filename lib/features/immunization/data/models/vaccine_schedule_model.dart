@@ -5,9 +5,6 @@ import '../../domain/entities/vaccine_schedule_entity.dart';
 part 'vaccine_schedule_model.g.dart';
 
 /// Model persistensi Hive CE untuk satu baris jadwal imunisasi.
-///
-/// `typeId: 2` — mengikuti dev plan §3.1 "VaccineScheduleModel". Jangan
-/// dipakai ulang: `UserModel` = 0, `BabyModel` = 1.
 @HiveType(typeId: 2)
 class VaccineScheduleModel extends HiveObject {
   @HiveField(0)

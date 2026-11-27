@@ -4,9 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../app/theme/app_colors.dart';
 
 /// Judul seksi dengan aksi opsional di kanan (komponen UI global).
-///
-/// Menggantikan `Text` + `GoogleFonts.baloo2` yang berulang di Dashboard,
-/// Profil & Pengaturan, Detail Vaksin, dan Article Detail.
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
     super.key,

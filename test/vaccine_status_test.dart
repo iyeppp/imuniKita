@@ -11,8 +11,7 @@ import 'package:imunikita/features/immunization/presentation/widgets/vaccine_sta
 import 'package:imunikita/app/theme/app_colors.dart';
 import 'package:imunikita/hive_registrar.g.dart';
 
-/// Test Temuan #3 — status jadwal imunisasi yang sudah lewat harus terbaca
-/// `TERLEWAT`, tanpa mengubah data yang tersimpan di Hive.
+/// Test status jadwal imunisasi yang sudah lewat harus terbaca `TERLEWAT`, tanpa mengubah data yang tersimpan di Hive.
 void main() {
   final hariIni = DateTime(2026, 9, 24);
 

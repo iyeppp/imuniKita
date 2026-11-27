@@ -3,8 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../../app/theme/app_colors.dart';
 
 /// Tombol neo-brutalism reusable dengan border tebal dan drop shadow solid.
-///
-/// Mendukung state loading (CircularProgressIndicator) dan custom icon.
 class NeoButton extends StatelessWidget {
   const NeoButton({
     super.key,

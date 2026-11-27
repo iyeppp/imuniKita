@@ -3,14 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../app/theme/app_colors.dart';
 
-/// Dialog konfirmasi generik (komponen UI global — dev plan tabel
-/// "Komponen UI Global / Shared Widgets").
-///
-/// Dipakai untuk aksi yang tidak bisa dibatalkan atau berisiko, mis. keluar
-/// dari akun di layar Profil & Pengaturan.
+/// Dialog konfirmasi generik.
 abstract class ConfirmDialog {
-  /// Tampilkan dialog dan kembalikan `true` bila user menekan tombol
-  /// konfirmasi, `false` bila membatalkan atau menutup dialog.
+  /// Tampilkan dialog dan kembalikan `true` bila user menekan tombol konfirmasi, `false` bila membatalkan atau menutup dialog.
   static Future<bool> show({
     required BuildContext context,
     required String title,

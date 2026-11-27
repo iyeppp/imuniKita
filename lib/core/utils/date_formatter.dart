@@ -1,7 +1,4 @@
 /// Format tanggal berbahasa Indonesia.
-///
-/// Ditulis manual (tanpa `DateFormat` ber-locale) agar tidak memerlukan
-/// `initializeDateFormatting()` saat startup dan hasilnya deterministik.
 abstract class DateFormatter {
   static const List<String> _bulan = [
     'Januari',

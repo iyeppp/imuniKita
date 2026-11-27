@@ -7,7 +7,7 @@ import '../../data/models/faskes_model.dart';
 
 // ── Datasource (REST API + Cache + Mock Fallback) ─────────────────────────
 
-/// Akses datasource faskes (B8-6, B8-7).
+/// Akses datasource faskes.
 final faskesDatasourceProvider = Provider<FaskesRemoteDatasource>(
   (ref) => ref.watch(faskesRemoteDatasourceProvider),
 );
@@ -15,7 +15,6 @@ final faskesDatasourceProvider = Provider<FaskesRemoteDatasource>(
 // ── Filter ────────────────────────────────────────────────────────────────
 
 /// Tipe faskes yang sedang aktif di chip filter.
-/// Default: [FaskesTipe.semua] (tampilkan semua tipe).
 final faskesTipeProvider = StateProvider<String>((ref) => FaskesTipe.semua);
 
 // ── List (filtered by tipe) ───────────────────────────────────────────────

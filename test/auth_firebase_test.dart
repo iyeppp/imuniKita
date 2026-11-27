@@ -23,10 +23,7 @@ import 'package:imunikita/hive_registrar.g.dart';
 import 'package:imunikita/injection/dependency_injection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// `FirebaseAuthException` punya konstruktor `@protected`, sehingga hanya bisa
-/// dipakai dari subclass. Subclass ini membuat fake remote dapat melempar
-/// exception dengan kode Firebase asli — repository tetap diuji lewat jalur
-/// pemetaan error yang sesungguhnya.
+/// `FirebaseAuthException` punya konstruktor `@protected`, sehingga hanya bisa dipakai dari subclass.
 class _TestFirebaseAuthException extends FirebaseAuthException {
   _TestFirebaseAuthException(String code) : super(code: code);
 }

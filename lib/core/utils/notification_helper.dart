@@ -1,12 +1,7 @@
 import '../constants/app_constants.dart';
 
 /// Utilitas penjadwalan notifikasi pengingat imunisasi H-7 & H-1.
-///
-/// Semua perhitungan tanggal/ID di sini bersifat murni (pure function) agar
-/// mudah diuji tanpa plugin notifikasi. Pengiriman ke OS dilakukan
-/// `NotificationService`, dipanggil oleh `ScheduleReminderUseCase`.
 abstract class NotificationHelper {
-  /// Offset pengingat yang didukung, sesuai dev plan (H-7 dan H-1).
   static const List<int> supportedDaysBefore = [7, 1];
 
   /// Tanggal pengingat = `tanggalTarget - daysBefore` pada jam [hour].
@@ -25,15 +20,9 @@ abstract class NotificationHelper {
   }
 
   /// ID notifikasi Android — deterministik dari `scheduleId` + offset hari.
-  ///
-  /// Deterministik penting agar notifikasi lama bisa dibatalkan/diganti
-  /// dengan ID yang sama setelah app di-restart (`String.hashCode` bawaan
-  /// Dart tidak dijamin stabil lintas proses/isolate).
   static int notificationId(String scheduleId, int daysBefore) {
     final offset = supportedDaysBefore.indexOf(daysBefore);
-    // Ruang ID diperbesar (100 juta) agar tabrakan antar `scheduleId` makin
-    // kecil, lalu dikali 2 + offset supaya H-7 dan H-1 jadwal yang sama tidak
-    // pernah bertabrakan (Temuan #45). Hasil tetap jauh di bawah batas int32.
+    // Ruang ID diperbesar (100 juta) agar tabrakan antar `scheduleId` makin kecil.
     final base = _fnv1a(scheduleId) % 100000000;
     return (base * 2) + (offset < 0 ? 9 : offset);
   }

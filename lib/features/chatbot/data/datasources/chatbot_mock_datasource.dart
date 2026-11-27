@@ -1,14 +1,13 @@
 import 'dart:math';
 
 /// Datasource berbasis rule/keyword — tidak ada koneksi AI/backend.
-/// Mendukung 30+ keyword mencakup vaksin nasional dan topik parenting umum.
 class ChatbotMockDatasource {
   static const String _defaultResponse =
       'Maaf, saya belum bisa menjawab itu secara detail. '
       'Silakan konsultasikan dengan dokter anak atau bidan terdekat. '
       'Anda bisa mencari faskes terdekat di menu Direktori Faskes. 🏥';
 
-  /// Peta keyword → respons. Matching case-insensitive, urutan atas diprioritaskan.
+  /// Peta keyword → respons.
   static const List<(List<String>, String)> _rules = [
     // ── Vaksin BCG ────────────────────────────────────────────────────────
     (
@@ -308,11 +307,6 @@ class ChatbotMockDatasource {
   final Random _random = Random();
 
   /// Cocokkan [keyword] ke [teks] (huruf kecil) dengan **batas kata**.
-  ///
-  /// Temuan #52: pencocokan `contains` biasa membuat keyword pendek menangkap
-  /// kata lain — mis. `asi` ikut cocok pada "mpasi"/"imunisasi" sehingga
-  /// pertanyaan MPASI dijawab dengan info ASI. Keyword multi-kata (mis.
-  /// "air susu ibu") tetap dicocokkan sebagai frasa.
   static bool _cocok(String teks, String keyword) {
     if (keyword.contains(' ')) return teks.contains(keyword);
 
@@ -322,7 +316,6 @@ class ChatbotMockDatasource {
   }
 
   /// Kembalikan respons berbasis keyword untuk [userMessage].
-  /// Mensimulasikan delay jaringan 300–700 ms.
   Future<String> getResponse(String userMessage) async {
     final delayMs = 300 + _random.nextInt(401); // 300–700 ms
     await Future.delayed(Duration(milliseconds: delayMs));

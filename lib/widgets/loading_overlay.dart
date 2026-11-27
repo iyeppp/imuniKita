@@ -4,9 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../app/theme/app_colors.dart';
 
 /// Indikator loading inline yang terpusat (komponen UI global).
-///
-/// Dipakai sebagai isi `AsyncValue.when(loading: ...)` agar tiap layar tidak
-/// lagi menulis `Center(child: CircularProgressIndicator())` sendiri.
 class AppLoadingIndicator extends StatelessWidget {
   const AppLoadingIndicator({super.key, this.size = 36, this.message});
 

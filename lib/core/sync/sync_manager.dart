@@ -69,18 +69,14 @@ class SyncManager {
   }
 
   /// Menarik (pull) seluruh data domain pengguna dari Firestore ke Hive.
-  ///
-  /// Menerapkan aturan:
-  /// 1. Lewati entitas yang masih memiliki antrean `delete` di outbox lokal.
-  /// 2. Gunakan strategi Last-Write-Wins (`updatedAt`) saat menggabungkan data.
   Future<void> pullAll(String uid) async {
     if (uid.isEmpty) return;
 
     try {
-      // 1. Kuras mutasi pending dulu jika ada
+      // 1.
       await pushPendingMutations();
 
-      // 2. Pull Profil Bayi
+      // 2.
       final babyRemoteDs = _babyRemote;
       if (babyRemoteDs != null) {
         final remoteBabies = await babyRemoteDs.getAll(uid);
@@ -100,7 +96,7 @@ class SyncManager {
       // Ambil seluruh bayi lokal untuk menarik subkoleksinya
       final localBabies = await _babyLocal.getByUser(uid);
       for (final baby in localBabies) {
-        // 3. Pull Jadwal Imunisasi
+        // 3.
         final vRemoteDs = _vaccineRemote;
         if (vRemoteDs != null) {
           final remoteSchedules = await vRemoteDs.getSchedules(uid, baby.babyId);
@@ -119,7 +115,7 @@ class SyncManager {
           }
         }
 
-        // 4. Pull Rekam Pertumbuhan
+        // 4.
         final gRemoteDs = _growthRemote;
         if (gRemoteDs != null) {
           final remoteRecords =
@@ -145,7 +141,7 @@ class SyncManager {
           }
         }
 
-        // 5. Pull Jurnal Kesehatan
+        // 5.
         final jRemoteDs = _journalRemote;
         if (jRemoteDs != null) {
           final remoteJournals =
@@ -166,7 +162,7 @@ class SyncManager {
         }
       }
 
-      // 6. Pull Skor Kuis
+      // 6.
       final qRemoteDs = _quizRemote;
       if (qRemoteDs != null) {
         final remoteScores = await qRemoteDs.getScores(uid);

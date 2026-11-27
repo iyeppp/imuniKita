@@ -61,21 +61,13 @@ import '../features/health_journal/domain/usecases/get_health_journals_usecase.d
 import '../features/education/data/datasources/quiz_score_remote_datasource.dart';
 
 // Registry pusat Riverpod: datasource -> repository -> use case.
-//
-// Semua provider ditulis manual (tanpa `riverpod_generator`) -- lihat dev
-// plan bagian 2 catatan konflik `build_runner` dengan `hive_ce_generator`.
-// Screen/notifier cukup memanggil `ref.read(xUseCaseProvider)`, tidak
-// pernah menyentuh datasource/repository secara langsung.
 
-// -- Auth (Temuan #22) ---------------------------------------------------------
+// -- Auth ---------------------------------------------------------------
 final authLocalDatasourceProvider = Provider<AuthLocalDatasource>((ref) {
   return const AuthLocalDatasource();
 });
 
 /// Remote datasource Firebase hanya dibuat bila bootstrap berhasil.
-///
-/// `null` berarti aplikasi berjalan local-only (desktop, atau init Firebase
-/// gagal) dan repository otomatis memakai fallback lokal ala UTS.
 final authRemoteDatasourceProvider = Provider<AuthRemoteDatasource?>((ref) {
   if (!FirebaseBootstrap.isInitialized) return null;
   return const FirebaseAuthRemoteDatasource();
@@ -170,7 +162,7 @@ final photoStorageServiceProvider = Provider<PhotoStorageService>((ref) {
   return PhotoStorageService();
 });
 
-/// Token FCM opsional (Tahap 9). Inisialisasi dilakukan sekali di `main`.
+/// Token FCM opsional.
 final pushServiceProvider = Provider<IPushService>((ref) {
   return PushService.instance;
 });
@@ -274,17 +266,15 @@ final generateScheduleUseCaseProvider = Provider<GenerateScheduleUseCase>((
 final scheduleReminderUseCaseProvider = Provider<ScheduleReminderUseCase>((
   ref,
 ) {
-  // Bug #11: repository diinjek agar flag reminderH7Sent/reminderH1Sent
-  // bisa di-set setelah notifikasi berhasil dijadwalkan.
+  // Repository diinjek agar flag reminderH7Sent/reminderH1Sent bisa di-set setelah notifikasi berhasil dijadwalkan.
   return ScheduleReminderUseCase(
     repository: ref.watch(immunizationRepositoryProvider),
-    // B9-4: deduplikasi lokal vs FCM.
+    // Deduplikasi lokal vs FCM.
     pushService: ref.watch(pushServiceProvider),
   );
 });
 
-/// Bug #34: alur "generate jadwal + daftarkan pengingat" dipakai bersama oleh
-/// Tambah Bayi, Kelola Profil Anak, dan `ImmunizationNotifier.build`.
+/// Alur "generate jadwal + daftarkan pengingat" dipakai bersama oleh Tambah Bayi, Kelola Profil Anak, dan `ImmunizationNotifier.build`.
 final syncBabyScheduleUseCaseProvider = Provider<SyncBabyScheduleUseCase>((
   ref,
 ) {
@@ -294,7 +284,7 @@ final syncBabyScheduleUseCaseProvider = Provider<SyncBabyScheduleUseCase>((
   );
 });
 
-/// Bug #34: dipakai toggle notifikasi di Profil & Pengaturan.
+/// Dipakai toggle notifikasi di Profil & Pengaturan.
 final rescheduleAllRemindersUseCaseProvider =
     Provider<RescheduleAllRemindersUseCase>((ref) {
       return RescheduleAllRemindersUseCase(
@@ -303,7 +293,7 @@ final rescheduleAllRemindersUseCaseProvider =
       );
     });
 
-// -- Growth (Temuan #32) --------------------------------------------------------
+// -- Growth --------------------------------------------------------------
 final growthLocalDatasourceProvider = Provider<GrowthLocalDatasource>((ref) {
   return const GrowthLocalDatasource();
 });
@@ -338,7 +328,7 @@ final deleteGrowthRecordsByBabyUseCaseProvider =
       );
     });
 
-// -- Health Journal (Temuan #32) ------------------------------------------------
+// -- Health Journal ------------------------------------------------------
 final healthJournalLocalDatasourceProvider =
     Provider<HealthJournalLocalDatasource>((ref) {
       return const HealthJournalLocalDatasource();

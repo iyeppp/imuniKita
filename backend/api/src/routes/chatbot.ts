@@ -106,8 +106,7 @@ router.post('/messages', async (req: AuthenticatedRequest, res: Response) => {
                 content: message,
               },
             ],
-            // Wajib: non-thinking mode. `thinking.type = disabled` mematikan
-            // chain-of-thought; `reasoning_effort: none` sebagai penegas.
+            // Wajib: non-thinking mode.
             thinking: { type: 'disabled' },
             reasoning_effort: 'none',
             temperature: 0.7,

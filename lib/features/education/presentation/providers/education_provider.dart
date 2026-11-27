@@ -12,13 +12,12 @@ import '../../data/models/video_model.dart';
 
 // ── Konten (REST API + Cache + Mock Fallback) ────────────────────────────
 
-/// Akses konten edukasi (B8-6, B8-7).
+/// Akses konten edukasi.
 final educationDatasourceProvider = Provider<EducationRemoteDatasource>((ref) {
   return ref.watch(educationRemoteDatasourceProvider);
 });
 
-/// Kategori aktif pada chip filter — dipakai bersama tab Artikel, Video,
-/// dan Kuis agar filter terasa konsisten.
+/// Kategori aktif pada chip filter — dipakai bersama tab Artikel, Video, dan Kuis agar filter terasa konsisten.
 final educationKategoriProvider = StateProvider<String>(
   (ref) => EducationKategori.semua,
 );
@@ -82,9 +81,6 @@ final artikelDetailProvider = Provider.family<ArticleModel?, String>((
 // ── Skor kuis ────────────────────────────────────────────────────────────
 
 /// Skor kuis yang sudah dikerjakan, dipetakan `quizId → QuizScoreModel`.
-///
-/// Disimpan di Hive CE box [AppConstants.educationQuizScoresBox] sehingga
-/// badge "Sudah dikerjakan ✓" tetap ada setelah aplikasi di-restart.
 class QuizScoreNotifier extends AsyncNotifier<Map<String, QuizScoreModel>> {
   @override
   Future<Map<String, QuizScoreModel>> build() async {
@@ -95,10 +91,6 @@ class QuizScoreNotifier extends AsyncNotifier<Map<String, QuizScoreModel>> {
   }
 
   /// Simpan hasil percobaan terbaru.
-  ///
-  /// Temuan #15: skor lama tidak lagi ditimpa — percobaan dihitung dan skor
-  /// tiap percobaan disimpan di `riwayatSkor`, sehingga user bisa melihat
-  /// perkembangan nilainya.
   Future<void> saveScore(QuizScoreModel skor) async {
     final box = await Hive.openBox<QuizScoreModel>(
       AppConstants.educationQuizScoresBox,

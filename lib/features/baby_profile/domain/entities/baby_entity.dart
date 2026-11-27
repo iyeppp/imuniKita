@@ -5,10 +5,6 @@ abstract class BabyGender {
 }
 
 /// Entity domain — representasi profil bayi tanpa dependency ke Hive CE.
-///
-/// Lapisan domain (use case, repository interface) hanya bergantung pada
-/// class ini, bukan pada `BabyModel`. Ini membuat logika bisnis tetap sama
-/// saat data source di-swap dari Hive CE (UTS) ke Firestore (UAS).
 class BabyEntity {
   const BabyEntity({
     required this.babyId,
@@ -45,7 +41,6 @@ class BabyEntity {
     String? jenisKelamin,
     String? fotoProfilPath,
     DateTime? updatedAt,
-    // Temuan #37: flag eksplisit agar foto profil bisa dihapus (di-set null).
     bool clearFotoProfilPath = false,
   }) {
     return BabyEntity(

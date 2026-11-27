@@ -22,7 +22,7 @@ import 'package:imunikita/hive_registrar.g.dart';
 import 'package:imunikita/injection/dependency_injection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Test Temuan #21 (ubah/hapus profil bayi) & #2 (bayi aktif).
+/// Test (ubah/hapus profil bayi) & #2 (bayi aktif).
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 

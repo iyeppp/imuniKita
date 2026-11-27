@@ -20,21 +20,12 @@ class NotificationService {
       'Notifikasi pengingat jadwal imunisasi H-7 dan H-1';
 
   /// GoRouter instance -- di-set dari [app.dart] setelah router dibuat.
-  /// Dipakai oleh [_onNotificationTap] untuk navigasi ke VaccineDetailScreen
-  /// (Fix Bug #6). Tidak di-set lewat constructor agar tetap kompatibel
-  /// dengan static pattern yang sudah ada.
   static GoRouter? _router;
 
   /// Payload jadwal yang menunggu router siap.
-  ///
-  /// Bila app dibuka dari notifikasi (kondisi terminated), payload sudah
-  /// tersedia di [init] padahal router baru dibuat setelah `runApp`. Payload
-  /// disimpan sementara di sini lalu dinavigasikan begitu [setRouter] dipanggil.
   static String? _pendingScheduleId;
 
-  /// `true` bila OS menolak alarm presisi (mis. Android 12+ tanpa izin
-  /// `SCHEDULE_EXACT_ALARM`). Penjadwalan berikutnya langsung memakai mode
-  /// inexact agar pengingat tetap terjadwal meski jamnya tidak presisi.
+  /// `true` bila OS menolak alarm presisi (mis. Android 12+ tanpa izin `SCHEDULE_EXACT_ALARM`).
   static bool _pakaiInexact = false;
 
   /// Daftarkan router untuk navigasi dari notifikasi tap.
@@ -48,7 +39,7 @@ class NotificationService {
     }
   }
 
-  /// Inisialisasi plugin. Dipanggil sekali di [main].
+  /// Inisialisasi plugin.
   static Future<void> init() async {
     const androidSettings = AndroidInitializationSettings(
       '@drawable/ic_stat_imunikita',
@@ -78,16 +69,14 @@ class NotificationService {
     // Minta permission notifikasi (Android 13+ / API 33+)
     await android?.requestNotificationsPermission();
 
-    // Fix Bug #29: catat apakah alarm presisi diizinkan. Bila tidak, pengingat
-    // tetap didaftarkan dengan mode inexact (perkiraan) alih-alih gagal senyap.
+    // Catat apakah alarm presisi diizinkan.
     try {
       _pakaiInexact = !(await android?.canScheduleExactNotifications() ?? true);
     } catch (_) {
       _pakaiInexact = false;
     }
 
-    // Fix Bug #29: tangani app yang dibuka dari ketukan notifikasi saat
-    // terminated (router belum ada, jadi payload disimpan dulu).
+    // Tangani app yang dibuka dari ketukan notifikasi saat terminated (router belum ada, jadi payload disimpan dulu).
     try {
       final launch = await _plugin.getNotificationAppLaunchDetails();
       if (launch?.didNotificationLaunchApp ?? false) {
@@ -102,7 +91,6 @@ class NotificationService {
   }
 
   /// Callback saat user mengetuk notifikasi.
-  /// Fix Bug #6: navigasi ke VaccineDetailScreen menggunakan payload (scheduleId).
   static void _onNotificationTap(NotificationResponse response) {
     final scheduleId = response.payload;
     if (scheduleId == null || scheduleId.isEmpty) return;
@@ -149,7 +137,7 @@ class NotificationService {
           channelDescription: _channelDesc,
           importance: Importance.max,
           priority: Priority.high,
-          // Temuan #50: ikon status bar monokrom (bukan ikon aplikasi).
+          // Ikon status bar monokrom (bukan ikon aplikasi).
           icon: '@drawable/ic_stat_imunikita',
         ),
         iOS: const DarwinNotificationDetails(
@@ -162,9 +150,7 @@ class NotificationService {
       payload: payload,
     );
 
-    // Fix Bug #29: alarm presisi butuh izin khusus. Bila ditolak, jangan
-    // menyerah — pakai alarm inexact agar pengingat tetap terkirim (jamnya
-    // bisa bergeser sedikit), lalu ingat untuk penjadwalan berikutnya.
+    // Alarm presisi butuh izin khusus.
     if (_pakaiInexact) {
       await jadwalkan(AndroidScheduleMode.inexactAllowWhileIdle);
       return;
@@ -193,9 +179,6 @@ class NotificationService {
   }
 
   /// Reset status fallback alarm presisi (khusus test).
-  ///
-  /// `_pakaiInexact` adalah state statis yang berubah saat OS menolak exact
-  /// alarm; tanpa reset, hasil satu test bisa memengaruhi test berikutnya.
   @visibleForTesting
   static void resetScheduleModeForTest() {
     _pakaiInexact = false;

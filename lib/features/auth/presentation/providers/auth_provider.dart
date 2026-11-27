@@ -9,28 +9,16 @@ import '../../../../injection/dependency_injection.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/login_usecase.dart';
 
-// Provider ditulis manual (tanpa codegen) mengikuti pola seluruh aplikasi —
-// lihat dev plan §2.
-
 // ── Profil user yang sedang login ────────────────────────────────────────
 
-/// Akun yang sedang login (Temuan #22: dibaca lewat repository auth, bukan
-/// `Hive.openBox` langsung dari presentation layer).
-///
-/// B2-6: setelah pembacaan awal, notifier mendengarkan `authStateChanges`
-/// sehingga login/logout (termasuk dari perangkat lain atau sesi kedaluwarsa)
-/// langsung memperbarui state tanpa perlu `ref.invalidate` manual.
-///
-/// Mengembalikan `null` bila sesi tidak ada (mis. setelah logout) sehingga
-/// layar yang mem-`watch` provider ini tetap aman dibuka.
+/// Akun yang sedang login, dibaca lewat repository auth (bukan Hive langsung).
 class CurrentUserNotifier extends AsyncNotifier<UserEntity?> {
   @override
   Future<UserEntity?> build() async {
     final repository = ref.read(authRepositoryProvider);
     final currentUser = await ref.read(getCurrentUserUseCaseProvider).execute();
 
-    // Langganan dipasang setelah pembacaan awal agar state tidak di-set
-    // sebelum build selesai. Stream Firebase langsung memancarkan sesi aktif.
+    // Langganan dipasang setelah pembacaan awal agar state tidak di-set sebelum build selesai.
     var disposed = false;
     final subscription = repository.authStateChanges().listen((user) {
       if (disposed) return;
@@ -44,9 +32,7 @@ class CurrentUserNotifier extends AsyncNotifier<UserEntity?> {
     return currentUser;
   }
 
-  /// Masuk memakai email + password. Hasilnya membedakan "belum ada akun",
-  /// "email tidak terdaftar", dan "password salah" agar layar bisa memberi
-  /// arahan yang tepat.
+  /// Masuk memakai email + password.
   Future<LoginResult> login(String email, String password) async {
     final hasil = await ref.read(loginUseCaseProvider).execute(email, password);
     if (hasil.berhasil) ref.invalidateSelf();
@@ -67,21 +53,14 @@ class CurrentUserNotifier extends AsyncNotifier<UserEntity?> {
       ref.read(sendPasswordResetUseCaseProvider).execute(email);
 
   /// Simpan perubahan profil dari layar Profil & Pengaturan.
-  ///
-  /// Penolakan email duplikat di mode lokal ada di `AuthRepositoryImpl`.
   Future<void> updateProfile(UserEntity updated) async {
     await ref.read(updateProfileUseCaseProvider).execute(updated);
     ref.invalidateSelf();
   }
 
-  /// Keluar dari akun — hanya menghapus sesi; data bayi, jadwal imunisasi,
-  /// pertumbuhan, dan jurnal **tetap tersimpan** di perangkat.
-  ///
-  /// Pengingat yang sudah terjadwal ikut dibatalkan supaya notifikasi bayi
-  /// milik akun ini tidak muncul lagi setelah keluar (Temuan #19).
+  /// Keluar dari akun — hanya menghapus sesi; data bayi, jadwal imunisasi, pertumbuhan, dan jurnal **tetap tersimpan** di perangkat.
   Future<void> logout() async {
-    // Hapus token FCM perangkat ini sebelum sesi Firebase berakhir (Tahap 9).
-    // Non-fatal: logout tetap harus berhasil walau Firestore tidak terjangkau.
+    // Hapus token FCM perangkat ini sebelum sesi Firebase berakhir.
     try {
       await PushService.instance.onLogout();
     } catch (_) {
@@ -93,8 +72,7 @@ class CurrentUserNotifier extends AsyncNotifier<UserEntity?> {
     try {
       await NotificationService.cancelAllNotifications();
     } catch (_) {
-      // Non-fatal: plugin notifikasi bisa gagal (mis. izin/kanal belum siap),
-      // tetapi logout tetap harus berhasil.
+      // Non-fatal: plugin notifikasi bisa gagal (mis. izin/kanal belum siap), tetapi logout tetap harus berhasil.
     }
 
     ref.invalidateSelf();
@@ -109,9 +87,6 @@ final currentUserProvider =
 // ── Preferensi notifikasi pengingat ──────────────────────────────────────
 
 /// Status notifikasi pengingat H-7 & H-1 (default aktif).
-///
-/// Dipakai bersama oleh layar Profil & Pengaturan (toggle) dan
-/// `ScheduleReminderUseCase` (berhenti menjadwalkan bila dimatikan).
 class NotificationPrefNotifier extends AsyncNotifier<bool> {
   @override
   Future<bool> build() => LocalStorageService.isNotificationEnabled();
@@ -119,18 +94,14 @@ class NotificationPrefNotifier extends AsyncNotifier<bool> {
   Future<void> setEnabled(bool enabled) async {
     await LocalStorageService.setNotificationEnabled(enabled);
 
-    // Samakan status di dokumen perangkat FCM agar server tidak mengirim push
-    // saat pengingat dimatikan (Tahap 9, opsional — no-op bila FCM nonaktif).
+    // Samakan status di dokumen perangkat FCM agar server tidak mengirim push saat pengingat dimatikan.
     try {
       await PushService.instance.syncNotificationsPreference(enabled);
     } catch (_) {
       // Non-fatal: preferensi lokal sudah tersimpan.
     }
 
-    // Saat dimatikan, batalkan semua pengingat yang sudah terjadwal agar
-    // tidak ada notifikasi "nyasar" setelah user memilih nonaktif.
-    // Gagal membatalkan (mis. plugin belum siap) tidak boleh membatalkan
-    // preferensi yang sudah dipilih user — lihat filosofi non-fatal di 1.5.
+    // Saat dimatikan, batalkan semua pengingat yang sudah terjadwal agar tidak ada notifikasi "nyasar" setelah user memilih nonaktif.
     if (!enabled) {
       try {
         await NotificationService.cancelAllNotifications();

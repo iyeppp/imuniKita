@@ -37,11 +37,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  /// Temuan #22: seluruh logika auth dipindahkan ke use case
-  /// (`LoginUseCase` lewat `currentUserProvider`); layar tidak lagi
-  /// membuka `Hive.openBox`/`SharedPreferences` sendiri.
-  ///
-  /// B2-3: kredensial (email + password) diverifikasi Firebase Auth.
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -105,10 +100,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  /// B2-1/B2-2: kirim tautan atur ulang password lewat Firebase Auth.
-  ///
-  /// Field email dipakai sebagai tujuan; bila kosong/tidak valid, user diminta
-  /// melengkapinya dulu (tanpa memanggil server).
+  /// /: kirim tautan atur ulang password lewat Firebase Auth.
   Future<void> _handleForgotPassword() async {
     final email = _emailController.text.trim();
     final validation = AuthValidators.email(email);
@@ -183,7 +175,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    // B2-4: kebijakan migrasi akun lokal UTS → Firebase.
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -261,7 +252,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 8),
 
-                    // B2-1: atur ulang password lewat Firebase Auth.
+                    // Atur ulang password lewat Firebase Auth.
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(

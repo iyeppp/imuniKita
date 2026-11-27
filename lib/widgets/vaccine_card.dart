@@ -6,12 +6,6 @@ import '../core/utils/date_formatter.dart';
 import '../features/immunization/domain/entities/vaccine_schedule_entity.dart';
 
 /// Kartu ringkasan satu jadwal imunisasi (komponen UI global).
-///
-/// Dipakai di Dashboard ("jadwal terdekat"), Kalender, dan Timeline agar nama,
-/// tanggal target, usia sasaran, tanggal realisasi, serta deskripsi selalu
-/// tampil dengan susunan yang sama. Bagian yang khas per layar (ikon pemicu,
-/// badge countdown/status, tombol) disuntikkan lewat [leading], [trailing],
-/// dan [footer].
 class VaccineCard extends StatelessWidget {
   const VaccineCard({
     super.key,

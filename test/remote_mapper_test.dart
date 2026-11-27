@@ -113,7 +113,7 @@ void main() {
       expect((map['tanggalRealisasi'] as Timestamp).toDate(), realisasi);
       expect(map['catatanReaksi'], 'Sedikit demam ringan');
       expect(map['schemaVersion'], 1);
-      // reminder flags per perangkat tidak ikut disinkronkan
+      // Reminder flags per perangkat tidak ikut disinkronkan
       expect(map.containsKey('reminderH7Sent'), isFalse);
       expect(map.containsKey('reminderH1Sent'), isFalse);
     });

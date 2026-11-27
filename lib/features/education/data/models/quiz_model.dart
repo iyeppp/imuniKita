@@ -1,7 +1,4 @@
 /// Model kuis edukasi (FR-05).
-///
-/// Kuis memakai pola *single select*: user memilih satu dari [QuizQuestion.pilihan],
-/// lalu langsung mendapat feedback `Benar`/`Salah` beserta penjelasan.
 class QuizModel {
   const QuizModel({
     required this.quizId,

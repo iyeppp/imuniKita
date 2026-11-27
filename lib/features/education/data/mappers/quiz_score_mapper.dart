@@ -3,8 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/quiz_score_model.dart';
 
 /// Mapper dua arah antara [QuizScoreModel] dan dokumen Firestore.
-///
-/// Path Firestore: `users/{uid}/quizScores/{quizId}`.
 class QuizScoreMapper {
   const QuizScoreMapper._();
 

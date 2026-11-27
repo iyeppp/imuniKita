@@ -3,8 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../app/theme/app_colors.dart';
 
-/// Label kategori konten edukasi (dipakai kartu artikel, kartu kuis, dan
-/// header Article Detail).
+/// Label kategori konten edukasi (dipakai kartu artikel, kartu kuis, dan header Article Detail).
 class EducationKategoriBadge extends StatelessWidget {
   const EducationKategoriBadge({super.key, required this.kategori, this.onTap});
 

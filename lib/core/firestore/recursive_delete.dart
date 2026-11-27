@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// Subkoleksi di bawah `users/{uid}/babies/{babyId}` yang ikut dihapus.
-///
-/// Firestore tidak memiliki cascade delete, dan Cloud Functions tidak dipakai
-/// (memerlukan billing), sehingga penghapusan dilakukan dari klien.
+/// Firestore tidak memiliki cascade delete, dan Cloud Functions tidak dipakai (memerlukan billing), sehingga penghapusan dilakukan dari klien.
 const List<String> babyChildCollections = [
   'vaccineSchedules',
   'growthRecords',

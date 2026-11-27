@@ -1,12 +1,9 @@
 /// Konstanta global aplikasi ImuniKita.
-///
-/// Kumpulan nilai tetap yang dipakai lintas fitur: nama box Hive CE, key
-/// SharedPreferences, dan konfigurasi notifikasi H-7/H-1.
 abstract class AppConstants {
   static const String appName = 'ImuniKita';
 
   // ── Nama Box Hive CE ──────────────────────────────────────────────────
-  /// Box user — nama sudah dipakai sejak Sprint 1 (login/register), jangan diubah.
+  /// Box user — nama sudah dipakai (login/register), jangan diubah.
   static const String usersBox = 'userBox';
   static const String babiesBox = 'babyBox';
   static const String vaccineSchedulesBox = 'vaccineScheduleBox';
@@ -17,9 +14,7 @@ abstract class AppConstants {
   static const String apiCacheBox = 'apiCacheBox';
 
   // ── Key SharedPreferences ─────────────────────────────────────────────
-  /// Cermin sesi untuk fitur non-auth. Sejak Tahap 2 sumber kebenaran login
-  /// adalah Firebase Auth (`FirebaseAuth.currentUser`), bukan key ini.
-  /// Harus identik dengan key yang dipakai `LoginScreen`/`RegisterScreen`.
+  /// Cermin sesi untuk fitur non-auth.
   static const String prefIsLoggedIn = 'is_logged_in';
   static const String prefUserId = 'user_id';
   static const String prefUserName = 'user_name';
@@ -36,12 +31,10 @@ abstract class AppConstants {
   /// Preferensi tema aplikasi ('system', 'light', 'dark').
   static const String prefThemeMode = 'theme_mode';
 
-  /// Penanda token FCM perangkat sudah terdaftar (Tahap 9, opsional).
+  /// Penanda token FCM perangkat sudah terdaftar.
   static const String prefPushRegistered = 'push_registered';
 
   // ── Info Aplikasi ─────────────────────────────────────────────────────
-  /// Versi aplikasi — disamakan manual dengan `version:` di `pubspec.yaml`
-  /// karena `package_info_plus` belum dipakai pada fase UTS.
   static const String appVersion = '1.0.0+1';
 
   // ── Konfigurasi Notifikasi (H-7 & H-1) ────────────────────────────────

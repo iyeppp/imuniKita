@@ -17,12 +17,12 @@ app.use(express.json());
 // Inisialisasi Firebase Admin jika service account dipasang
 initializeFirebaseAdmin();
 
-// Healthcheck endpoint (B8-1)
+// Healthcheck endpoint
 app.get('/healthz', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Routes terlindungi (B8-2 s/d B8-4)
+// Routes terlindungi
 app.use('/v1/education', requireAuth as any, educationRouter);
 app.use('/v1/faskes', requireAuth as any, faskesRouter);
 app.use('/v1/chatbot', requireAuth as any, chatbotRouter);

@@ -15,8 +15,6 @@ abstract class HealthJournalRemoteDatasource {
 }
 
 /// Implementasi Firebase Firestore untuk [HealthJournalRemoteDatasource].
-///
-/// Dokumen tersimpan di `users/{uid}/babies/{babyId}/healthJournals/{journalId}`.
 class FirebaseHealthJournalRemoteDatasource implements HealthJournalRemoteDatasource {
   FirebaseHealthJournalRemoteDatasource({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;

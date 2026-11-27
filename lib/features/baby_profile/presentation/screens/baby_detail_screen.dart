@@ -24,12 +24,7 @@ import '../../domain/entities/baby_entity.dart';
 import '../providers/active_baby_provider.dart';
 import '../providers/baby_provider.dart';
 
-/// Kelola satu profil bayi — Temuan #21.
-///
-/// `UpdateBabyUseCase` sudah ada sejak Sprint 1 tetapi belum dipakai UI mana
-/// pun, sehingga salah input tanggal lahir tidak bisa diperbaiki tanpa
-/// menghapus seluruh data aplikasi. Layar ini menyediakan ubah + hapus
-/// (berkonfirmasi) sekaligus pemilihan bayi aktif (Temuan #2).
+/// Kelola satu profil bayi —.
 class BabyDetailScreen extends ConsumerWidget {
   const BabyDetailScreen({super.key, required this.babyId});
 
@@ -150,8 +145,7 @@ class _FormKelolaBayiState extends ConsumerState<_FormKelolaBayi> {
             ),
           );
 
-      // Tanggal lahir berubah → seluruh jadwal imunisasi harus dihitung ulang,
-      // kalau tidak tanggal target vaksin tetap mengikuti tanggal lahir lama.
+      // Tanggal lahir berubah → seluruh jadwal imunisasi harus dihitung ulang, kalau tidak tanggal target vaksin tetap mengikuti tanggal lahir lama.
       var jumlahJadwal = 0;
       if (tanggalBerubah) {
         jumlahJadwal = await _hitungUlangJadwal(babyId, nama);
@@ -186,13 +180,11 @@ class _FormKelolaBayiState extends ConsumerState<_FormKelolaBayi> {
     }
   }
 
-  /// Bersihkan jadwal lama lalu bangun ulang seluruh jadwal dari tanggal lahir
-  /// baru. Mengembalikan jumlah jadwal yang dibuat (Temuan #47: agar pesan ke
-  /// user tidak lagi menulis "13" secara hardcoded).
+  /// Bersihkan jadwal lama lalu bangun ulang seluruh jadwal dari tanggal lahir baru.
   Future<int> _hitungUlangJadwal(String babyId, String nama) async {
     await ref.read(immunizationProvider(babyId).notifier).deleteAllForBaby();
 
-    // Bug #34: generate + penjadwalan pengingat lewat satu use case bersama.
+    // Generate + penjadwalan pengingat lewat satu use case bersama.
     final jadwal = await ref
         .read(syncBabyScheduleUseCaseProvider)
         .execute(babyId: babyId, namaAnak: nama, tanggalLahir: _tanggalLahir);
@@ -232,8 +224,6 @@ class _FormKelolaBayiState extends ConsumerState<_FormKelolaBayi> {
     final nama = widget.baby.namaAnak;
 
     try {
-      // Cascade: bersihkan data tiap fitur sebelum profilnya dihapus agar
-      // tidak menyisakan jadwal/pertumbuhan/jurnal yatim di Hive.
       await ref.read(immunizationProvider(babyId).notifier).deleteAllForBaby();
       await ref.read(growthProvider(babyId).notifier).deleteAllForBaby();
       await ref.read(journalProvider(babyId).notifier).deleteAllForBaby();

@@ -315,16 +315,16 @@ void main() {
 
       expect(summary.babyCount, equals(1));
 
-      // Verifikasi B6-2: BabyModel.userId di Hive lokal di-rewrite ke newUid
+      // Verifikasi: BabyModel.userId di Hive lokal di-rewrite ke newUid
       final updatedBabyLocal = babyBox.get('b1');
       expect(updatedBabyLocal?.userId, equals(newUid));
       expect(updatedBabyLocal?.babyId, equals('b1')); // ID tetap identik!
 
-      // Verifikasi B6-3: Data muncul di remote dengan ID identik
+      // Verifikasi: Data muncul di remote dengan ID identik
       expect(babyRemote.items.containsKey('b1'), isTrue);
       expect(vaccineRemote.items.containsKey('s1'), isTrue);
 
-      // Verifikasi B6-4: Penanda migrasi lokal ter-set
+      // Verifikasi: Penanda migrasi lokal ter-set
       expect(await LocalStorageService.isMigrationDone(newUid), isTrue);
 
       // Verifikasi Idempotensi: Jalankan migrasi ke-2x -> skip (summary 0)

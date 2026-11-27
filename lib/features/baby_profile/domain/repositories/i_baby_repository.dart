@@ -1,10 +1,6 @@
 import '../entities/baby_entity.dart';
 
 /// Kontrak repository profil bayi.
-///
-/// Fase UTS diimplementasikan oleh `BabyRepositoryImpl` di atas Hive CE.
-/// Fase UAS tinggal mengganti implementasi ini agar memakai Firestore,
-/// tanpa mengubah use case atau UI (lihat dev plan §6.1).
 abstract class IBabyRepository {
   /// Seluruh bayi yang terdaftar milik [userId].
   Future<List<BabyEntity>> getBabiesByUser(String userId);

@@ -4,10 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../app/router/app_router.dart';
 
 /// Bottom navigation utama ImuniKita (komponen UI global).
-///
-/// Sebelumnya `BottomNavigationBar` ditulis ulang manual di Dashboard,
-/// Kalender, Faskes, ImuniBot, dan Profil. Urutan tab baku:
-/// **Home · Kalender · Faskes · ImuniBot · Profil**.
 class AppBottomNavBar extends StatelessWidget {
   const AppBottomNavBar({super.key, required this.currentIndex});
 
@@ -28,9 +24,7 @@ class AppBottomNavBar extends StatelessWidget {
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: (index) {
-        // Menekan tab yang sedang aktif tidak perlu navigasi ulang — selain
-        // mubazir, ini juga akan me-reset state layar (mis. tanggal terpilih
-        // di Kalender).
+        // Menekan tab yang sedang aktif tidak perlu navigasi ulang — selain mubazir, ini juga akan me-reset state layar (mis. tanggal terpilih di Kalender).
         if (index == currentIndex) return;
         context.go(_routes[index]);
       },

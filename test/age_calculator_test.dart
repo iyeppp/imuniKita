@@ -1,8 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:imunikita/core/utils/age_calculator.dart';
 
-/// Test Temuan #36 — perhitungan usia harus benar untuk tanggal lahir akhir
-/// bulan (29–31) yang sebelumnya menghasilkan `days` negatif.
+/// Test perhitungan usia harus benar untuk tanggal lahir akhir bulan (29–31) yang sebelumnya menghasilkan `days` negatif.
 void main() {
   group('AgeCalculator.breakdown — kasus akhir bulan (#36)', () {
     test('31 Jan → 1 Mar = 1 bulan 1 hari (bukan −2 hari)', () {

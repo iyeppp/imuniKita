@@ -5,11 +5,6 @@ import '../../../../injection/dependency_injection.dart';
 import '../../domain/entities/baby_entity.dart';
 
 /// State list bayi milik user yang sedang login.
-///
-/// Pola `AsyncNotifier` tanpa codegen — lihat dev plan §2. `build()` otomatis
-/// dipanggil ulang lewat `ref.invalidateSelf()` setiap kali ada perubahan
-/// data (tambah/update bayi), sehingga screen manapun yang me-`watch`
-/// provider ini selalu mendapat data terbaru.
 class BabyNotifier extends AsyncNotifier<List<BabyEntity>> {
   @override
   Future<List<BabyEntity>> build() async {
@@ -18,9 +13,7 @@ class BabyNotifier extends AsyncNotifier<List<BabyEntity>> {
     return ref.read(getBabiesUseCaseProvider).execute(userId);
   }
 
-  /// Simpan bayi baru dan refresh list. Mengembalikan entity yang tersimpan
-  /// agar pemanggil (mis. `AddBabyScreen`) bisa langsung memicu
-  /// `GenerateScheduleUseCase` dengan `babyId` yang baru dibuat.
+  /// Simpan bayi baru dan refresh list.
   Future<BabyEntity> addBaby(BabyEntity baby) async {
     final created = await ref.read(addBabyUseCaseProvider).execute(baby);
     ref.invalidateSelf();
@@ -32,8 +25,7 @@ class BabyNotifier extends AsyncNotifier<List<BabyEntity>> {
     ref.invalidateSelf();
   }
 
-  /// Hapus profil bayi. Data turunan (jadwal, pertumbuhan, jurnal) dibersihkan
-  /// pemanggil lewat provider masing-masing fitur — lihat `BabyDetailScreen`.
+  /// Hapus profil bayi.
   Future<void> deleteBaby(String babyId) async {
     await ref.read(deleteBabyUseCaseProvider).execute(babyId);
     ref.invalidateSelf();
@@ -43,7 +35,7 @@ class BabyNotifier extends AsyncNotifier<List<BabyEntity>> {
 final babyNotifierProvider =
     AsyncNotifierProvider<BabyNotifier, List<BabyEntity>>(BabyNotifier.new);
 
-/// Detail satu bayi berdasarkan id — dipakai `BabyDetailScreen` (Temuan #21).
+/// Detail satu bayi berdasarkan id — dipakai `BabyDetailScreen`.
 final babyByIdProvider = FutureProvider.family<BabyEntity?, String>((
   ref,
   babyId,

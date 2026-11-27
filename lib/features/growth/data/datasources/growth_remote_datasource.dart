@@ -11,8 +11,6 @@ abstract class GrowthRemoteDatasource {
 }
 
 /// Implementasi Firebase Firestore untuk [GrowthRemoteDatasource].
-///
-/// Dokumen tersimpan di `users/{uid}/babies/{babyId}/growthRecords/{recordId}`.
 class FirebaseGrowthRemoteDatasource implements GrowthRemoteDatasource {
   FirebaseGrowthRemoteDatasource({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;

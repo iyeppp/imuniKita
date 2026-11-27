@@ -5,7 +5,7 @@ import '../../../../core/network/api_client.dart';
 import '../models/faskes_model.dart';
 import 'faskes_mock_datasource.dart';
 
-/// Remote datasource direktori faskes dengan cache Hive & fallback mock offline (B8-6, B8-7).
+/// Remote datasource direktori faskes dengan cache Hive & fallback mock offline.
 class FaskesRemoteDatasource {
   FaskesRemoteDatasource({
     this.apiClient,

@@ -13,9 +13,7 @@ import 'package:imunikita/features/immunization/domain/entities/vaccine_schedule
 import 'package:imunikita/features/immunization/presentation/providers/immunization_provider.dart';
 import 'package:imunikita/hive_registrar.g.dart';
 
-/// Test Bug #7 — `ImmunizationNotifier.updateStatus` harus membatalkan
-/// notifikasi H-7 & H-1 saat sebuah jadwal ditandai `SELESAI`, agar
-/// pengingat tidak tetap muncul untuk vaksin yang sudah diberikan.
+/// Test `ImmunizationNotifier.updateStatus` harus membatalkan notifikasi H-7 & H-1 saat sebuah jadwal ditandai `SELESAI`.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 

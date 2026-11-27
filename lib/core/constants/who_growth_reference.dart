@@ -1,14 +1,4 @@
 /// Tabel referensi pertumbuhan **WHO Child Growth Standards** (0–24 bulan).
-///
-/// Temuan #8: sebelumnya grafik hanya menggambar satu garis statis (7 kg / 65 cm
-/// / 40 cm) sehingga klaim "sesuai standar WHO" tidak berdasar. Di sini
-/// disediakan **median, −2SD, dan +2SD** per bulan untuk berat badan (BB),
-/// tinggi/panjang badan (TB), dan lingkar kepala (LK), dipisah laki-laki dan
-/// perempuan.
-///
-/// Nilai diringkas dari tabel WHO Child Growth Standards (0–24 bulan).
-/// Keterbatasan yang diketahui: hanya sampai 24 bulan dan bukan alat diagnosis —
-/// tetap alat bantu visual untuk orang tua.
 library;
 
 /// Satu seri referensi (satu metrik, satu jenis kelamin).
@@ -37,7 +27,7 @@ class WhoSeries {
   /// Usia tertinggi yang didukung tabel (bulan).
   int get maxMonth => startMonth + median.length - 1;
 
-  /// Interpolasi linear nilai [seri] pada [bulan]. `null` bila di luar rentang.
+  /// Interpolasi linear nilai [seri] pada [bulan].
   static double? _interpolate(
     List<double> seri,
     double bulan,

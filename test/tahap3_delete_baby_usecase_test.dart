@@ -5,14 +5,7 @@ import 'package:imunikita/features/baby_profile/domain/entities/baby_entity.dart
 import 'package:imunikita/features/baby_profile/domain/repositories/i_baby_repository.dart';
 import 'package:imunikita/features/baby_profile/domain/usecases/delete_baby_usecase.dart';
 
-/// Test unit Tahap 3 — `DeleteBabyUseCase` dengan `remoteCascade`.
-///
-/// Menguji:
-/// 1. Hapus lokal selalu dipanggil.
-/// 2. `remoteCascade` dipanggil bila disediakan.
-/// 3. `remoteCascade` **tidak memblok** penghapusan lokal (unawaited).
-/// 4. Kegagalan `remoteCascade` tidak menyebabkan `execute` gagal.
-/// 5. Tanpa `remoteCascade` (null), use case tetap berjalan normal.
+/// Test unit — `DeleteBabyUseCase` dengan `remoteCascade`.
 void main() {
   group('DeleteBabyUseCase', () {
     late _FakeBabyRepository fakeRepo;
@@ -74,7 +67,7 @@ void main() {
         throwsA(isA<Exception>()),
       );
 
-      // remoteCascade tidak boleh dipanggil karena deleteBaby gagal duluan
+      // RemoteCascade tidak boleh dipanggil karena deleteBaby gagal duluan
       expect(cascadeCalled, isFalse);
       expect(fakeRepo.deletedIds, isEmpty);
     });
@@ -90,7 +83,7 @@ void main() {
         },
       );
 
-      // execute tidak boleh throw meskipun remoteCascade gagal
+      // Execute tidak boleh throw meskipun remoteCascade gagal
       await useCase.execute('baby-offline');
 
       // Tunggu cascade selesai agar Zone error tercatat
@@ -117,7 +110,7 @@ void main() {
       await useCase.execute('baby-slow');
       order.add('execute-returned');
 
-      // execute harus kembali sebelum cascade selesai
+      // Execute harus kembali sebelum cascade selesai
       expect(order, ['execute-returned']);
 
       // Setelah cascade selesai

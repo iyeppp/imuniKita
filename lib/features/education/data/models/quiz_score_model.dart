@@ -5,14 +5,6 @@ import 'package:hive_ce/hive_ce.dart';
 part 'quiz_score_model.g.dart';
 
 /// Skor kuis yang sudah dikerjakan user (FR-05, poin 5.3).
-///
-/// Dipersist ke Hive CE box `educationQuizScoresBox` dengan key `quizId`,
-/// sehingga Education Hub bisa menampilkan badge "Sudah dikerjakan ✓"
-/// tanpa perlu fetch ulang.
-///
-/// Temuan #15: field [attemptCount] dan [riwayatSkor] menyimpan **riwayat**
-/// percobaan (sebelumnya skor lama selalu ditimpa). Keduanya nullable agar
-/// data lama yang belum punya field ini tetap terbaca.
 @HiveType(typeId: 5)
 class QuizScoreModel extends HiveObject {
   @HiveField(0)

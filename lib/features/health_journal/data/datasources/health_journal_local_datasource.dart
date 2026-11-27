@@ -4,9 +4,6 @@ import '../../../../core/constants/app_constants.dart';
 import '../models/health_journal_model.dart';
 
 /// Sumber data lokal jurnal kesehatan via Hive CE.
-///
-/// `[UAS]`: akan didampingi `health_journal_remote_datasource.dart` (Firestore)
-/// — lihat dev plan §1.1 & §6.1.
 class HealthJournalLocalDatasource {
   const HealthJournalLocalDatasource();
 

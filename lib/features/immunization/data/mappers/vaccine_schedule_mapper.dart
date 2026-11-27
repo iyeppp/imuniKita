@@ -3,10 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/vaccine_schedule_model.dart';
 
 /// Mapper dua arah antara [VaccineScheduleModel] dan dokumen Firestore.
-///
-/// Path Firestore: `users/{uid}/babies/{babyId}/vaccineSchedules/{scheduleId}`.
-/// Sesuai aturan: `reminderH7Sent` dan `reminderH1Sent` bersifat per-perangkat
-/// sehingga tidak ikut disinkronkan ke cloud.
 class VaccineScheduleMapper {
   const VaccineScheduleMapper._();
 

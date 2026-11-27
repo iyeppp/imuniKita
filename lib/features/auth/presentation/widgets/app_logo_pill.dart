@@ -3,8 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../../app/theme/app_colors.dart';
 
 /// Logo Pill ImuniKita dengan gaya neo-brutalism.
-/// Menggunakan logo karakter jarum suntik terbaru (`syringe_logo.png`).
-/// Digunakan di LoginScreen dan screen lain yang memerlukan branding header.
 class AppLogoPill extends StatelessWidget {
   const AppLogoPill({super.key});
 

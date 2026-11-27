@@ -10,9 +10,7 @@ import 'package:imunikita/features/education/presentation/screens/education_hub_
 import 'package:imunikita/hive_registrar.g.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Regresi bug navigasi: halaman Edukasi sebelumnya tidak punya tombol
-/// kembali karena `/education` adalah route top-level dan dibuka dengan `go`
-/// (tumpukan hanya berisi satu halaman, jadi tidak ada yang bisa di-`pop`).
+/// Regresi: halaman Edukasi harus punya tombol kembali saat dibuka langsung.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -69,9 +67,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(child: MaterialApp.router(routerConfig: router)),
     );
-    // `pumpAndSettle` untuk menyelesaikan transisi halaman dan build ulang
-    // router; thumbnail konten memakai `CachedNetworkImage` yang di test
-    // langsung jatuh ke placeholder (tanpa animasi tak berujung).
+    // `pumpAndSettle` untuk menyelesaikan transisi halaman dan build ulang router.
     await tester.pumpAndSettle();
   }
 

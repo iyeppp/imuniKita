@@ -12,8 +12,6 @@ abstract class VaccineRemoteDatasource {
 }
 
 /// Implementasi Firebase Firestore untuk [VaccineRemoteDatasource].
-///
-/// Dokumen tersimpan di `users/{uid}/babies/{babyId}/vaccineSchedules/{scheduleId}`.
 class FirebaseVaccineRemoteDatasource implements VaccineRemoteDatasource {
   FirebaseVaccineRemoteDatasource({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;

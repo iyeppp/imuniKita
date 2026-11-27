@@ -4,9 +4,6 @@ import '../../../../core/constants/app_constants.dart';
 import '../models/vaccine_schedule_model.dart';
 
 /// Sumber data lokal jadwal imunisasi via Hive CE.
-///
-/// `[UAS]`: akan didampingi `vaccine_remote_datasource.dart` (Firestore) —
-/// lihat dev plan §1.1 & §6.1.
 class VaccineLocalDatasource {
   const VaccineLocalDatasource();
 

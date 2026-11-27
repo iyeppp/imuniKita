@@ -4,9 +4,6 @@ import '../../../../core/constants/app_constants.dart';
 import '../models/growth_record_model.dart';
 
 /// Sumber data lokal rekam pertumbuhan via Hive CE.
-///
-/// `[UAS]`: akan didampingi `growth_remote_datasource.dart` (Firestore) —
-/// lihat dev plan §1.1 & §6.1.
 class GrowthLocalDatasource {
   const GrowthLocalDatasource();
 

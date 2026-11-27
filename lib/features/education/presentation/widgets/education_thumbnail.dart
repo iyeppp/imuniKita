@@ -5,11 +5,6 @@ import '../../../../app/theme/app_colors.dart';
 import '../../data/datasources/education_mock_datasource.dart';
 
 /// Thumbnail/hero konten edukasi.
-///
-/// Konten UTS memakai URL gambar eksternal, jadi widget ini selalu punya
-/// *fallback*: bila `imageUrl` kosong, gagal dimuat, atau perangkat sedang
-/// offline, yang tampil adalah gradien warna kategori + ikon — bukan error
-/// atau kotak kosong.
 class EducationThumbnail extends StatelessWidget {
   const EducationThumbnail({
     super.key,

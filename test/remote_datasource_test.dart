@@ -14,7 +14,7 @@ import 'package:imunikita/features/immunization/data/datasources/vaccine_remote_
 import 'package:imunikita/features/immunization/data/models/vaccine_schedule_model.dart';
 import 'package:imunikita/injection/dependency_injection.dart';
 
-/// Test unit Tahap 4 — kontrak remote datasource dan registrasi DI.
+/// Test unit — kontrak remote datasource dan registrasi DI.
 void main() {
   group('Remote Datasource DI Providers (B4-7)', () {
     test('provider mengembalikan null saat Firebase belum diinisialisasi', () {

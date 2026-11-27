@@ -34,7 +34,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     final trimmed = text.trim();
     if (trimmed.isEmpty) return;
 
-    // 1. Tambah pesan user
+    // 1.
     final userMessage = ChatMessage(
       id: _uuid.v4(),
       text: trimmed,
@@ -46,7 +46,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       isLoading: true,
     );
 
-    // 2. Ambil respons dari datasource (REST API / Mock Fallback)
+    // 2.
     try {
       final responseText = await _datasource.getResponse(trimmed);
 

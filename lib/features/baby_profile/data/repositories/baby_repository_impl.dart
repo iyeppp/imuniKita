@@ -14,9 +14,6 @@ import '../mappers/baby_mapper.dart';
 import '../models/baby_model.dart';
 
 /// Implementasi offline-first `IBabyRepository`.
-///
-/// Menyimpan lokal ke Hive CE terlebih dahulu, lalu mendaftarkan mutasi
-/// ke `SyncQueue` outbox untuk disinkronkan ke Firestore.
 class BabyRepositoryImpl implements IBabyRepository {
   const BabyRepositoryImpl(
     this._localDatasource, {
@@ -102,7 +99,6 @@ class BabyRepositoryImpl implements IBabyRepository {
 
       final updated = await _localDatasource.update(model);
 
-      // Jika foto diganti, hapus file foto lama (B7-4)
       if (existing?.fotoProfilPath != null &&
           existing!.fotoProfilPath!.isNotEmpty &&
           existing.fotoProfilPath != updated.fotoProfilPath) {
@@ -134,7 +130,7 @@ class BabyRepositoryImpl implements IBabyRepository {
       final existing = await _localDatasource.getById(babyId);
       final uid = _uid ?? existing?.userId ?? '';
 
-      // Hapus file foto lokal jika ada (B7-4)
+      // Hapus file foto lokal jika ada
       if (existing?.fotoProfilPath != null && existing!.fotoProfilPath!.isNotEmpty) {
         await photoStorageService?.deletePhoto(existing.fotoProfilPath);
       }

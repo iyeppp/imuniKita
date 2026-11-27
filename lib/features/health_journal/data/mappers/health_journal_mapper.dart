@@ -3,8 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/health_journal_model.dart';
 
 /// Mapper dua arah antara [HealthJournalModel] dan dokumen Firestore.
-///
-/// Path Firestore: `users/{uid}/babies/{babyId}/healthJournals/{journalId}`.
 class HealthJournalMapper {
   const HealthJournalMapper._();
 

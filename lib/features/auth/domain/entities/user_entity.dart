@@ -1,8 +1,4 @@
 /// Entity domain — akun pengguna ImuniKita.
-///
-/// Bebas dari Hive CE (`UserModel` hanya dipakai di lapisan data), sehingga
-/// logika auth tidak berubah saat data source di-swap ke Firebase Auth pada
-/// fase UAS (dev plan §6.1).
 class UserEntity {
   const UserEntity({
     required this.localId,

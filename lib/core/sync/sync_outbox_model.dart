@@ -3,8 +3,6 @@ import 'package:hive_ce/hive_ce.dart';
 part 'sync_outbox_model.g.dart';
 
 /// Operasi mutasi yang diantrekan saat offline untuk dikirim ke Firestore saat online.
-///
-/// `typeId: 6` — jangan dipakai ulang (0=User, 1=Baby, 2=Vaccine, 3=Growth, 4=Journal, 5=QuizScore).
 @HiveType(typeId: 6)
 class SyncOperationModel extends HiveObject {
   @HiveField(0)
