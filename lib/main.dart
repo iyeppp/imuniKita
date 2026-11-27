@@ -8,6 +8,7 @@ import 'app/app.dart';
 import 'core/errors/failures.dart';
 import 'core/firebase/firebase_bootstrap.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/push_service.dart';
 import 'hive_registrar.g.dart';
 
 void main() async {
@@ -41,6 +42,13 @@ void main() async {
   // status `TERLEWAT` sudah dilakukan saat data dibaca (`VaccineStatus.effective`),
   // sehingga task background harian tidak diperlukan.
   await NotificationService.init();
+
+  // 4. Inisialisasi PushService (opsional, Tahap 9).
+  //
+  // Default nonaktif (`ENABLE_PUSH` tidak di-set) sehingga pengingat lokal tetap
+  // menjadi jalur utama. Bila diaktifkan, token FCM didaftarkan dan pengingat
+  // lokal dilewati agar tidak dobel (B9-4).
+  await PushService.instance.init();
 
   runApp(const ProviderScope(child: ImuniKitaApp()));
 }

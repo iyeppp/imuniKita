@@ -79,21 +79,22 @@ router.post('/messages', async (req: AuthenticatedRequest, res: Response) => {
     });
   }
 
-  const groqApiKey = process.env.GROQ_API_KEY;
-  const geminiApiKey = process.env.GEMINI_API_KEY;
+  const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
+  // Dikunci: hanya DeepSeek-V4.1-Flash, tanpa opsi model lain.
+  const deepseekModel = 'deepseek-flash';
 
-  if (groqApiKey) {
+  if (deepseekApiKey) {
     try {
       const response = await fetch(
-        'https://api.groq.com/openai/v1/chat/completions',
+        'https://api.deepseek.com/chat/completions',
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${groqApiKey}`,
+            Authorization: `Bearer ${deepseekApiKey}`,
           },
           body: JSON.stringify({
-            model: 'llama-3.3-70b-versatile',
+            model: deepseekModel,
             messages: [
               {
                 role: 'system',
@@ -105,7 +106,13 @@ router.post('/messages', async (req: AuthenticatedRequest, res: Response) => {
                 content: message,
               },
             ],
+            // Wajib: non-thinking mode. `thinking.type = disabled` mematikan
+            // chain-of-thought; `reasoning_effort: none` sebagai penegas.
+            thinking: { type: 'disabled' },
+            reasoning_effort: 'none',
             temperature: 0.7,
+            max_tokens: 1024,
+            stream: false,
           }),
         },
       );
@@ -116,53 +123,22 @@ router.post('/messages', async (req: AuthenticatedRequest, res: Response) => {
           json.choices?.[0]?.message?.content ||
           getKeywordFallbackReply(message);
 
+        console.log(
+          `[Chatbot] DeepSeek reply OK (model: ${deepseekModel}, thinking: disabled).`,
+        );
         return res.json({
           data: { reply: replyText },
           meta: { fetchedAt: new Date().toISOString(), version: '1.0' },
         });
       }
+
+      const errorBody = await response.text();
+      console.warn(
+        `[Chatbot] DeepSeek gagal (${response.status}): ${errorBody.slice(0, 300)}`,
+      );
     } catch (e) {
       console.warn(
-        '[Chatbot] Panggilan Groq LLM gagal, mencoba fallback keyword.',
-      );
-    }
-  } else if (geminiApiKey) {
-    try {
-      // Panggilan LLM (Gemini API)
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: 'user',
-                parts: [
-                  {
-                    text: `Anda adalah asisten kesehatan anak ramah ImuniKita. Jawab pertanyaan ibu/orang tua berikut dengan ringkas, empati, dan akurat medis:\n\n${message}`,
-                  },
-                ],
-              },
-            ],
-          }),
-        },
-      );
-
-      if (response.ok) {
-        const json: any = await response.json();
-        const replyText =
-          json.candidates?.[0]?.content?.parts?.[0]?.text ||
-          getKeywordFallbackReply(message);
-
-        return res.json({
-          data: { reply: replyText },
-          meta: { fetchedAt: new Date().toISOString(), version: '1.0' },
-        });
-      }
-    } catch (e) {
-      console.warn(
-        '[Chatbot] Panggilan Gemini LLM gagal, menggunakan fallback keyword.',
+        '[Chatbot] Panggilan DeepSeek gagal, menggunakan fallback keyword.',
       );
     }
   }

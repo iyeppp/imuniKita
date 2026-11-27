@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/services/local_storage_service.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../../../core/services/push_service.dart';
 import '../../../../core/utils/notification_helper.dart';
 import '../entities/vaccine_schedule_entity.dart';
 import '../repositories/i_immunization_repository.dart';
@@ -16,11 +17,19 @@ import '../repositories/i_immunization_repository.dart';
 /// `reminderH1Sent` di-set `true` lewat repository sehingga alur ini tidak
 /// mendaftarkan ulang pengingat yang sudah terjadwal.
 class ScheduleReminderUseCase {
-  const ScheduleReminderUseCase({this.repository});
+  const ScheduleReminderUseCase({this.repository, this.pushService});
 
   /// Opsional -- bila diisi, flag `reminderH7Sent`/`reminderH1Sent` akan
   /// diperbarui setelah notifikasi berhasil dijadwalkan (Bug #11).
   final IImmunizationRepository? repository;
+
+  /// Opsional -- sumber status FCM untuk deduplikasi (B9-4).
+  ///
+  /// Bila pengiriman push sedang aktif, pengingat lokal dilewati agar user
+  /// tidak menerima dua notifikasi untuk jadwal yang sama. Bila push tidak
+  /// aktif (fitur dimatikan, izin ditolak, atau registrasi gagal saat offline),
+  /// `null`/`false` membuat pengingat lokal tetap dijadwalkan sebagai fallback.
+  final IPushService? pushService;
 
   Future<void> execute({
     required String namaAnak,
@@ -29,6 +38,16 @@ class ScheduleReminderUseCase {
     // Hormati preferensi "Notifikasi Pengingat" di layar Profil & Pengaturan:
     // bila user mematikannya, tidak ada pengingat baru yang didaftarkan.
     if (!await LocalStorageService.isNotificationEnabled()) return;
+
+    // B9-4: bila FCM aktif, server (GitHub Actions) yang mengirim pengingat.
+    // Jangan set flag lokal di sini supaya fallback bisa dipulihkan bila FCM
+    // kemudian dinonaktifkan.
+    if (pushService != null && await pushService!.isPushActive()) {
+      debugPrint(
+        'ScheduleReminderUseCase: FCM aktif — pengingat lokal dilewati.',
+      );
+      return;
+    }
 
     for (final schedule in schedules) {
       if (schedule.status != VaccineStatus.belum) continue;

@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import * as admin from 'firebase_admin_placeholder';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -14,10 +13,16 @@ export function initializeFirebaseAdmin() {
   try {
     const adminModule = require('firebase-admin');
     if (!adminModule.apps.length) {
-      adminModule.initializeApp();
+      adminModule.initializeApp({
+        projectId: process.env.FIREBASE_PROJECT_ID || 'imunikita-dev-f',
+      });
     }
     firebaseAdminApp = adminModule;
-    console.log('[AuthMiddleware] Firebase Admin SDK berhasil diinisialisasi.');
+    console.log(
+      '[AuthMiddleware] Firebase Admin SDK berhasil diinisialisasi (project: ' +
+        (process.env.FIREBASE_PROJECT_ID || 'imunikita-dev-f') +
+        ').',
+    );
   } catch (e) {
     console.warn(
       '[AuthMiddleware] Firebase Admin SDK tidak terinisialisasi (Service Account belum dipasang). Mode demo aktif.',

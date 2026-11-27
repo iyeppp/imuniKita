@@ -36,6 +36,9 @@ abstract class AppConstants {
   /// Preferensi tema aplikasi ('system', 'light', 'dark').
   static const String prefThemeMode = 'theme_mode';
 
+  /// Penanda token FCM perangkat sudah terdaftar (Tahap 9, opsional).
+  static const String prefPushRegistered = 'push_registered';
+
   // ── Info Aplikasi ─────────────────────────────────────────────────────
   /// Versi aplikasi — disamakan manual dengan `version:` di `pubspec.yaml`
   /// karena `package_info_plus` belum dipakai pada fase UTS.

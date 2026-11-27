@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/services/local_storage_service.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../../../core/services/push_service.dart';
 import '../../../../injection/dependency_injection.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/login_usecase.dart';
@@ -79,6 +80,14 @@ class CurrentUserNotifier extends AsyncNotifier<UserEntity?> {
   /// Pengingat yang sudah terjadwal ikut dibatalkan supaya notifikasi bayi
   /// milik akun ini tidak muncul lagi setelah keluar (Temuan #19).
   Future<void> logout() async {
+    // Hapus token FCM perangkat ini sebelum sesi Firebase berakhir (Tahap 9).
+    // Non-fatal: logout tetap harus berhasil walau Firestore tidak terjangkau.
+    try {
+      await PushService.instance.onLogout();
+    } catch (_) {
+      // Diabaikan dengan sengaja.
+    }
+
     await ref.read(logoutUseCaseProvider).execute();
 
     try {
@@ -109,6 +118,14 @@ class NotificationPrefNotifier extends AsyncNotifier<bool> {
 
   Future<void> setEnabled(bool enabled) async {
     await LocalStorageService.setNotificationEnabled(enabled);
+
+    // Samakan status di dokumen perangkat FCM agar server tidak mengirim push
+    // saat pengingat dimatikan (Tahap 9, opsional — no-op bila FCM nonaktif).
+    try {
+      await PushService.instance.syncNotificationsPreference(enabled);
+    } catch (_) {
+      // Non-fatal: preferensi lokal sudah tersimpan.
+    }
 
     // Saat dimatikan, batalkan semua pengingat yang sudah terjadwal agar
     // tidak ada notifikasi "nyasar" setelah user memilih nonaktif.

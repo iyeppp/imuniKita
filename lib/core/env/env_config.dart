@@ -41,4 +41,15 @@ class EnvConfig {
 
   static const int authEmulatorPort = 9099;
   static const int firestoreEmulatorPort = 8080;
+
+  // ── Push Notification (FCM) ─────────────────────────────────────────────────
+  /// Aktifkan pengiriman H-7/H-1 lewat FCM (opsional, Tahap 9).
+  ///
+  /// Default **nonaktif** agar notifikasi lokal tetap menjadi jalur wajib yang
+  /// tidak bergantung server. Jalankan:
+  /// `flutter run --dart-define=ENABLE_PUSH=true`
+  ///
+  /// Pengiriman tetap dilakukan GitHub Actions cron, bukan Cloud Functions.
+  static bool get pushEnabled =>
+      const bool.fromEnvironment('ENABLE_PUSH', defaultValue: false);
 }

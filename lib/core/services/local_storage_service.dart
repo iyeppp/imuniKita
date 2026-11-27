@@ -82,6 +82,17 @@ class LocalStorageService {
   static Future<void> setNotificationEnabled(bool enabled) async =>
       (await instance).setBool(await _notificationPrefKey(), enabled);
 
+  /// Penanda token FCM perangkat sudah terdaftar (Tahap 9, opsional).
+  ///
+  /// Dipakai `PushService` agar `ScheduleReminderUseCase` bisa membaca status
+  /// deduplikasi tanpa menunggu jaringan. `false` berarti pengingat lokal tetap
+  /// dijadwalkan (fallback aman).
+  static Future<bool> isPushRegistered() async =>
+      (await instance).getBool(AppConstants.prefPushRegistered) ?? false;
+
+  static Future<void> setPushRegistered(bool registered) async =>
+      (await instance).setBool(AppConstants.prefPushRegistered, registered);
+
   /// Preferensi tema aplikasi (system, light, dark).
   static Future<ThemeMode> getThemeMode() async {
     final modeStr = (await instance).getString(AppConstants.prefThemeMode);

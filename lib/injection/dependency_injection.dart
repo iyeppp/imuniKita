@@ -9,6 +9,7 @@ import '../core/network/api_cache.dart';
 import '../core/network/api_client.dart';
 import '../core/network/network_info.dart';
 import '../core/services/photo_storage_service.dart';
+import '../core/services/push_service.dart';
 import '../core/sync/data_migration.dart';
 import '../core/sync/sync_manager.dart';
 import '../core/sync/sync_queue.dart';
@@ -169,6 +170,11 @@ final photoStorageServiceProvider = Provider<PhotoStorageService>((ref) {
   return PhotoStorageService();
 });
 
+/// Token FCM opsional (Tahap 9). Inisialisasi dilakukan sekali di `main`.
+final pushServiceProvider = Provider<IPushService>((ref) {
+  return PushService.instance;
+});
+
 final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient();
 });
@@ -177,7 +183,9 @@ final apiCacheProvider = Provider<ApiCache>((ref) {
   return ApiCache();
 });
 
-final educationRemoteDatasourceProvider = Provider<EducationRemoteDatasource>((ref) {
+final educationRemoteDatasourceProvider = Provider<EducationRemoteDatasource>((
+  ref,
+) {
   return EducationRemoteDatasource(
     apiClient: ref.watch(apiClientProvider),
     apiCache: ref.watch(apiCacheProvider),
@@ -191,10 +199,10 @@ final faskesRemoteDatasourceProvider = Provider<FaskesRemoteDatasource>((ref) {
   );
 });
 
-final chatbotRemoteDatasourceProvider = Provider<ChatbotRemoteDatasource>((ref) {
-  return ChatbotRemoteDatasource(
-    apiClient: ref.watch(apiClientProvider),
-  );
+final chatbotRemoteDatasourceProvider = Provider<ChatbotRemoteDatasource>((
+  ref,
+) {
+  return ChatbotRemoteDatasource(apiClient: ref.watch(apiClientProvider));
 });
 
 final babyRepositoryProvider = Provider<IBabyRepository>((ref) {
@@ -242,8 +250,9 @@ final vaccineLocalDatasourceProvider = Provider<VaccineLocalDatasource>((ref) {
   return const VaccineLocalDatasource();
 });
 
-final vaccineRemoteDatasourceProvider =
-    Provider<VaccineRemoteDatasource?>((ref) {
+final vaccineRemoteDatasourceProvider = Provider<VaccineRemoteDatasource?>((
+  ref,
+) {
   if (!FirebaseBootstrap.isInitialized) return null;
   return FirebaseVaccineRemoteDatasource();
 });
@@ -269,6 +278,8 @@ final scheduleReminderUseCaseProvider = Provider<ScheduleReminderUseCase>((
   // bisa di-set setelah notifikasi berhasil dijadwalkan.
   return ScheduleReminderUseCase(
     repository: ref.watch(immunizationRepositoryProvider),
+    // B9-4: deduplikasi lokal vs FCM.
+    pushService: ref.watch(pushServiceProvider),
   );
 });
 
@@ -297,8 +308,7 @@ final growthLocalDatasourceProvider = Provider<GrowthLocalDatasource>((ref) {
   return const GrowthLocalDatasource();
 });
 
-final growthRemoteDatasourceProvider =
-    Provider<GrowthRemoteDatasource?>((ref) {
+final growthRemoteDatasourceProvider = Provider<GrowthRemoteDatasource?>((ref) {
   if (!FirebaseBootstrap.isInitialized) return null;
   return FirebaseGrowthRemoteDatasource();
 });
@@ -336,9 +346,9 @@ final healthJournalLocalDatasourceProvider =
 
 final healthJournalRemoteDatasourceProvider =
     Provider<HealthJournalRemoteDatasource?>((ref) {
-  if (!FirebaseBootstrap.isInitialized) return null;
-  return FirebaseHealthJournalRemoteDatasource();
-});
+      if (!FirebaseBootstrap.isInitialized) return null;
+      return FirebaseHealthJournalRemoteDatasource();
+    });
 
 final healthJournalRepositoryProvider = Provider<IHealthJournalRepository>((
   ref,
@@ -378,8 +388,9 @@ final deleteHealthJournalsByBabyUseCaseProvider =
     });
 
 // -- Education (Quiz Score) ----------------------------------------------------
-final quizScoreRemoteDatasourceProvider =
-    Provider<QuizScoreRemoteDatasource?>((ref) {
+final quizScoreRemoteDatasourceProvider = Provider<QuizScoreRemoteDatasource?>((
+  ref,
+) {
   if (!FirebaseBootstrap.isInitialized) return null;
   return FirebaseQuizScoreRemoteDatasource();
 });
